@@ -1,0 +1,215 @@
+/* pages/address-edit/address-edit.wxss */
+
+.address-edit-container {
+  background: var(--secondary-color);
+  min-height: 100vh;
+  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--primary-color);
+  height: 88rpx;
+  padding-top: var(--status-bar-height, 44rpx);
+  z-index: 1000;
+}
+
+/* 地址编辑标题区域 */
+.address-edit-header {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-base) var(--spacing-lg);
+  margin-top: calc(88rpx + var(--status-bar-height, 44rpx));
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.address-edit-back-btn {
+  width: 68rpx;
+  height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.address-edit-back-btn:active {
+  transform: scale(0.95);
+}
+
+.back-arrow-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.address-edit-title-section {
+  flex: 1;
+  text-align: center;
+}
+
+.address-edit-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.address-edit-placeholder {
+  width: 68rpx;
+  height: 68rpx;
+}
+
+/* 表单内容 */
+.form-content {
+  padding: var(--spacing-base);
+}
+
+.form-section {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-base);
+  overflow: hidden;
+}
+
+.form-item {
+  padding: var(--spacing-lg) var(--spacing-base);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.label-text {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4757;
+  margin-left: 4rpx;
+  font-size: var(--font-size-base);
+}
+
+.form-input {
+  width: 100%;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) 0;
+  border: none;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.form-textarea {
+  width: 100%;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) 0;
+  border: none;
+  outline: none;
+  min-height: 80rpx;
+  line-height: 1.5;
+}
+
+.form-textarea::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* 地址选择器 */
+.location-item {
+  cursor: pointer;
+}
+
+.location-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+}
+
+.location-text {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.location-text.placeholder {
+  color: var(--text-placeholder);
+}
+
+.arrow {
+  color: var(--text-placeholder);
+  font-size: var(--font-size-base);
+}
+
+/* 默认地址设置 */
+.default-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-base);
+}
+
+.default-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+}
+
+.default-switch {
+  transform: scale(0.8);
+}
+
+/* 底部保存按钮 */
+.bottom-save {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: var(--spacing-base) var(--spacing-lg);
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: #ffffff;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  padding: var(--spacing-base) 0;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.save-btn:active {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+/* 禁用状态 */
+.save-btn.disabled {
+  background: var(--text-placeholder);
+  color: #ffffff;
+} 

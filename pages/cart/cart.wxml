@@ -1,0 +1,124 @@
+<!--pages/cart/cart.wxml-->
+<view class="cart-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 购物车标题区域 -->
+  <view class="cart-header">
+    <view class="cart-title-section">
+      <view class="cart-icon">🛒</view>
+      <view class="cart-title-text">
+        <text class="cart-title">购物车</text>
+      </view>
+    </view>
+    <view class="cart-actions">
+      <view class="action-btn" bindtap="onDeleteModeTap">
+        <view class="action-icon">🗑</view>
+        <text class="action-text">管理</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 购物车商品列表 -->
+  <view class="cart-content">
+    <view wx:if="{{cartList.length > 0}}" class="cart-list">
+      <view 
+        class="cart-item" 
+        wx:for="{{cartList}}" 
+        wx:key="id"
+      >
+        <!-- 选择框 -->
+        <view class="item-checkbox" bindtap="onSelectItem" data-index="{{index}}">
+          <view class="checkbox {{item.selected ? 'checked' : ''}}">
+            <view wx:if="{{item.selected}}" class="check-icon">✓</view>
+          </view>
+        </view>
+
+        <!-- 商品图片 -->
+        <view class="item-image">
+          <image src="{{item.coverUrl}}" class="product-image" mode="aspectFill" />
+        </view>
+
+        <!-- 商品信息 -->
+        <view class="item-info">
+          <view class="product-title">{{item.name}}</view>
+          <view class="product-tags">
+            <text class="tag">{{item.age}}</text>
+            <text class="tag">{{item.condition}}</text>
+            <text class="tag">{{item.count}}本装</text>
+          </view>
+          <view class="product-desc">平均每本 ¥{{item.averagePrice}} · {{item.description}}</view>
+          
+          <!-- 价格和控制区域 -->
+          <view class="item-bottom">
+            <view class="item-price">¥{{item.price}}</view>
+            <view class="quantity-controls">
+              <view 
+                class="control-btn {{item.quantity <= 1 ? 'disabled' : ''}}" 
+                bindtap="onDecreaseQuantity" 
+                data-index="{{index}}"
+              >
+                −
+              </view>
+              <view class="quantity-num">{{item.quantity}}</view>
+              <view 
+                class="control-btn" 
+                bindtap="onIncreaseQuantity" 
+                data-index="{{index}}"
+              >
+                +
+              </view>
+            </view>
+            <view class="delete-btn" bindtap="onDeleteItem" data-index="{{index}}">
+              删除
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空购物车状态 -->
+    <view wx:else class="empty-cart">
+      <view class="empty-icon">📚</view>
+      <view class="empty-text">购物车还是空的</view>
+      <view class="empty-desc">快去添加一些绘本盲盒吧～</view>
+      <view class="empty-actions">
+        <view class="goto-home-btn" bindtap="onGoToHome">
+          去首页看看
+        </view>
+        <view class="goto-blindbox-btn" bindtap="onGoToBlindbox">
+          选择盲盒
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部结算栏 -->
+  <view wx:if="{{cartList.length > 0}}" class="bottom-bar">
+    <view class="select-all" bindtap="onSelectAll">
+      <view class="checkbox {{isAllSelected ? 'checked' : ''}}">
+        <view wx:if="{{isAllSelected}}" class="check-icon">✓</view>
+      </view>
+      <text class="select-all-text">全选</text>
+    </view>
+    
+    <view class="checkout-info">
+      <view class="selected-info">
+        已选 <text class="highlight">{{selectedCount}}</text> 件商品
+      </view>
+      <view class="total-section">
+        <text class="total-label">合计:</text>
+        <text class="total-price">¥{{totalPrice}}</text>
+      </view>
+    </view>
+    
+    <view 
+      class="checkout-btn {{selectedCount > 0 ? 'active' : 'disabled'}}" 
+      bindtap="onCheckout"
+    >
+      去结算
+    </view>
+  </view>
+</view>

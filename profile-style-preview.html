@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile 登录区域样式预览</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-placeholder: #94a3b8;
+            --border-color: #e2e8f0;
+            --spacing-sm: 8px;
+            --spacing-base: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-xxl: 48px;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-base: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 20px;
+            --border-radius-base: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-xl: 16px;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .preview-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            background: var(--primary-color);
+            padding-bottom: var(--spacing-xxl);
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(3deg); }
+        }
+
+        .custom-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px var(--spacing-base);
+            position: relative;
+            z-index: 2;
+        }
+
+        .settings-icon {
+            color: #ffffff;
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .settings-icon:hover {
+            transform: rotate(90deg);
+        }
+
+        /* 已登录状态 */
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-xl);
+            position: relative;
+            z-index: 2;
+            min-height: 320px;
+        }
+
+        .user-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            min-height: 220px;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            position: relative;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .avatar-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: #4CAF50;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .user-details {
+            text-align: center;
+            margin-bottom: var(--spacing-base);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .user-name {
+            color: #ffffff;
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-status {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .user-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 var(--spacing-lg);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border: none;
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-lg) var(--spacing-xxl);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            min-width: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        .logout-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+        }
+
+        .logout-text {
+            color: var(--primary-color);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* 未登录状态 */
+        .login-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-xl);
+            position: relative;
+            z-index: 2;
+            min-height: 320px;
+        }
+
+        .login-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            min-height: 220px;
+            justify-content: center;
+        }
+
+        .login-avatar {
+            position: relative;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .default-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+        }
+
+        .login-details {
+            text-align: center;
+            margin-bottom: var(--spacing-base);
+        }
+
+        .login-title {
+            color: #ffffff;
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .login-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 var(--spacing-lg);
+        }
+
+        .primary-login-btn {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-lg) var(--spacing-xxl);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            min-width: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: none;
+        }
+
+        .primary-login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .primary-login-btn:hover::before {
+            left: 100%;
+        }
+
+        .primary-login-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn-text {
+            color: var(--primary-color);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .state-toggle {
+            margin: 20px;
+            text-align: center;
+        }
+
+        .toggle-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: #5856eb;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="state-toggle">
+        <button class="toggle-btn" onclick="showLoggedOut()">未登录状态</button>
+        <button class="toggle-btn" onclick="showLoggedIn()">已登录状态</button>
+    </div>
+
+    <div class="preview-container">
+        <!-- 未登录状态 -->
+        <div id="logged-out" class="profile-header">
+            <div class="custom-navbar">
+                <div></div>
+                <div></div>
+                <div class="settings-icon">⚙</div>
+            </div>
+            <div class="login-info">
+                <div class="login-content">
+                    <div class="login-avatar">
+                        <div class="default-avatar">👤</div>
+                    </div>
+                    <div class="login-details">
+                        <div class="login-title">欢迎来到绘本童书</div>
+                        <div class="login-subtitle">登录后享受更多服务</div>
+                    </div>
+                </div>
+                <div class="login-actions">
+                    <div class="primary-login-btn">
+                        <span class="login-btn-text">登录/注册</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 已登录状态 -->
+        <div id="logged-in" class="profile-header hidden">
+            <div class="custom-navbar">
+                <div></div>
+                <div></div>
+                <div class="settings-icon">⚙</div>
+            </div>
+            <div class="user-info" id="loggedInState">
+                <div class="user-content">
+                    <div class="user-avatar">
+                        <img src="https://picsum.photos/200/200?random=user" alt="用户头像">
+                    </div>
+                    <div class="user-details">
+                        <h2 class="user-name">张先生</h2>
+                        <p class="user-status">微信用户 · 普通会员</p>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <span class="logout-text">退出登录</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoggedOut() {
+            document.getElementById('logged-out').classList.remove('hidden');
+            document.getElementById('logged-in').classList.add('hidden');
+        }
+
+        function showLoggedIn() {
+            document.getElementById('logged-out').classList.add('hidden');
+            document.getElementById('logged-in').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html> 

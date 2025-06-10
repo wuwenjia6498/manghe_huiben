@@ -1,0 +1,168 @@
+<!--pages/order/order.wxml-->
+<view class="order-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 订单标题区域 -->
+  <view class="order-header">
+    <view class="order-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
+    </view>
+    <view class="order-title-section">
+      <text class="order-title">确认订单</text>
+    </view>
+    <view class="order-placeholder"></view>
+  </view>
+
+  <!-- 页面内容 -->
+  <view class="order-content">
+    <!-- 收货地址 -->
+    <view class="address-section">
+      <view class="section-header">
+        <view class="section-icon">📍</view>
+        <view class="section-title">收货地址</view>
+      </view>
+      
+      <view class="address-card" bindtap="onSelectAddress">
+        <view class="address-info">
+          <view class="address-name">{{addressInfo.name}} {{addressInfo.phone}}</view>
+          <view class="address-detail">{{addressInfo.detail}}</view>
+        </view>
+        <view class="address-arrow">></view>
+      </view>
+      
+      <!-- 添加新地址 -->
+      <view class="add-address" bindtap="onAddAddress">
+        <view class="add-icon">+</view>
+        <view class="add-text">添加新地址</view>
+      </view>
+    </view>
+
+    <!-- 商品信息 -->
+    <view class="goods-section">
+      <view class="section-header">
+        <view class="section-icon">📦</view>
+        <view class="section-title">商品信息</view>
+      </view>
+      
+      <view class="goods-list">
+        <view class="goods-item" wx:for="{{orderItems}}" wx:key="id">
+          <image src="{{item.coverUrl}}" class="goods-image" />
+          <view class="goods-info">
+            <view class="goods-name">{{item.name}}</view>
+            <view class="goods-tags">
+              <text class="tag">{{item.age}}</text>
+              <text class="tag">{{item.condition}}</text>
+              <text class="tag">{{item.count}}本装</text>
+            </view>
+            <view class="goods-desc">平均每本 ¥{{item.averagePrice}}</view>
+          </view>
+          <view class="goods-price">
+            <view class="price">¥{{item.price}}</view>
+            <view class="quantity">x{{item.quantity}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配送方式 -->
+    <view class="delivery-section">
+      <view class="section-header">
+        <view class="section-icon">🚚</view>
+        <view class="section-title">配送方式</view>
+      </view>
+      
+      <view class="delivery-options">
+        <view class="delivery-option {{deliveryType === 'express' ? 'selected' : ''}}" bindtap="onSelectDelivery" data-type="express">
+          <view class="radio-btn">
+            <view class="radio-inner {{deliveryType === 'express' ? 'checked' : ''}}"></view>
+          </view>
+          <view class="option-info">
+            <view class="option-title">快递配送</view>
+            <view class="option-desc">预计1-3天送达</view>
+          </view>
+        </view>
+        
+        <view class="delivery-option {{deliveryType === 'pickup' ? 'selected' : ''}}" bindtap="onSelectDelivery" data-type="pickup">
+          <view class="radio-btn">
+            <view class="radio-inner {{deliveryType === 'pickup' ? 'checked' : ''}}"></view>
+          </view>
+          <view class="option-info">
+            <view class="option-title">门店自取</view>
+            <view class="option-desc">营业时间到店自取</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单备注 -->
+    <view class="compact-note-section">
+      <view class="compact-note-header">
+        <text class="compact-note-icon">📝</text>
+        <text class="compact-note-title">订单备注</text>
+      </view>
+      <view class="compact-note-wrapper">
+        <textarea 
+          placeholder="请输入备注信息（选填）" 
+          value="{{orderNote}}"
+          bindinput="onNoteInput"
+          maxlength="100"
+          class="compact-note-input"
+        ></textarea>
+      </view>
+    </view>
+
+    <!-- 支付方式 -->
+    <view class="payment-section">
+      <view class="section-header">
+        <view class="section-icon">💳</view>
+        <view class="section-title">支付方式</view>
+      </view>
+      
+      <view class="payment-option selected">
+        <view class="radio-btn">
+          <view class="radio-inner checked"></view>
+        </view>
+        <view class="payment-info">
+          <view class="payment-icon">💚</view>
+          <view class="payment-name">微信支付</view>
+        </view>
+        <view class="payment-check">✓</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部支付栏 -->
+  <view class="bottom-payment">
+    <view class="price-detail">
+      <view class="price-row">
+        <text class="price-label">商品金额:</text>
+        <text class="price-value">¥{{orderAmount}}</text>
+      </view>
+      <view class="price-row">
+        <text class="price-label">首单优惠:</text>
+        <text class="price-value discount">-¥{{firstDiscount}}</text>
+      </view>
+      <view class="price-row">
+        <text class="price-label">满减优惠:</text>
+        <text class="price-value discount">-¥{{fullDiscount}}</text>
+      </view>
+      <view class="price-row">
+        <text class="price-label">运费:</text>
+        <text class="price-value free">{{deliveryFee === 0 ? '包邮' : '¥' + deliveryFee}}</text>
+      </view>
+      <view class="total-row">
+        <text class="total-label">应付金额:</text>
+        <text class="total-value">¥{{finalAmount}}</text>
+      </view>
+    </view>
+    
+    <view class="payment-btn" bindtap="onConfirmPayment">
+      确认支付
+    </view>
+    
+    <view class="payment-tip">点击支付即同意《用户协议》</view>
+  </view>
+</view>

@@ -1,0 +1,285 @@
+/* pages/address/address.wxss */
+
+.address-container {
+  background: var(--secondary-color);
+  min-height: 100vh;
+  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--primary-color);
+  height: 88rpx;
+  padding-top: var(--status-bar-height, 44rpx);
+  z-index: 1000;
+}
+
+/* 地址标题区域 */
+.address-header {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-base) var(--spacing-lg);
+  margin-top: calc(88rpx + var(--status-bar-height, 44rpx));
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.address-back-btn {
+  width: 68rpx;
+  height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.address-back-btn:active {
+  transform: scale(0.95);
+}
+
+.back-arrow-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.address-title-section {
+  flex: 1;
+  text-align: center;
+}
+
+.address-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.address-placeholder {
+  width: 68rpx;
+  height: 68rpx;
+}
+
+/* 地址内容区域 */
+.address-content {
+  padding: var(--spacing-base);
+}
+
+/* 地址列表 */
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-base);
+}
+
+.address-item {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* 地址信息 */
+.address-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.address-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.name-phone {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+}
+
+.name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.phone {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.default-tag {
+  background: var(--primary-color);
+  color: #ffffff;
+  font-size: var(--font-size-xs);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.address-detail {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-base);
+}
+
+/* 地址操作 */
+.address-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--spacing-sm);
+  border-top: 1rpx solid var(--border-color);
+}
+
+.action-left {
+  display: flex;
+  align-items: center;
+}
+
+.default-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.default-btn.active {
+  color: var(--primary-color);
+}
+
+.radio-btn {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.default-btn.active .radio-btn {
+  border-color: var(--primary-color);
+}
+
+.radio-inner {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.radio-inner.checked {
+  background: var(--primary-color);
+}
+
+.action-right {
+  display: flex;
+  gap: var(--spacing-base);
+}
+
+.edit-btn, .delete-btn {
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-base);
+  transition: all 0.3s ease;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.edit-btn {
+  color: var(--primary-color);
+  border: 1rpx solid var(--primary-color);
+  background: rgba(239, 91, 166, 0.1);
+}
+
+.edit-btn:active {
+  background: rgba(239, 91, 166, 0.2);
+  transform: scale(0.95);
+}
+
+.delete-btn {
+  color: #ff4757;
+  border: 1rpx solid #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+}
+
+.delete-btn:active {
+  background: rgba(255, 71, 87, 0.2);
+  transform: scale(0.95);
+}
+
+/* 空状态 */
+.empty-address {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl) var(--spacing-base);
+  text-align: center;
+  margin-top: 200rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-desc {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+/* 底部添加按钮 */
+.bottom-add {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: var(--spacing-base) var(--spacing-lg);
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.add-address-btn {
+  background: var(--primary-color);
+  color: #ffffff;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  padding: var(--spacing-base) 0;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  transition: all 0.3s ease;
+}
+
+.add-address-btn:active {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+.add-icon {
+  font-size: var(--font-size-lg);
+  font-weight: normal;
+} 

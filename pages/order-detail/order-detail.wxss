@@ -1,0 +1,443 @@
+/* pages/order-detail/order-detail.wxss */
+
+.order-detail-container {
+  background: var(--secondary-color);
+  min-height: 100vh;
+  padding-bottom: 100rpx; /* 为底部操作栏留出空间 */
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--primary-color);
+  height: 88rpx;
+  padding-top: var(--status-bar-height, 44rpx);
+  z-index: 1000;
+}
+
+/* 订单详情标题区域 */
+.order-detail-header {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-base) var(--spacing-lg);
+  margin-top: calc(88rpx + var(--status-bar-height, 44rpx));
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.order-detail-back-btn {
+  width: 68rpx;
+  height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.order-detail-back-btn:active {
+  transform: scale(0.95);
+}
+
+.back-arrow-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.order-detail-title-section {
+  flex: 1;
+  text-align: center;
+}
+
+.order-detail-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.order-detail-placeholder {
+  width: 68rpx;
+  height: 68rpx;
+}
+
+/* 页面内容 */
+.order-detail-content {
+  padding: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* 订单状态区域 */
+.status-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-base);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: #ffffff;
+}
+
+.status-icon {
+  font-size: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-info {
+  flex: 1;
+}
+
+.status-text {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.status-desc {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.4;
+}
+
+.status-time {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+}
+
+/* 物流信息 */
+.logistics-section {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-base);
+}
+
+.logistics-info {
+  margin: var(--spacing-sm) 0;
+}
+
+.logistics-item {
+  display: flex;
+  margin-bottom: var(--spacing-sm);
+  position: relative;
+  padding-left: var(--spacing-base);
+}
+
+.logistics-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 6rpx;
+  top: 30rpx;
+  bottom: -var(--spacing-sm);
+  width: 2rpx;
+  background: var(--border-color);
+}
+
+.logistics-item::after {
+  content: '';
+  position: absolute;
+  left: 2rpx;
+  top: 8rpx;
+  width: 10rpx;
+  height: 10rpx;
+  background: var(--primary-color);
+  border-radius: 50%;
+}
+
+.logistics-time {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 2rpx;
+  min-width: 180rpx;
+}
+
+.logistics-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.express-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--secondary-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-base);
+  margin-top: var(--spacing-sm);
+}
+
+.express-company {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.express-number {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* 通用区域样式 */
+.address-section,
+.goods-section,
+.order-info-section,
+.amount-section {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-base);
+}
+
+/* 区域头部 */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.section-icon {
+  font-size: var(--font-size-lg);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 收货地址 */
+.address-info {
+  padding: var(--spacing-xs) 0;
+}
+
+.address-name {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.address-detail {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* 商品列表 */
+.goods-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.goods-item {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.goods-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.goods-image {
+  width: 110rpx;
+  height: 82rpx;
+  border-radius: var(--border-radius-base);
+  margin-right: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.goods-info {
+  flex: 1;
+}
+
+.goods-name {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.3;
+}
+
+.goods-tags {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: rgba(239, 91, 166, 0.1);
+  color: var(--primary-color);
+  font-size: var(--font-size-xs);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(239, 91, 166, 0.2);
+  font-weight: 500;
+}
+
+.goods-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.goods-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.price {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 4rpx;
+}
+
+.quantity {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* 订单信息列表 */
+.order-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.info-label {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.info-value {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* 费用明细 */
+.amount-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.amount-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.amount-item.total {
+  border-top: 1rpx solid var(--border-color);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.amount-label {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.amount-item.total .amount-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.amount-value {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.amount-value.discount {
+  color: var(--primary-color);
+}
+
+.amount-value.free {
+  color: var(--primary-color);
+}
+
+.amount-item.total .amount-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* 底部操作栏 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: var(--spacing-sm);
+  border-top: 1rpx solid var(--border-color);
+  display: flex;
+  gap: var(--spacing-sm);
+  z-index: 999;
+}
+
+.action-btn {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-base);
+  padding: var(--spacing-sm) 0;
+  border-radius: var(--border-radius-base);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.action-btn.primary {
+  background: var(--primary-color);
+  color: #ffffff;
+}
+
+.action-btn.primary:active {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+.action-btn.secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1rpx solid var(--border-color);
+}
+
+.action-btn.secondary:active {
+  background: var(--secondary-color);
+}
+
+.action-btn.danger {
+  background: #FF4757;
+  color: #ffffff;
+}
+
+.action-btn.danger:active {
+  background: #FF3742;
+  transform: scale(0.98);
+} 

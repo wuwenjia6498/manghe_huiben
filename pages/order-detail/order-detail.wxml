@@ -1,0 +1,193 @@
+<!--pages/order-detail/order-detail.wxml-->
+<view class="order-detail-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 订单标题区域 -->
+  <view class="order-detail-header">
+    <view class="order-detail-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
+    </view>
+    <view class="order-detail-title-section">
+      <text class="order-detail-title">订单详情</text>
+    </view>
+    <view class="order-detail-placeholder"></view>
+  </view>
+
+  <!-- 页面内容 -->
+  <view class="order-detail-content">
+    <!-- 订单状态 -->
+    <view class="status-section">
+      <view class="status-icon">
+        <text wx:if="{{orderInfo.status === 'pending'}}">⏰</text>
+        <text wx:elif="{{orderInfo.status === 'shipping'}}">🚚</text>
+        <text wx:else>✅</text>
+      </view>
+      <view class="status-info">
+        <view class="status-text">{{orderInfo.statusText}}</view>
+        <view class="status-desc">
+          <text wx:if="{{orderInfo.status === 'pending'}}">您的订单正在准备中，我们会尽快为您发货</text>
+          <text wx:elif="{{orderInfo.status === 'shipping'}}">您的包裹正在路上，请耐心等待</text>
+          <text wx:else>订单已完成，感谢您的购买</text>
+        </view>
+        <view class="status-time">{{orderInfo.createTime}}</view>
+      </view>
+    </view>
+
+    <!-- 物流信息 -->
+    <view wx:if="{{orderInfo.status === 'shipping' || orderInfo.status === 'completed'}}" class="logistics-section">
+      <view class="section-header">
+        <view class="section-icon">📦</view>
+        <view class="section-title">物流信息</view>
+      </view>
+      
+      <view class="logistics-info">
+        <view class="logistics-item">
+          <view class="logistics-time">2024-12-25 14:30</view>
+          <view class="logistics-desc">包裹已到达目的地，准备派送</view>
+        </view>
+        <view class="logistics-item">
+          <view class="logistics-time">2024-12-25 08:20</view>
+          <view class="logistics-desc">包裹正在运输途中</view>
+        </view>
+        <view class="logistics-item">
+          <view class="logistics-time">2024-12-24 16:45</view>
+          <view class="logistics-desc">包裹已从发货地发出</view>
+        </view>
+        <view class="logistics-item">
+          <view class="logistics-time">2024-12-24 10:30</view>
+          <view class="logistics-desc">商家已发货</view>
+        </view>
+      </view>
+      
+      <view class="express-info">
+        <text class="express-company">圆通速递</text>
+        <text class="express-number">YT2024122500001</text>
+      </view>
+    </view>
+
+    <!-- 收货地址 -->
+    <view class="address-section">
+      <view class="section-header">
+        <view class="section-icon">📍</view>
+        <view class="section-title">收货地址</view>
+      </view>
+      
+      <view class="address-info">
+        <view class="address-name">{{orderInfo.address.name}} {{orderInfo.address.phone}}</view>
+        <view class="address-detail">{{orderInfo.address.detail}}</view>
+      </view>
+    </view>
+
+    <!-- 商品信息 -->
+    <view class="goods-section">
+      <view class="section-header">
+        <view class="section-icon">🛍️</view>
+        <view class="section-title">商品信息</view>
+      </view>
+      
+      <view class="goods-list">
+        <view class="goods-item" wx:for="{{orderInfo.goods}}" wx:key="id">
+          <image src="{{item.coverUrl}}" class="goods-image" />
+          <view class="goods-info">
+            <view class="goods-name">{{item.name}}</view>
+            <view class="goods-tags">
+              <text class="tag">{{item.age}}</text>
+              <text class="tag">{{item.condition}}</text>
+              <text class="tag">{{item.count}}本装</text>
+            </view>
+            <view class="goods-desc">平均每本 ¥{{item.averagePrice}}</view>
+          </view>
+          <view class="goods-price">
+            <view class="price">¥{{item.price}}</view>
+            <view class="quantity">x{{item.quantity}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单信息 -->
+    <view class="order-info-section">
+      <view class="section-header">
+        <view class="section-icon">📄</view>
+        <view class="section-title">订单信息</view>
+      </view>
+      
+      <view class="order-info-list">
+        <view class="info-item">
+          <text class="info-label">订单编号</text>
+          <text class="info-value">{{orderInfo.orderNo}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">下单时间</text>
+          <text class="info-value">{{orderInfo.createTime}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">支付方式</text>
+          <text class="info-value">微信支付</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">配送方式</text>
+          <text class="info-value">{{orderInfo.deliveryType === 'express' ? '快递配送' : '门店自取'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 费用明细 -->
+    <view class="amount-section">
+      <view class="section-header">
+        <view class="section-icon">💰</view>
+        <view class="section-title">费用明细</view>
+      </view>
+      
+      <view class="amount-list">
+        <view class="amount-item">
+          <text class="amount-label">商品金额</text>
+          <text class="amount-value">¥{{orderInfo.goodsAmount}}</text>
+        </view>
+        <view class="amount-item">
+          <text class="amount-label">运费</text>
+          <text class="amount-value">{{orderInfo.deliveryFee === 0 ? '包邮' : '¥' + orderInfo.deliveryFee}}</text>
+        </view>
+        <view class="amount-item">
+          <text class="amount-label">优惠金额</text>
+          <text class="amount-value discount">-¥{{orderInfo.discountAmount}}</text>
+        </view>
+        <view class="amount-item total">
+          <text class="amount-label">实付金额</text>
+          <text class="amount-value">¥{{orderInfo.totalAmount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <view class="action-btn secondary" bindtap="onContactService">
+      联系客服
+    </view>
+    <view 
+      wx:if="{{orderInfo.status === 'completed'}}"
+      class="action-btn primary" 
+      bindtap="onBuyAgain"
+    >
+      再次购买
+    </view>
+    <view 
+      wx:elif="{{orderInfo.status === 'shipping'}}"
+      class="action-btn primary" 
+      bindtap="onConfirmReceive"
+    >
+      确认收货
+    </view>
+    <view 
+      wx:elif="{{orderInfo.status === 'pending'}}"
+      class="action-btn danger" 
+      bindtap="onCancelOrder"
+    >
+      取消订单
+    </view>
+  </view>
+</view> 

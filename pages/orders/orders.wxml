@@ -1,0 +1,133 @@
+<!--pages/orders/orders.wxml-->
+<view class="orders-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 订单标题区域 -->
+  <view class="orders-header">
+    <view class="orders-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
+    </view>
+    <view class="orders-title-section">
+      <text class="orders-title">我的订单</text>
+    </view>
+    <view class="orders-placeholder"></view>
+  </view>
+
+  <!-- 订单状态筛选 -->
+  <view class="status-tabs">
+    <view 
+      class="tab-item {{currentTab === 'all' ? 'active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="all"
+    >
+      全部
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'pending' ? 'active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="pending"
+    >
+      待发货
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'shipping' ? 'active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="shipping"
+    >
+      待收货
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'completed' ? 'active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="completed"
+    >
+      已完成
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="orders-content">
+    <view wx:if="{{orderList.length > 0}}" class="orders-list">
+      <view class="order-item" wx:for="{{orderList}}" wx:key="id">
+        <!-- 订单头部 -->
+        <view class="order-header">
+          <view class="order-info">
+            <text class="order-number">订单号：{{item.orderNo}}</text>
+            <text class="order-time">{{item.createTime}}</text>
+          </view>
+          <view class="order-status {{item.status}}">{{item.statusText}}</view>
+        </view>
+
+        <!-- 商品列表 -->
+        <view class="goods-list">
+          <view class="goods-item" wx:for="{{item.goods}}" wx:key="id" wx:for-item="goods">
+            <image src="{{goods.coverUrl}}" class="goods-image" />
+            <view class="goods-info">
+              <view class="goods-name">{{goods.name}}</view>
+              <view class="goods-tags">
+                <text class="tag">{{goods.age}}</text>
+                <text class="tag">{{goods.condition}}</text>
+                <text class="tag">{{goods.count}}本装</text>
+              </view>
+              <view class="goods-desc">平均每本 ¥{{goods.averagePrice}}</view>
+            </view>
+            <view class="goods-price">
+              <view class="price">¥{{goods.price}}</view>
+              <view class="quantity">x{{goods.quantity}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 订单金额 -->
+        <view class="order-amount">
+          <text class="amount-label">实付款：</text>
+          <text class="amount-value">¥{{item.totalAmount}}</text>
+        </view>
+
+        <!-- 订单操作 -->
+        <view class="order-actions">
+          <view class="action-btn secondary" bindtap="onOrderDetail" data-order="{{item}}">
+            查看详情
+          </view>
+          <view 
+            wx:if="{{item.status === 'completed'}}"
+            class="action-btn primary" 
+            bindtap="onBuyAgain" 
+            data-order="{{item}}"
+          >
+            再次购买
+          </view>
+          <view 
+            wx:elif="{{item.status === 'shipping'}}"
+            class="action-btn primary" 
+            bindtap="onConfirmReceive" 
+            data-order="{{item}}"
+          >
+            确认收货
+          </view>
+          <view 
+            wx:elif="{{item.status === 'pending'}}"
+            class="action-btn secondary" 
+            bindtap="onCancelOrder" 
+            data-order="{{item}}"
+          >
+            取消订单
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-orders">
+      <view class="empty-icon">📦</view>
+      <view class="empty-text">暂无相关订单</view>
+      <view class="empty-desc">快去选购一些绘本盲盒吧～</view>
+      <view class="goto-home-btn" bindtap="onGoToHome">
+        去首页看看
+      </view>
+    </view>
+  </view>
+</view> 

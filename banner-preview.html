@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绘本盲盒 Banner 卡片预览</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f8f8f8;
+            padding: 20px;
+        }
+
+        /* Banner卡片容器 */
+        .banner-card-container {
+            max-width: 375px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f8f8;
+        }
+
+        /* Banner卡片 */
+        .banner-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(232, 88, 166, 0.25);
+            background: white;
+            min-height: 400px;
+        }
+
+        /* 背景图片层 */
+        .banner-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 背景遮罩层 - 使用主色调加深 */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(239, 91, 166, 0.90) 0%, 
+                rgba(232, 88, 166, 0.88) 30%,
+                rgba(236, 72, 153, 0.90) 70%,
+                rgba(219, 39, 119, 0.92) 100%);
+            z-index: 2;
+        }
+
+        /* Banner内容层 */
+        .banner-content {
+            position: relative;
+            z-index: 3;
+            padding: 30px 20px 40px;
+        }
+
+        /* 装饰性图标 */
+        .decorative-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .icon-book {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            backdrop-filter: blur(5px);
+            border: 0.5px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* 标题区域 */
+        .title-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .book-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .main-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .main-title::before {
+            content: '📚';
+            font-size: 18px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* 开始选择按钮 */
+        .start-button {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 0.5px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            max-width: 160px;
+            margin: 0 auto;
+        }
+
+        .start-button:hover {
+            transform: scale(0.98);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .button-icon {
+            font-size: 16px;
+        }
+
+        .start-button span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #E858A6;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .arrow-container {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-icon {
+            width: 12px;
+            height: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover .arrow-icon {
+            transform: translateX(2px);
+        }
+
+        /* 为什么选择盲盒区域 */
+        .why-section {
+            text-align: center;
+            padding: 25px 20px 30px;
+        }
+
+        .section-icon {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 促销横幅 */
+        .promotion-banner {
+            background: rgba(239, 91, 166, 0.08);
+            margin: 0;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .promo-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .promo-text {
+            font-size: 13px;
+            color: #EF5BA6;
+            font-weight: 500;
+        }
+
+        .promo-note {
+            font-size: 11px;
+            color: #DB2777;
+            font-weight: 500;
+        }
+
+        /* 预览说明 */
+        .preview-info {
+            max-width: 375px;
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-info h2 {
+            color: #E858A6;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .preview-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .feature-list li {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner卡片预览 -->
+    <div class="banner-card-container">
+        <div class="banner-card">
+            <!-- 背景图片层 -->
+            <div class="banner-background">
+                <img src="./images/reading-child-bg.svg" class="background-image" alt="可爱小孩阅读背景">
+                <div class="background-overlay"></div>
+            </div>
+            
+            <!-- 内容层 -->
+            <div class="banner-content">
+                <!-- 顶部装饰图标 -->
+                <div class="decorative-icons">
+                    <div class="icon-book">📚</div>
+                </div>
+                
+                <!-- 主标题区域 -->
+                <div class="title-section">
+                    <div class="book-icon">📚</div>
+                    <div class="main-title">绘本盲盒来啦</div>
+                    <div class="subtitle">精选绘本自由搭配</div>
+                    <div class="description">低价好绘本，惊喜不断，随选随享</div>
+                </div>
+                
+                <!-- 开始选择按钮 -->
+                <div class="start-button">
+                    <div class="button-icon">🎁</div>
+                    <span>开始选择盲盒</span>
+                    <div class="arrow-container">
+                        <img src="./images/arrow-right.svg" class="arrow-icon" alt="箭头">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 为什么选择盲盒区域 -->
+    <div class="why-section">
+        <div class="section-icon">🦋</div>
+        <div class="section-title">为什么选择盲盒</div>
+        <div class="section-subtitle">让每一次阅读都充满惊喜</div>
+    </div>
+
+    <!-- 促销横幅 -->
+    <div class="promotion-banner">
+        <div class="promo-icon">🎁</div>
+        <div class="promo-text">首单立减10元，分享再得5元优惠</div>
+        <div class="promo-note">仅余3天</div>
+    </div>
+
+    <!-- 预览说明 -->
+    <div class="preview-info">
+        <h2>🎨 页面设计优化完成</h2>
+        <p>根据您的要求，已对Banner和促销信息进行了优化：</p>
+        <ul class="feature-list">
+            <li>Banner与下方内容间距优化，视觉更加紧凑</li>
+            <li>促销信息改为窄条状设计，显示在底部</li>
+            <li>去除边框和圆角，极简设计</li>
+            <li>保持主色调 #EF5BA6 的一致性</li>
+            <li>紧凑的横向布局，不占用过多空间</li>
+            <li>内容居中显示，视觉平衡</li>
+        </ul>
+        <p><strong>✨ 设计亮点：</strong>窄条状的促销信息贴底显示，既不干扰主要内容，又能有效传达优惠信息，实现了极简而实用的效果。</p>
+    </div>
+</body>
+</html> 

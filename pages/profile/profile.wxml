@@ -1,0 +1,162 @@
+<!--pages/profile/profile.wxml-->
+<view class="profile-container">
+  <!-- 上半部分：用户信息区域 -->
+  <view class="profile-header">
+    <!-- 自定义导航栏 -->
+    <view class="custom-navbar">
+      <view class="navbar-left"></view>
+      <view class="navbar-center"></view>
+      <view class="navbar-right" bindtap="onSettingsTap">
+        <view class="settings-icon">⚙</view>
+      </view>
+    </view>
+
+    <!-- 已登录状态 -->
+    <view wx:if="{{isLoggedIn}}" class="user-info">
+      <view class="user-content">
+        <view class="user-avatar">
+          <image src="{{userInfo.avatar}}" class="avatar-image" />
+          <view class="avatar-badge"></view>
+        </view>
+        <view class="user-details">
+          <view class="user-name">{{userInfo.name}}</view>
+          <view class="user-status">{{userInfo.status}}</view>
+        </view>
+      </view>
+      <view class="user-actions">
+        <view class="logout-btn" bindtap="onLogoutTap">
+          <text class="logout-text">退出登录</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 未登录状态 -->
+    <view wx:else class="login-info">
+      <view class="login-content">
+        <view class="login-avatar">
+          <view class="default-avatar">👤</view>
+        </view>
+        <view class="login-details">
+          <view class="login-title">欢迎来到绘本童书</view>
+          <view class="login-subtitle">登录后享受更多服务</view>
+        </view>
+      </view>
+      <view class="login-actions">
+        <view class="primary-login-btn" bindtap="onLoginTap">
+          <text class="login-btn-text">登录/注册</text>
+        </view>
+      </view>
+    </view>
+
+
+  </view>
+
+  <!-- 下半部分：功能列表 -->
+  <view class="profile-content">
+    <!-- 订单管理 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-icon">🛍</view>
+        <view class="section-title">订单管理</view>
+      </view>
+      
+      <view class="menu-list">
+        <view class="menu-item" bindtap="onOrdersTap" data-type="pending">
+          <view class="item-icon pending">📦</view>
+          <view class="item-info">
+            <view class="item-title">待发货</view>
+            <view class="item-desc">{{isLoggedIn ? '查看待发货订单' : '登录后查看订单'}}</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onOrdersTap" data-type="shipping">
+          <view class="item-icon shipping">🚚</view>
+          <view class="item-info">
+            <view class="item-title">待收货</view>
+            <view class="item-desc">{{isLoggedIn ? '查看运输中订单' : '登录后查看订单'}}</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onOrdersTap" data-type="all">
+          <view class="item-icon all">📋</view>
+          <view class="item-info">
+            <view class="item-title">全部订单</view>
+            <view class="item-desc">{{isLoggedIn ? '查看所有订单' : '登录后查看订单'}}</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 更多功能 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-icon">⋯</view>
+        <view class="section-title">更多功能</view>
+      </view>
+      
+      <view class="menu-list">
+        <view class="menu-item" bindtap="onAddressTap">
+          <view class="item-icon address">📍</view>
+          <view class="item-info">
+            <view class="item-title">收货地址</view>
+            <view class="item-desc">{{isLoggedIn ? '管理收货地址信息' : '登录后管理地址'}}</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onCustomerServiceTap">
+          <view class="item-icon service">💬</view>
+          <view class="item-info">
+            <view class="item-title">联系客服</view>
+            <view class="item-desc">在线客服支持</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onAgreementTap">
+          <view class="item-icon agreement">📄</view>
+          <view class="item-info">
+            <view class="item-title">用户协议</view>
+            <view class="item-desc">查看服务条款</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onPrivacyTap">
+          <view class="item-icon privacy">🛡</view>
+          <view class="item-info">
+            <view class="item-title">隐私政策</view>
+            <view class="item-desc">了解隐私保护</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onAboutTap">
+          <view class="item-icon about">ℹ</view>
+          <view class="item-info">
+            <view class="item-title">关于我们</view>
+            <view class="item-desc">了解本童书</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 推荐给朋友 -->
+    <view class="recommend-section">
+      <view class="recommend-btn" bindtap="onRecommendTap">
+        <view class="recommend-icon">💗</view>
+        <view class="recommend-text">推荐给朋友</view>
+      </view>
+    </view>
+
+    <!-- 版权信息 -->
+    <view class="footer">
+      <view class="app-version">绘本童书小程序 v1.0.0</view>
+      <view class="copyright">© 2025 绘本童. All rights reserved.</view>
+    </view>
+  </view>
+</view>

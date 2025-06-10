@@ -1,0 +1,239 @@
+/**app.wxss**/
+
+/* 全局变量定义 */
+page {
+  --primary-color: #EF5BA6;
+  --primary-light: #f299c1;
+  --primary-dark: #d44a91;
+  --secondary-color: #f8f8f8;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-placeholder: #999999;
+  --border-color: #e5e5e5;
+  --success-color: #07c160;
+  --warning-color: #ff976a;
+  --error-color: #fa5151;
+  
+  /* 系统状态栏高度，会被JS动态设置 */
+  --status-bar-height: 44rpx;
+  
+  /* 字体大小规范 */
+  --font-size-xs: 24rpx;
+  --font-size-sm: 28rpx;
+  --font-size-base: 32rpx;
+  --font-size-lg: 36rpx;
+  --font-size-xl: 40rpx;
+  --font-size-xxl: 48rpx;
+  
+  /* 间距规范 */
+  --spacing-xs: 8rpx;
+  --spacing-sm: 16rpx;
+  --spacing-base: 24rpx;
+  --spacing-lg: 32rpx;
+  --spacing-xl: 48rpx;
+  
+  /* 圆角规范 */
+  --border-radius-sm: 8rpx;
+  --border-radius-base: 12rpx;
+  --border-radius-lg: 16rpx;
+  --border-radius-xl: 24rpx;
+}
+
+/* 基础样式重置 */
+page {
+  box-sizing: border-box;
+  background-color: var(--secondary-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* 通用布局类 */
+.container {
+  padding: var(--spacing-base);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* 通用卡片样式 */
+.card {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--spacing-base);
+}
+
+.card-padding {
+  padding: var(--spacing-lg);
+}
+
+/* 按钮样式 */
+.btn {
+  border: none;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-base) var(--spacing-lg);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: #ffffff;
+}
+
+.btn-primary:active {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--primary-color);
+  border: 2rpx solid var(--primary-color);
+}
+
+.btn-large {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-size-lg);
+  border-radius: var(--border-radius-lg);
+}
+
+.btn-disabled {
+  background: #cccccc !important;
+  color: #999999 !important;
+  border: none !important;
+}
+
+/* 文本样式 */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-placeholder {
+  color: var(--text-placeholder);
+}
+
+.text-brand {
+  color: var(--primary-color);
+}
+
+.text-success {
+  color: var(--success-color);
+}
+
+.text-warning {
+  color: var(--warning-color);
+}
+
+.text-error {
+  color: var(--error-color);
+}
+
+/* 字体大小 */
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-xxl { font-size: var(--font-size-xxl); }
+
+.text-bold { font-weight: 600; }
+
+/* 间距工具类 */
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-base { margin-top: var(--spacing-base); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-base { margin-bottom: var(--spacing-base); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-base { padding: var(--spacing-base); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+
+/* 徽章样式 */
+.badge {
+  background: var(--primary-color);
+  color: #ffffff;
+  font-size: var(--font-size-xs);
+  padding: 2rpx 8rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.badge-secondary {
+  background: var(--text-secondary);
+}
+
+.badge-success {
+  background: var(--success-color);
+}
+
+.badge-warning {
+  background: var(--warning-color);
+}
+
+/* 分割线 */
+.divider {
+  height: 2rpx;
+  background: var(--border-color);
+  margin: var(--spacing-base) 0;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-base);
+  color: var(--text-placeholder);
+}
+
+.empty-state .icon {
+  font-size: 120rpx;
+  margin-bottom: var(--spacing-base);
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  color: var(--text-placeholder);
+}

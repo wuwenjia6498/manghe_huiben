@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绘本盲盒 - 图标生成器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: #f8f8f8;
+        }
+        .icon-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        .icon-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .download-btn {
+            background: #EF5BA6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>绘本盲盒小程序图标</h1>
+    <p>点击下载按钮保存对应的PNG图标文件</p>
+    
+    <div class="icon-container">
+        <!-- 首页图标 -->
+        <div class="icon-item">
+            <svg id="home-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M8 18L24 6L40 18V38C40 39.1046 39.1046 40 38 40H10C8.89543 40 8 39.1046 8 38V18Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18 40V24H30V40" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">首页</div>
+            <button class="download-btn" onclick="downloadIcon('home-icon', 'tab-home.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('home-icon-active', 'tab-home-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 商品详情图标 -->
+        <div class="icon-item">
+            <svg id="product-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="16" width="32" height="24" rx="2" stroke="#999999" stroke-width="2"/>
+                <path d="M16 16V12C16 10.8954 16.8954 10 18 10H30C31.1046 10 32 10.8954 32 12V16" stroke="#999999" stroke-width="2"/>
+                <path d="M8 24H40" stroke="#999999" stroke-width="2"/>
+                <circle cx="20" cy="30" r="2" fill="#999999"/>
+                <circle cx="28" cy="30" r="2" fill="#999999"/>
+                <path d="M12 34H36" stroke="#999999" stroke-width="1.5"/>
+            </svg>
+            <div class="icon-name">商品详情</div>
+            <button class="download-btn" onclick="downloadIcon('product-icon', 'tab-product.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('product-icon-active', 'tab-product-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 盲盒图标 -->
+        <div class="icon-item">
+            <svg id="blindbox-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <!-- 盒子主体 -->
+                <rect x="10" y="16" width="28" height="20" rx="4" ry="4" 
+                      fill="none" 
+                      stroke="#999999" 
+                      stroke-width="3"/>
+                
+                <!-- 盒子盖子 -->
+                <path d="M8 16 L40 16 Q42 16 42 18 L42 20 Q42 22 40 22 L8 22 Q6 22 6 20 L6 18 Q6 16 8 16 Z" 
+                      fill="none" 
+                      stroke="#999999" 
+                      stroke-width="3"/>
+                
+                <!-- 蝴蝶结装饰 -->
+                <path d="M24 16 L24 10" 
+                      stroke="#999999" 
+                      stroke-width="3" 
+                      stroke-linecap="round"/>
+                
+                <!-- 蝴蝶结左侧 -->
+                <path d="M16 10 Q20 6 24 10 Q20 14 16 10" 
+                      fill="none" 
+                      stroke="#999999" 
+                      stroke-width="2.4"/>
+                
+                <!-- 蝴蝶结右侧 -->
+                <path d="M32 10 Q28 6 24 10 Q28 14 32 10" 
+                      fill="none" 
+                      stroke="#999999" 
+                      stroke-width="2.4"/>
+                
+                <!-- 神秘感装饰点 -->
+                <circle cx="18" cy="26" r="2" fill="#999999" opacity="0.6"/>
+                <circle cx="30" cy="30" r="2" fill="#999999" opacity="0.6"/>
+                <circle cx="24" cy="32" r="1.6" fill="#999999" opacity="0.4"/>
+            </svg>
+            <div class="icon-name">盲盒</div>
+            <button class="download-btn" onclick="downloadIcon('blindbox-icon', 'tab-blindbox.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('blindbox-icon-active', 'tab-blindbox-active.png')">下载激活</button>
+        </div>
+
+        <!-- 分类图标 -->
+        <div class="icon-item">
+            <svg id="category-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect x="6" y="6" width="16" height="16" rx="2" stroke="#999999" stroke-width="2"/>
+                <rect x="26" y="6" width="16" height="16" rx="2" stroke="#999999" stroke-width="2"/>
+                <rect x="6" y="26" width="16" height="16" rx="2" stroke="#999999" stroke-width="2"/>
+                <rect x="26" y="26" width="16" height="16" rx="2" stroke="#999999" stroke-width="2"/>
+            </svg>
+            <div class="icon-name">分类</div>
+            <button class="download-btn" onclick="downloadIcon('category-icon', 'tab-category.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('category-icon-active', 'tab-category-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 购物车图标 -->
+        <div class="icon-item">
+            <svg id="cart-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M16 32C17.1046 32 18 32.8954 18 34C18 35.1046 17.1046 36 16 36C14.8954 36 14 35.1046 14 34C14 32.8954 14.8954 32 16 32Z" stroke="#999999" stroke-width="2"/>
+                <path d="M34 32C35.1046 32 36 32.8954 36 34C36 35.1046 35.1046 36 34 36C32.8954 36 32 35.1046 32 34C32 32.8954 32.8954 32 34 32Z" stroke="#999999" stroke-width="2"/>
+                <path d="M2 2H8L12.4 22.8C12.7506 24.5669 14.2967 25.8996 16.1 26H33.6C35.4033 25.8996 36.9494 24.5669 37.3 22.8L40 12H10" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">购物车</div>
+            <button class="download-btn" onclick="downloadIcon('cart-icon', 'tab-cart.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('cart-icon-active', 'tab-cart-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 订单图标 -->
+        <div class="icon-item">
+            <svg id="order-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M32 6H16C14.8954 6 14 6.89543 14 8V40C14 41.1046 14.8954 42 16 42H32C33.1046 42 34 41.1046 34 40V8C34 6.89543 33.1046 6 32 6Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 16H28" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 24H28" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 32H28" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="icon-name">订单</div>
+            <button class="download-btn" onclick="downloadIcon('order-icon', 'tab-order.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('order-icon-active', 'tab-order-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 我的图标 -->
+        <div class="icon-item">
+            <svg id="profile-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 24C28.4183 24 32 20.4183 32 16C32 11.5817 28.4183 8 24 8C19.5817 8 16 11.5817 16 16C16 20.4183 19.5817 24 24 24Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 40C8 32.268 14.268 26 22 26H26C33.732 26 40 32.268 40 40" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">我的</div>
+            <button class="download-btn" onclick="downloadIcon('profile-icon', 'tab-profile.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('profile-icon-active', 'tab-profile-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 搜索图标 -->
+        <div class="icon-item">
+            <svg id="search-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <circle cx="21" cy="21" r="13" stroke="#999999" stroke-width="2"/>
+                <path d="m33 33 6 6" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">搜索</div>
+            <button class="download-btn" onclick="downloadIcon('search-icon', 'icon-search.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('search-icon-active', 'icon-search-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 收藏图标 -->
+        <div class="icon-item">
+            <svg id="favorite-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M20.84 4.61a5.5 5.5 0 0 1 6.32 0l.24.16a5.5 5.5 0 0 0 4.08.66l.27-.05a5.5 5.5 0 0 1 6.07 6.07l-.05.27a5.5 5.5 0 0 0 .66 4.08l.16.24a5.5 5.5 0 0 1 0 6.32l-.16.24a5.5 5.5 0 0 0-.66 4.08l.05.27a5.5 5.5 0 0 1-6.07 6.07l-.27-.05a5.5 5.5 0 0 0-4.08.66l-.24.16a5.5 5.5 0 0 1-6.32 0l-.24-.16a5.5 5.5 0 0 0-4.08-.66l-.27.05a5.5 5.5 0 0 1-6.07-6.07l.05-.27a5.5 5.5 0 0 0-.66-4.08l-.16-.24a5.5 5.5 0 0 1 0-6.32l.16-.24a5.5 5.5 0 0 0 .66-4.08l-.05-.27a5.5 5.5 0 0 1 6.07-6.07l.27.05a5.5 5.5 0 0 0 4.08-.66l.24-.16Z" stroke="#999999" stroke-width="2"/>
+                <path d="M18 24L22 28L30 20" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">收藏</div>
+            <button class="download-btn" onclick="downloadIcon('favorite-icon', 'icon-favorite.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('favorite-icon-active', 'icon-favorite-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 通知图标 -->
+        <div class="icon-item">
+            <svg id="notification-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M18 32a6 6 0 0 0 12 0" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a10.09 10.09 0 0 1 1.26-4c2.85-4.44 7.36-5 9.01-5s6.16.56 9.01 5a10.09 10.09 0 0 1 1.26 4c.14 2.5.81 4.37 1.73 5.82a3.5 3.5 0 0 1-1.73 5.18H15.73a3.5 3.5 0 0 1-1.73-5.18c.92-1.45 1.59-3.32 1.73-5.82Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">通知</div>
+            <button class="download-btn" onclick="downloadIcon('notification-icon', 'icon-notification.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('notification-icon-active', 'icon-notification-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 设置图标 -->
+        <div class="icon-item">
+            <svg id="settings-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19.4 44a1.65 1.65 0 0 0 .33 1.82l3.54 3.54a1.65 1.65 0 0 0 2.34 0l3.54-3.54a1.65 1.65 0 0 0 .33-1.82 12.3 12.3 0 0 1 0-4.8 1.65 1.65 0 0 1 1.51-1.34l5-.65a1.65 1.65 0 0 0 1.32-2l-1.05-4.85a1.65 1.65 0 0 0-1.24-1.27 12.3 12.3 0 0 1-4.15-2.4 1.65 1.65 0 0 1-.48-1.71l1.95-4.65a1.65 1.65 0 0 0-.22-1.79l-3.54-3.54a1.65 1.65 0 0 0-2.34 0l-3.54 3.54a1.65 1.65 0 0 0-.33 1.82 12.3 12.3 0 0 1 0 4.8 1.65 1.65 0 0 1-1.51 1.34l-5 .65a1.65 1.65 0 0 0-1.32 2l1.05 4.85a1.65 1.65 0 0 0 1.24 1.27 12.3 12.3 0 0 1 4.15 2.4 1.65 1.65 0 0 1 .48 1.71l-1.95 4.65a1.65 1.65 0 0 0 .22 1.79Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">设置</div>
+            <button class="download-btn" onclick="downloadIcon('settings-icon', 'icon-settings.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('settings-icon-active', 'icon-settings-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 地址图标 -->
+        <div class="icon-item">
+            <svg id="location-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M21 10a3 3 0 1 1 6 0c0 6-3 10-3 10s-3-4-3-10Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 7c-4.97 0-9 4.03-9 9 0 7.5 9 18 9 18s9-10.5 9-18c0-4.97-4.03-9-9-9Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">地址</div>
+            <button class="download-btn" onclick="downloadIcon('location-icon', 'icon-location.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('location-icon-active', 'icon-location-active.png')">下载激活</button>
+        </div>
+        
+        <!-- 客服图标 -->
+        <div class="icon-item">
+            <svg id="service-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M21 16.5c0-.77.64-1.5 1.5-1.5h3c.86 0 1.5.73 1.5 1.5S26.36 18 25.5 18h-3c-.86 0-1.5-.73-1.5-1.5Z" stroke="#999999" stroke-width="2"/>
+                <path d="M24 40c8.84 0 16-7.16 16-16S32.84 8 24 8 8 15.16 8 24s7.16 16 16 16Z" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 28v4" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="icon-name">客服</div>
+            <button class="download-btn" onclick="downloadIcon('service-icon', 'icon-service.png')">下载普通</button>
+            <button class="download-btn" onclick="downloadIcon('service-icon-active', 'icon-service-active.png')">下载激活</button>
+        </div>
+    </div>
+
+    <!-- 隐藏的激活状态图标 -->
+    <div style="display: none;">
+        <svg id="home-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M8 18L24 6L40 18V38C40 39.1046 39.1046 40 38 40H10C8.89543 40 8 39.1046 8 38V18Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 40V24H30V40" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="blindbox-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <defs>
+                <linearGradient id="boxGradientBig" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#EF5BA6;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#E91E63;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="ribbonGradientBig" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#EF5BA6;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <!-- 盒子主体 -->
+            <rect x="10" y="16" width="28" height="20" rx="4" ry="4" 
+                  fill="url(#boxGradientBig)" 
+                  stroke="#EF5BA6" 
+                  stroke-width="3"/>
+            
+            <!-- 盒子盖子 -->
+            <path d="M8 16 L40 16 Q42 16 42 18 L42 20 Q42 22 40 22 L8 22 Q6 22 6 20 L6 18 Q6 16 8 16 Z" 
+                  fill="url(#boxGradientBig)" 
+                  stroke="#EF5BA6" 
+                  stroke-width="3"/>
+            
+            <!-- 蝴蝶结装饰 -->
+            <path d="M24 16 L24 10" 
+                  stroke="url(#ribbonGradientBig)" 
+                  stroke-width="3" 
+                  stroke-linecap="round"/>
+            
+            <!-- 蝴蝶结左侧 -->
+            <path d="M16 10 Q20 6 24 10 Q20 14 16 10" 
+                  fill="url(#ribbonGradientBig)" 
+                  stroke="#EF5BA6" 
+                  stroke-width="2.4"/>
+            
+            <!-- 蝴蝶结右侧 -->
+            <path d="M32 10 Q28 6 24 10 Q28 14 32 10" 
+                  fill="url(#ribbonGradientBig)" 
+                  stroke="#EF5BA6" 
+                  stroke-width="2.4"/>
+            
+            <!-- 神秘感装饰点 -->
+            <circle cx="18" cy="26" r="2" fill="#ffffff" opacity="0.8"/>
+            <circle cx="30" cy="30" r="2" fill="#ffffff" opacity="0.8"/>
+            <circle cx="24" cy="32" r="1.6" fill="#ffffff" opacity="0.6"/>
+            
+            <!-- 光效装饰 -->
+            <circle cx="14" cy="20" r="1" fill="#ffffff" opacity="0.9"/>
+            <circle cx="34" cy="24" r="1" fill="#ffffff" opacity="0.7"/>
+        </svg>
+        
+        <svg id="product-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="16" width="32" height="24" rx="2" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M16 16V12C16 10.8954 16.8954 10 18 10H30C31.1046 10 32 10.8954 32 12V16" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M8 24H40" stroke="#EF5BA6" stroke-width="2"/>
+            <circle cx="20" cy="30" r="2" fill="#EF5BA6"/>
+            <circle cx="28" cy="30" r="2" fill="#EF5BA6"/>
+            <path d="M12 34H36" stroke="#EF5BA6" stroke-width="1.5"/>
+        </svg>
+        
+        <svg id="category-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect x="6" y="6" width="16" height="16" rx="2" stroke="#EF5BA6" stroke-width="2"/>
+            <rect x="26" y="6" width="16" height="16" rx="2" stroke="#EF5BA6" stroke-width="2"/>
+            <rect x="6" y="26" width="16" height="16" rx="2" stroke="#EF5BA6" stroke-width="2"/>
+            <rect x="26" y="26" width="16" height="16" rx="2" stroke="#EF5BA6" stroke-width="2"/>
+        </svg>
+        
+        <svg id="cart-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M16 32C17.1046 32 18 32.8954 18 34C18 35.1046 17.1046 36 16 36C14.8954 36 14 35.1046 14 34C14 32.8954 14.8954 32 16 32Z" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M34 32C35.1046 32 36 32.8954 36 34C36 35.1046 35.1046 36 34 36C32.8954 36 32 35.1046 32 34C32 32.8954 32.8954 32 34 32Z" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M2 2H8L12.4 22.8C12.7506 24.5669 14.2967 25.8996 16.1 26H33.6C35.4033 25.8996 36.9494 24.5669 37.3 22.8L40 12H10" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="order-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M32 6H16C14.8954 6 14 6.89543 14 8V40C14 41.1046 14.8954 42 16 42H32C33.1046 42 34 41.1046 34 40V8C34 6.89543 33.1046 6 32 6Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 16H28" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 24H28" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 32H28" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        
+        <svg id="profile-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M24 24C28.4183 24 32 20.4183 32 16C32 11.5817 28.4183 8 24 8C19.5817 8 16 11.5817 16 16C16 20.4183 19.5817 24 24 24Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 40C8 32.268 14.268 26 22 26H26C33.732 26 40 32.268 40 40" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="search-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="21" cy="21" r="13" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="m33 33 6 6" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="favorite-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M20.84 4.61a5.5 5.5 0 0 1 6.32 0l.24.16a5.5 5.5 0 0 0 4.08.66l.27-.05a5.5 5.5 0 0 1 6.07 6.07l-.05.27a5.5 5.5 0 0 0 .66 4.08l.16.24a5.5 5.5 0 0 1 0 6.32l-.16.24a5.5 5.5 0 0 0-.66 4.08l.05.27a5.5 5.5 0 0 1-6.07 6.07l-.27-.05a5.5 5.5 0 0 0-4.08.66l-.24.16a5.5 5.5 0 0 1-6.32 0l-.24-.16a5.5 5.5 0 0 0-4.08-.66l-.27.05a5.5 5.5 0 0 1-6.07-6.07l.05-.27a5.5 5.5 0 0 0-.66-4.08l-.16-.24a5.5 5.5 0 0 1 0-6.32l.16-.24a5.5 5.5 0 0 0 .66-4.08l-.05-.27a5.5 5.5 0 0 1 6.07-6.07l.27.05a5.5 5.5 0 0 0 4.08-.66l.24-.16Z" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M18 24L22 28L30 20" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="notification-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M18 32a6 6 0 0 0 12 0" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.73 21a10.09 10.09 0 0 1 1.26-4c2.85-4.44 7.36-5 9.01-5s6.16.56 9.01 5a10.09 10.09 0 0 1 1.26 4c.14 2.5.81 4.37 1.73 5.82a3.5 3.5 0 0 1-1.73 5.18H15.73a3.5 3.5 0 0 1-1.73-5.18c.92-1.45 1.59-3.32 1.73-5.82Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="settings-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M24 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 44a1.65 1.65 0 0 0 .33 1.82l3.54 3.54a1.65 1.65 0 0 0 2.34 0l3.54-3.54a1.65 1.65 0 0 0 .33-1.82 12.3 12.3 0 0 1 0-4.8 1.65 1.65 0 0 1 1.51-1.34l5-.65a1.65 1.65 0 0 0 1.32-2l-1.05-4.85a1.65 1.65 0 0 0-1.24-1.27 12.3 12.3 0 0 1-4.15-2.4 1.65 1.65 0 0 1-.48-1.71l1.95-4.65a1.65 1.65 0 0 0-.22-1.79l-3.54-3.54a1.65 1.65 0 0 0-2.34 0l-3.54 3.54a1.65 1.65 0 0 0-.33 1.82 12.3 12.3 0 0 1 0 4.8 1.65 1.65 0 0 1-1.51 1.34l-5 .65a1.65 1.65 0 0 0-1.32 2l1.05 4.85a1.65 1.65 0 0 0 1.24 1.27 12.3 12.3 0 0 1 4.15 2.4 1.65 1.65 0 0 1 .48 1.71l-1.95 4.65a1.65 1.65 0 0 0 .22 1.79Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="location-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M21 10a3 3 0 1 1 6 0c0 6-3 10-3 10s-3-4-3-10Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M24 7c-4.97 0-9 4.03-9 9 0 7.5 9 18 9 18s9-10.5 9-18c0-4.97-4.03-9-9-9Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg id="service-icon-active" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M21 16.5c0-.77.64-1.5 1.5-1.5h3c.86 0 1.5.73 1.5 1.5S26.36 18 25.5 18h-3c-.86 0-1.5-.73-1.5-1.5Z" stroke="#EF5BA6" stroke-width="2"/>
+            <path d="M24 40c8.84 0 16-7.16 16-16S32.84 8 24 8 8 15.16 8 24s7.16 16 16 16Z" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M24 28v4" stroke="#EF5BA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <script>
+        function downloadIcon(iconId, filename) {
+            const svg = document.getElementById(iconId);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置高分辨率
+            canvas.width = 96;
+            canvas.height = 96;
+            
+            const img = new Image();
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 96, 96);
+                
+                canvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    
+                    URL.revokeObjectURL(url);
+                    URL.revokeObjectURL(link.href);
+                }, 'image/png');
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html> 

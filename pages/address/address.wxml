@@ -1,0 +1,78 @@
+<!--pages/address/address.wxml-->
+<view class="address-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 地址标题区域 -->
+  <view class="address-header">
+    <view class="address-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
+    </view>
+    <view class="address-title-section">
+      <text class="address-title">收货地址</text>
+    </view>
+    <view class="address-placeholder"></view>
+  </view>
+
+  <!-- 地址列表 -->
+  <view class="address-content">
+    <view wx:if="{{addressList.length > 0}}" class="address-list">
+      <view class="address-item" wx:for="{{addressList}}" wx:key="id">
+        <!-- 地址信息 -->
+        <view class="address-info">
+          <view class="address-top">
+            <view class="name-phone">
+              <text class="name">{{item.name}}</text>
+              <text class="phone">{{item.phone}}</text>
+            </view>
+            <view wx:if="{{item.isDefault}}" class="default-tag">默认</view>
+          </view>
+          
+          <view class="address-detail">{{item.detail}}</view>
+          
+          <!-- 地址操作 -->
+          <view class="address-actions">
+            <view class="action-left">
+              <view 
+                class="default-btn {{item.isDefault ? 'active' : ''}}" 
+                bindtap="onSetDefault" 
+                data-id="{{item.id}}"
+              >
+                <view class="radio-btn">
+                  <view class="radio-inner {{item.isDefault ? 'checked' : ''}}"></view>
+                </view>
+                <text>设为默认</text>
+              </view>
+            </view>
+            
+            <view class="action-right">
+              <view class="edit-btn" bindtap="onEditAddress" data-address="{{item}}">
+                编辑
+              </view>
+              <view class="delete-btn" bindtap="onDeleteAddress" data-id="{{item.id}}">
+                删除
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-address">
+      <view class="empty-icon">📍</view>
+      <view class="empty-text">暂无收货地址</view>
+      <view class="empty-desc">添加收货地址，让购物更便捷</view>
+    </view>
+  </view>
+
+  <!-- 底部添加按钮 -->
+  <view class="bottom-add">
+    <view class="add-address-btn" bindtap="onAddAddress">
+      <view class="add-icon">+</view>
+      <text>添加新地址</text>
+    </view>
+  </view>
+</view> 

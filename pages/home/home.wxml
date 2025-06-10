@@ -1,0 +1,79 @@
+<!--pages/home/home.wxml-->
+<view class="home-container">
+  <!-- Banner卡片区域 -->
+  <view class="banner-card-container">
+    <view class="banner-card">
+      <!-- 背景图片层 -->
+      <view class="banner-background">
+        <image src="../../images/reading-child-bg.svg" class="background-image" mode="aspectFill"></image>
+        <view class="background-overlay"></view>
+      </view>
+      
+      <!-- 内容层 -->
+      <view class="banner-content">
+        <!-- 顶部装饰图标 -->
+        <view class="decorative-icons">
+          <view class="icon-book">📚</view>
+        </view>
+        
+        <!-- 主标题区域 -->
+        <view class="title-section">
+          <view class="book-icon">📚</view>
+          <view class="main-title">绘本盲盒来啦</view>
+          <view class="subtitle">精选绘本自由搭配</view>
+          <view class="description">低价好绘本，惊喜不断，随选随享</view>
+        </view>
+        
+        <!-- 开始选择按钮 -->
+        <view class="start-button" bindtap="goToBlindboxSelect">
+          <view class="button-icon">🎁</view>
+          <text>开始选择盲盒</text>
+          <view class="arrow-container">
+            <image src="../../images/arrow-right.svg" class="arrow-icon" mode="aspectFit"></image>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 为什么选择盲盒标题 -->
+  <view class="why-section">
+    <view class="section-icon">🦋</view>
+    <text class="section-title">为什么选择盲盒</text>
+    <view class="section-subtitle">让每一次阅读都充满惊喜</view>
+  </view>
+  
+  <!-- 特色卡片区域 -->
+  <view class="features-section">
+    <view class="feature-card">
+      <view class="feature-icon green">📚</view>
+      <view class="feature-content">
+        <view class="feature-title">超值优惠</view>
+        <view class="feature-desc">平均每本不到2元，比市价便宜70%</view>
+      </view>
+    </view>
+    
+    <view class="feature-card">
+      <view class="feature-icon blue">⭐</view>
+      <view class="feature-content">
+        <view class="feature-title">品质保证</view>
+        <view class="feature-desc">精选优质绘本，成色透明标注</view>
+      </view>
+    </view>
+    
+    <view class="feature-card">
+      <view class="feature-icon orange">💎</view>
+      <view class="feature-content">
+        <view class="feature-title">惊喜体验</view>
+        <view class="feature-desc">随机搭配组合，每次都有新发现</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部优惠提示 -->
+  <view class="promotion-banner">
+    <view class="promo-icon">🎁</view>
+    <text class="promo-text">首单立减10元，分享再得5元优惠</text>
+    <view class="promo-note">仅余3天</view>
+  </view>
+</view> 

@@ -1,0 +1,93 @@
+<!--pages/category/category.wxml-->
+<view class="category-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">分类浏览</text>
+    <text class="page-subtitle">按需求精选您的绘本盲盒</text>
+  </view>
+
+  <!-- 年龄分类 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🎂 按年龄选择</text>
+      <text class="section-desc">适龄阅读，成长更快乐</text>
+    </view>
+    <view class="category-grid">
+      <view 
+        class="category-card age-card" 
+        wx:for="{{ageCategories}}" 
+        wx:key="id"
+        bindtap="onAgeCategoryTap"
+        data-category="{{item}}"
+      >
+        <view class="category-icon {{item.iconclass}}">
+          <text class="icon-text">{{item.icon}}</text>
+        </view>
+        <view class="category-info">
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.count}}个盲盒</text>
+        </view>
+        <view class="category-tag">{{item.tag}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 新旧程度分类 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">✨ 按新旧程度</text>
+      <text class="section-desc">根据预算选择合适的盲盒</text>
+    </view>
+    <view class="category-list">
+      <view 
+        class="category-row" 
+        wx:for="{{conditionCategories}}" 
+        wx:key="id"
+        bindtap="onConditionCategoryTap"
+        data-category="{{item}}"
+      >
+        <view class="row-left">
+          <view class="condition-badge {{item.badgeClass}}">{{item.condition}}</view>
+          <view class="row-info">
+            <text class="row-title">{{item.name}}</text>
+            <text class="row-desc">{{item.description}}</text>
+          </view>
+        </view>
+        <view class="row-right">
+          <text class="price-range">¥{{item.priceRange}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门推荐 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🔥 热门推荐</text>
+      <text class="section-desc">最受欢迎的盲盒组合</text>
+    </view>
+    <view class="recommend-list">
+      <view 
+        class="recommend-card"
+        wx:for="{{recommendList}}" 
+        wx:key="id"
+        bindtap="onRecommendTap"
+        data-product="{{item}}"
+      >
+        <image src="{{item.coverUrl}}" class="recommend-cover" mode="aspectFill" />
+        <view class="recommend-info">
+          <text class="recommend-title">{{item.name}}</text>
+          <view class="recommend-tags">
+            <text class="tag">{{item.ageRange}}</text>
+            <text class="tag">{{item.condition}}</text>
+          </view>
+          <view class="recommend-price">
+            <text class="price">¥{{item.price}}</text>
+            <text class="original-price">¥{{item.originalPrice}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

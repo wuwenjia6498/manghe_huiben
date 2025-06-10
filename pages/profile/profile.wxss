@@ -1,0 +1,497 @@
+/* pages/profile/profile.wxss */
+
+.profile-container {
+  background: var(--secondary-color);
+  min-height: 100vh;
+}
+
+/* 上半部分：用户信息区域 */
+.profile-header {
+  background: var(--primary-color);
+  padding-bottom: var(--spacing-xxl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景装饰 */
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(3deg); }
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--status-bar-height, 44rpx) var(--spacing-base) var(--spacing-base) var(--spacing-base);
+  position: relative;
+  z-index: 2;
+}
+
+.navbar-left, .navbar-right {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-center {
+  flex: 1;
+  text-align: center;
+}
+
+.settings-icon {
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  transition: all 0.3s ease;
+}
+
+.settings-icon:active {
+  transform: rotate(90deg);
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-xl);
+  position: relative;
+  z-index: 2;
+  min-height: 320rpx;
+}
+
+.user-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  min-height: 220rpx;
+  justify-content: center;
+}
+
+.user-avatar {
+  position: relative;
+  margin-bottom: var(--spacing-lg);
+}
+
+.avatar-image {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+}
+
+.avatar-badge {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 28rpx;
+  height: 28rpx;
+  background: #4CAF50;
+  border-radius: 50%;
+  border: 3rpx solid #ffffff;
+  box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.3);
+}
+
+.user-details {
+  text-align: center;
+  margin-bottom: var(--spacing-base);
+  min-height: 80rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-name {
+  color: #ffffff;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.user-status {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  text-align: center;
+  max-width: 400rpx;
+}
+
+.user-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 var(--spacing-lg);
+}
+
+/* 退出按钮 */
+.logout-btn {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg) var(--spacing-xxl);
+  transition: all 0.3s ease;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  min-width: 280rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.logout-btn:active::before {
+  left: 100%;
+}
+
+.logout-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.18);
+}
+
+.logout-text {
+  color: var(--primary-color);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+/* 登录状态样式 */
+.login-avatar {
+  position: relative;
+  margin-bottom: var(--spacing-lg);
+}
+
+.default-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 70rpx;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20rpx);
+}
+
+.login-details {
+  text-align: center;
+  margin-bottom: var(--spacing-base);
+}
+
+.login-title {
+  color: #ffffff;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 var(--spacing-lg);
+}
+
+.primary-login-btn {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg) var(--spacing-xxl);
+  transition: all 0.3s ease;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  min-width: 280rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.primary-login-btn:active::before {
+  left: 100%;
+}
+
+.primary-login-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+}
+
+.login-btn-text {
+  color: var(--primary-color);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.wechat-login-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1rpx solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-sm) var(--spacing-base);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  min-width: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wechat-login-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.wechat-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+}
+
+/* 登录信息 */
+.login-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-xl);
+  position: relative;
+  z-index: 2;
+  min-height: 320rpx;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  min-height: 220rpx;
+  justify-content: center;
+}
+
+/* 下半部分：功能列表 */
+.profile-content {
+  padding: var(--spacing-lg) var(--spacing-base) var(--spacing-base);
+  margin-top: -var(--spacing-lg); /* 向上偏移，减少头部和内容区间距 */
+}
+
+/* 功能区域 */
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-base);
+}
+
+.section-icon {
+  font-size: var(--font-size-lg);
+  margin-right: var(--spacing-sm);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 菜单列表 */
+.menu-list {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-bottom: 1rpx solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:active {
+  background: var(--secondary-color);
+}
+
+/* 功能图标 */
+.item-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-base);
+  font-size: var(--font-size-xl);
+}
+
+.item-icon.pending {
+  background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
+}
+
+.item-icon.shipping {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.item-icon.all {
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+}
+
+.item-icon.address {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+}
+
+.item-icon.service {
+  background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+}
+
+.item-icon.agreement {
+  background: linear-gradient(135deg, #607D8B 0%, #455A64 100%);
+}
+
+.item-icon.privacy {
+  background: linear-gradient(135deg, #795548 0%, #5D4037 100%);
+}
+
+.item-icon.about {
+  background: linear-gradient(135deg, #3F51B5 0%, #303F9F 100%);
+}
+
+/* 功能信息 */
+.item-info {
+  flex: 1;
+}
+
+.item-title {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4rpx;
+}
+
+.item-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.item-arrow {
+  color: var(--text-placeholder);
+  font-size: var(--font-size-lg);
+}
+
+/* 推荐给朋友 */
+.recommend-section {
+  margin: var(--spacing-lg) 0;
+}
+
+.recommend-btn {
+  background: transparent;
+  border: 2rpx solid var(--primary-color);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.recommend-btn:active {
+  background: var(--primary-color);
+  transform: scale(0.98);
+}
+
+.recommend-btn:active .recommend-icon,
+.recommend-btn:active .recommend-text {
+  color: #ffffff;
+}
+
+.recommend-icon {
+  font-size: var(--font-size-lg);
+  margin-right: var(--spacing-sm);
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.recommend-text {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+/* 版权信息 */
+.footer {
+  text-align: center;
+  padding: var(--spacing-lg) 0 var(--spacing-xxl);
+}
+
+.app-version {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.copyright {
+  font-size: var(--font-size-xs);
+  color: var(--text-placeholder);
+}

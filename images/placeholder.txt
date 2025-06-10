@@ -1,0 +1,16 @@
+请使用 images/create-icons.html 文件生成底部导航栏图标：
+
+需要生成的图标文件：
+- tab-home.png (首页 - 普通状态)
+- tab-home-active.png (首页 - 激活状态)
+- tab-cart.png (购物车 - 普通状态)
+- tab-cart-active.png (购物车 - 激活状态)
+- tab-order.png (订单 - 普通状态)
+- tab-order-active.png (订单 - 激活状态)
+- tab-profile.png (我的 - 普通状态)
+- tab-profile-active.png (我的 - 激活状态)
+
+使用方法：
+1. 用浏览器打开 create-icons.html
+2. 点击对应的下载按钮生成图标
+3. 将生成的PNG文件放到此目录下 

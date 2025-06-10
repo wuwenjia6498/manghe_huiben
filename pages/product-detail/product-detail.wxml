@@ -1,0 +1,165 @@
+<!--pages/product-detail/product-detail.wxml-->
+<view class="product-detail-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <view class="navbar-center">
+      <text class="navbar-title">商品详情</text>
+    </view>
+    <view class="navbar-right" bindtap="onShareTap">
+      <view class="share-icon">⤴</view>
+    </view>
+  </view>
+
+  <!-- 商品主图区域 -->
+  <view class="product-hero">
+    <image src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" class="hero-image" mode="aspectFill" />
+    
+    <!-- 浮动后退按钮 -->
+    <view class="floating-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow.svg" class="back-arrow-icon" />
+    </view>
+    
+    <view class="hero-overlay">
+      <view class="hero-content">
+        <view class="brand-info">
+          <view class="brand-icon">📚</view>
+          <text class="brand-name">绘本盲盒</text>
+        </view>
+        <view class="product-subtitle">精选优质绘本，随机组合</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 价格信息 -->
+  <view class="price-section">
+    <view class="current-price">¥{{currentPrice}}</view>
+    <view class="original-price">¥{{originalPrice}}</view>
+  </view>
+
+  <!-- 商品配置选项 -->
+  <view class="config-section">
+    
+    <!-- 选择年龄段 -->
+    <view class="config-item">
+      <view class="config-header">
+        <view class="config-icon">🎂</view>
+        <view class="config-title">选择年龄段</view>
+      </view>
+      <view class="config-desc">为您的孩子适合的年龄段</view>
+      <view class="option-list">
+        <view 
+          class="option-tag {{selectedAge === item.value ? 'selected' : ''}}" 
+          wx:for="{{ageOptions}}" 
+          wx:key="value"
+          bindtap="onSelectAge"
+          data-value="{{item.value}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 选择新旧程度 -->
+    <view class="config-item">
+      <view class="config-header">
+        <view class="config-icon">⭐</view>
+        <view class="config-title">选择新旧程度</view>
+      </view>
+      <view class="config-desc">不同品相，不同价格</view>
+      <view class="option-list">
+        <view 
+          class="option-tag {{selectedCondition === item.value ? 'selected' : ''}}" 
+          wx:for="{{conditionOptions}}" 
+          wx:key="value"
+          bindtap="onSelectCondition"
+          data-value="{{item.value}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 选择本数 -->
+    <view class="config-item">
+      <view class="config-header">
+        <view class="config-icon">📖</view>
+        <view class="config-title">选择本数</view>
+      </view>
+      <view class="config-desc">更多本数更超值，平均单本价格更低</view>
+      <view class="option-list">
+        <view 
+          class="option-tag {{selectedCount === item.value ? 'selected' : ''}}" 
+          wx:for="{{countOptions}}" 
+          wx:key="value"
+          bindtap="onSelectCount"
+          data-value="{{item.value}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 成新度说明 -->
+  <view class="info-section">
+    <view class="info-header">
+      <view class="info-icon">💡</view>
+      <text class="info-title">成新度说明</text>
+    </view>
+    <view class="info-list">
+      <view class="info-item" wx:for="{{conditionInfo}}" wx:key="condition">
+        <text class="condition-name">{{item.condition}}：</text>
+        <text class="condition-desc">{{item.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发货与售后 -->
+  <view class="info-section">
+    <view class="info-header">
+      <view class="info-icon">🚚</view>
+      <text class="info-title">发货与售后</text>
+    </view>
+    <view class="service-list">
+      <view class="service-item">
+        <view class="service-icon good">📦</view>
+        <text class="service-text">随机发货，盲盒内容为惊喜组合</text>
+      </view>
+      <view class="service-item">
+        <view class="service-icon warning">⏰</view>
+        <text class="service-text">48小时内发货</text>
+      </view>
+      <view class="service-item">
+        <view class="service-icon error">❌</view>
+        <text class="service-text">盲盒商品不支持退换货</text>
+      </view>
+      <view class="service-item">
+        <view class="service-icon info">💬</view>
+        <text class="service-text">如有质量问题，请联系客服处理</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 价格信息 -->
+  <view class="price-info-section">
+    <view class="info-header">
+      <view class="info-icon">🏷️</view>
+      <text class="info-title">价格信息</text>
+    </view>
+    <view class="final-price">
+      <view class="price-current">¥{{currentPrice}}</view>
+      <view class="price-original">¥{{originalPrice}}</view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <view class="action-btn secondary" bindtap="onAddToCart">
+      加入购物车
+    </view>
+    <view class="action-btn primary" bindtap="onBuyNow">
+      立即购买
+    </view>
+  </view>
+</view>

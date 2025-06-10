@@ -1,0 +1,36 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 盒子主体 -->
+  <rect x="5" y="8" width="14" height="10" rx="2" ry="2" 
+        fill="none" 
+        stroke="#999999" 
+        stroke-width="1.5"/>
+  
+  <!-- 盒子盖子 -->
+  <path d="M4 8 L20 8 Q21 8 21 9 L21 10 Q21 11 20 11 L4 11 Q3 11 3 10 L3 9 Q3 8 4 8 Z" 
+        fill="none" 
+        stroke="#999999" 
+        stroke-width="1.5"/>
+  
+  <!-- 蝴蝶结装饰 -->
+  <path d="M12 8 L12 5" 
+        stroke="#999999" 
+        stroke-width="1.5" 
+        stroke-linecap="round"/>
+  
+  <!-- 蝴蝶结左侧 -->
+  <path d="M8 5 Q10 3 12 5 Q10 7 8 5" 
+        fill="none" 
+        stroke="#999999" 
+        stroke-width="1.2"/>
+  
+  <!-- 蝴蝶结右侧 -->
+  <path d="M16 5 Q14 3 12 5 Q14 7 16 5" 
+        fill="none" 
+        stroke="#999999" 
+        stroke-width="1.2"/>
+  
+  <!-- 神秘感装饰点 -->
+  <circle cx="9" cy="13" r="1" fill="#999999" opacity="0.6"/>
+  <circle cx="15" cy="15" r="1" fill="#999999" opacity="0.6"/>
+  <circle cx="12" cy="16" r="0.8" fill="#999999" opacity="0.4"/>
+</svg> 

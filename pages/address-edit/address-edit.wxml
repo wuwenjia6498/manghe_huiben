@@ -1,0 +1,107 @@
+<!--pages/address-edit/address-edit.wxml-->
+<view class="address-edit-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <!-- 空白导航栏，保持品牌色背景 -->
+  </view>
+
+  <!-- 地址编辑标题区域 -->
+  <view class="address-edit-header">
+    <view class="address-edit-back-btn" bindtap="onBackTap">
+      <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
+    </view>
+    <view class="address-edit-title-section">
+      <text class="address-edit-title">{{mode === 'add' ? '添加地址' : '编辑地址'}}</text>
+    </view>
+    <view class="address-edit-placeholder"></view>
+  </view>
+
+  <!-- 表单内容 -->
+  <view class="form-content">
+    <!-- 联系人信息 -->
+    <view class="form-section">
+      <view class="form-item">
+        <view class="form-label">
+          <text class="label-text">收货人</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入收货人姓名" 
+          value="{{formData.name}}"
+          bindinput="onNameInput"
+          maxlength="20"
+        />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">
+          <text class="label-text">手机号</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入手机号码" 
+          value="{{formData.phone}}"
+          bindinput="onPhoneInput"
+          maxlength="11"
+        />
+      </view>
+    </view>
+
+    <!-- 地址信息 -->
+    <view class="form-section">
+      <view class="form-item location-item" bindtap="onSelectLocation">
+        <view class="form-label">
+          <text class="label-text">所在地区</text>
+          <text class="required">*</text>
+        </view>
+        <view class="location-selector">
+          <text class="location-text {{formData.region ? '' : 'placeholder'}}">
+            {{formData.region || '请选择省市区'}}
+          </text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">
+          <text class="label-text">详细地址</text>
+          <text class="required">*</text>
+        </view>
+        <textarea 
+          class="form-textarea" 
+          placeholder="街道、楼牌号等详细信息" 
+          value="{{formData.detailAddress}}"
+          bindinput="onDetailAddressInput"
+          maxlength="100"
+          auto-height
+        ></textarea>
+      </view>
+    </view>
+
+    <!-- 设置默认 -->
+    <view class="form-section">
+      <view class="default-section" bindtap="onToggleDefault">
+        <view class="default-label">设为默认地址</view>
+        <view class="switch-container">
+          <switch 
+            class="default-switch" 
+            checked="{{formData.isDefault}}"
+            bindchange="onDefaultChange"
+            color="{{primaryColor}}"
+          />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部保存按钮 -->
+  <view class="bottom-save">
+    <view class="save-btn" bindtap="onSaveAddress">
+      保存地址
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情页 Banner 预览</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f8f8f8;
+        }
+
+        /* 手机预览容器 */
+        .phone-container {
+            max-width: 375px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 自定义导航栏 */
+        .custom-navbar {
+            height: 44px;
+            background: #EF5BA6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .navbar-right {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .share-icon {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* 浮动后退按钮 */
+        .floating-back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 34px;
+            height: 34px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .floating-back-btn:hover {
+            transform: scale(1.05);
+            background: rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-back-btn:active {
+            transform: scale(0.92);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .back-arrow-icon {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.2s ease;
+        }
+
+        .floating-back-btn:active .back-arrow-icon {
+            transform: translateX(-1px);
+        }
+
+        .navbar-center {
+            flex: 1;
+            text-align: center;
+        }
+
+        .navbar-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* 商品主图区域 */
+        .product-hero {
+            height: 250px;
+            position: relative;
+            background: linear-gradient(135deg, #EF5BA6, #f299c1);
+            overflow: hidden;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(0, 0, 0, 0.15) 0%, 
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(0, 0, 0, 0.15) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .brand-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .brand-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .product-subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* 价格区域 */
+        .price-section {
+            background: #ffffff;
+            padding: 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .current-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #EF5BA6;
+        }
+
+        .original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        /* 预览说明 */
+        .preview-info {
+            max-width: 375px;
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-info h2 {
+            color: #EF5BA6;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .preview-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .feature-list li {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 400px) {
+            .phone-container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .preview-info {
+                margin: 10px;
+                padding: 12px;
+            }
+        }
+    </style>
+    <script>
+        // 后退按钮点击事件
+        function goBack() {
+            // 优先使用浏览器的后退功能
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // 如果没有历史记录，跳转到首页或指定页面
+                window.location.href = '/';
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('商品详情页面加载完成');
+            
+            // 模拟一些页面交互效果
+            const backBtn = document.querySelector('.floating-back-btn');
+            if (backBtn) {
+                backBtn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                
+                backBtn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- 手机预览容器 -->
+    <div class="phone-container">
+        <!-- 自定义导航栏 -->
+        <div class="custom-navbar">
+            <div class="navbar-center">
+                <div class="navbar-title">商品详情</div>
+            </div>
+            <div class="navbar-right">
+                <div class="share-icon">⤴</div>
+            </div>
+        </div>
+
+        <!-- 商品主图区域 -->
+        <div class="product-hero">
+            <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" class="hero-image" alt="咖啡和书本背景">
+            
+            <!-- 浮动后退按钮 -->
+            <div class="floating-back-btn" onclick="goBack()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="back-arrow-icon">
+                    <defs>
+                        <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+                        </filter>
+                    </defs>
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" 
+                          fill="url(#arrowGradient)" 
+                          filter="url(#shadow)"
+                          stroke="rgba(255,255,255,0.3)" 
+                          stroke-width="0.5"/>
+                    <path d="M8.5 12L13.5 7L13.5 17Z" 
+                          fill="rgba(255,255,255,0.9)" 
+                          opacity="0.8"/>
+                </svg>
+            </div>
+            
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <div class="brand-info">
+                        <div class="brand-icon">📚</div>
+                        <div class="brand-name">绘本盲盒</div>
+                    </div>
+                    <div class="product-subtitle">精选优质绘本，随机组合</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 价格区域 -->
+        <div class="price-section">
+            <div class="current-price">¥29.9</div>
+            <div class="original-price">¥45.0</div>
+        </div>
+    </div>
+
+    <!-- 预览说明 -->
+    <div class="preview-info">
+        <h2>🎨 商品详情页Banner设计</h2>
+        <p>根据您的要求，我为商品详情页设计了全新的Banner：</p>
+        <ul class="feature-list">
+            <li>使用您提供的Unsplash咖啡书本图片作为背景</li>
+            <li>将左下角的文字移动到画面中心位置</li>
+            <li>优化后退按钮：使用精美SVG图标替换简陋文字箭头</li>
+            <li>浮动按钮采用毛玻璃效果，加入渐变和阴影</li>
+            <li>添加点击跳转功能，支持浏览器后退操作</li>
+            <li>精细化交互动画：悬停放大、点击缩小、箭头位移</li>
+        </ul>
+        <p><strong>✨ 设计亮点：</strong>精致小巧的SVG渐变箭头图标配合毛玻璃按钮，尺寸适中更加精美。点击可实现真实的页面跳转，交互动画流畅自然，符合现代UI设计标准。</p>
+        
+        <div style="margin-top: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #EF5BA6;">
+            <p><strong>🎯 功能说明：</strong></p>
+            <ul style="margin: 8px 0; padding-left: 20px;">
+                <li><strong>点击后退按钮</strong>：自动返回上一页面（浏览器后退）</li>
+                <li><strong>悬停效果</strong>：按钮微微放大，提供视觉反馈</li>
+                <li><strong>点击动画</strong>：按钮缩小+箭头左移，模拟真实按压感</li>
+                <li><strong>智能跳转</strong>：有历史记录时后退，否则跳转首页</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html> 
