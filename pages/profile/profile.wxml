@@ -142,6 +142,16 @@
           </view>
           <view class="item-arrow">></view>
         </view>
+        
+        <!-- 管理端入口 -->
+        <view class="menu-item admin-entry" bindtap="enterAdminMode">
+          <view class="item-icon admin">👨‍💼</view>
+          <view class="item-info">
+            <view class="item-title">管理后台</view>
+            <view class="item-desc">进入管理端系统</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
       </view>
     </view>
 

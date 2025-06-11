@@ -417,6 +417,11 @@
   background: linear-gradient(135deg, #3F51B5 0%, #303F9F 100%);
 }
 
+.item-icon.admin {
+  background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+  box-shadow: 0 4rpx 20rpx rgba(233, 30, 99, 0.3);
+}
+
 /* 功能信息 */
 .item-info {
   flex: 1;
@@ -494,4 +499,27 @@
 .copyright {
   font-size: var(--font-size-xs);
   color: var(--text-placeholder);
+}
+
+/* 管理端入口特殊样式 */
+.admin-entry {
+  border: 2rpx solid #E91E63;
+  border-radius: var(--border-radius-lg);
+  margin: var(--spacing-base) 0;
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(233, 30, 99, 0.02) 100%);
+}
+
+.admin-entry:active {
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(233, 30, 99, 0.05) 100%);
+  transform: scale(0.98);
+}
+
+.admin-entry .item-title {
+  color: #E91E63;
+  font-weight: 600;
+}
+
+.admin-entry .item-desc {
+  color: #E91E63;
+  opacity: 0.8;
 }

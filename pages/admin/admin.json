@@ -1,0 +1,11 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": false,
+  "backgroundColor": "#f8f8f8",
+  "backgroundTextStyle": "light",
+  "navigationBarTitleText": "管理看板",
+  "navigationBarBackgroundColor": "#EF5BA6",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
+} 

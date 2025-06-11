@@ -10,7 +10,9 @@ Page({
       name: '张先生',
       status: '微信用户 · 普通会员',
       avatar: 'https://picsum.photos/200/200?random=user'
-    }
+    },
+    settingsClickCount: 0, // 设置按钮点击次数
+    showAdminEntry: false // 是否显示管理端入口
   },
 
   /**
@@ -120,6 +122,32 @@ Page({
     wx.showToast({
       title: '设置功能开发中',
       icon: 'none'
+    });
+  },
+
+  /**
+   * 进入管理模式
+   */
+  enterAdminMode() {
+    // 设置管理员访问标记
+    wx.setStorageSync('adminAccess', true);
+    
+    // 跳转到管理端页面
+    wx.navigateTo({
+      url: '/pages/admin/admin',
+      success: () => {
+        wx.showToast({
+          title: '已进入管理后台',
+          icon: 'success'
+        });
+      },
+      fail: (error) => {
+        console.error('跳转管理端失败:', error);
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'error'
+        });
+      }
     });
   },
 

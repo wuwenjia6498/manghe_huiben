@@ -1,0 +1,246 @@
+<!--pages/admin-products/admin-products.wxml-->
+<view class="admin-products-page">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-actions">
+      <view class="add-btn" bindtap="onAddProduct">
+        <text class="add-icon">+</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-section">
+    <view class="stats-card">
+      <view class="stat-item">
+        <view class="stat-number">{{statistics.total}}</view>
+        <view class="stat-label">商品总量</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-number">{{statistics.active}}</view>
+        <view class="stat-label">在售中</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-number">{{statistics.inactive}}</view>
+        <view class="stat-label">已下架</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选器 -->
+  <view class="filter-section">
+    <scroll-view class="filter-scroll" scroll-x="true">
+      <view class="filter-tags">
+        <view 
+          class="filter-tag {{currentFilter === '' ? 'active' : ''}}"
+          bindtap="onFilterChange"
+          data-filter=""
+        >
+          全部
+        </view>
+        <view 
+          wx:for="{{ageGroups}}" 
+          wx:key="id"
+          class="filter-tag {{currentFilter === item.age_group ? 'active' : ''}}"
+          bindtap="onFilterChange"
+          data-filter="{{item.age_group}}"
+        >
+          {{item.age_group}}
+        </view>
+        <view 
+          class="filter-tag {{currentFilter === 'inactive' ? 'active' : ''}}"
+          bindtap="onFilterChange"
+          data-filter="inactive"
+        >
+          已下架
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="products-section">
+    <view wx:for="{{filteredAgeGroups}}" wx:key="id" class="age-group-card">
+      <!-- 年龄段头部 -->
+      <view class="age-group-header">
+        <view class="age-group-info">
+          <view class="age-group-details">
+            <view class="age-group-title">
+              <text class="age-text">{{item.age_group}}绘本盲盒</text>
+            </view>
+          </view>
+        </view>
+        <view class="age-group-toggle">
+          <switch 
+            checked="{{item.status === 'active'}}"
+            bindchange="onToggleAgeGroup"
+            data-age-group="{{item.age_group}}"
+            color="#EF5BA6"
+          />
+        </view>
+      </view>
+
+      <!-- SKU列表 -->
+      <view class="sku-list">
+        <view wx:for="{{item.skus}}" wx:key="id" wx:for-item="sku" class="sku-item">
+          <view class="sku-info">
+            <view class="sku-spec">
+              <text class="condition">{{sku.condition}}</text>
+              <text class="divider">·</text>
+              <text class="count">{{sku.book_count}}本装</text>
+            </view>
+            <view class="sku-price">
+              <text class="current-price">¥{{sku.price}}</text>
+              <view class="stock-info {{sku.stock_status}}">
+                <text>库存{{sku.stock}}</text>
+              </view>
+            </view>
+          </view>
+          
+          <view class="sku-actions">
+            <view class="action-btn" bindtap="onEditSku" data-sku="{{sku}}">
+              <text>编辑</text>
+            </view>
+            <view class="action-btn {{sku.status === 'active' ? 'online' : 'offline'}}" 
+                  bindtap="onToggleSku" data-sku="{{sku}}">
+              <text>{{sku.status === 'active' ? '上架' : '下架'}}</text>
+            </view>
+            <view class="action-btn delete-btn" bindtap="onDeleteSku" data-sku="{{sku}}">
+              <text>删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{filteredAgeGroups.length === 0}}" class="empty-state">
+    <view class="empty-text">暂无商品数据</view>
+    <view class="empty-desc">点击右上角添加按钮创建商品</view>
+  </view>
+  
+  <!-- 管理端底部导航 -->
+  <view class="admin-tabbar">
+    <view class="tab-item {{currentTab === 'home' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="home">
+      <view class="tab-icon">🏠</view>
+      <view class="tab-text">首页</view>
+    </view>
+    <view class="tab-item {{currentTab === 'products' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="products">
+      <view class="tab-icon">📦</view>
+      <view class="tab-text">商品</view>
+    </view>
+    <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="orders">
+      <view class="tab-icon">📋</view>
+      <view class="tab-text">订单</view>
+    </view>
+    <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="users">
+      <view class="tab-icon">👥</view>
+      <view class="tab-text">用户</view>
+    </view>
+    <view class="tab-item {{currentTab === 'settings' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="settings">
+      <view class="tab-icon">⚙️</view>
+      <view class="tab-text">设置</view>
+    </view>
+  </view>
+</view>
+
+<!-- SKU编辑弹窗 -->
+<view wx:if="{{showEditModal}}" class="modal-overlay" bindtap="onCloseEditModal">
+  <view class="edit-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <view class="modal-title">编辑SKU</view>
+      <view class="modal-close" bindtap="onCloseEditModal">×</view>
+    </view>
+    
+    <view class="modal-body">
+      <view class="form-item">
+        <view class="form-label">年龄段</view>
+        <picker mode="selector" range="{{ageGroupOptions}}" value="{{editForm.ageIndex}}" bindchange="onAgeChange">
+          <view class="form-input">{{ageGroupOptions[editForm.ageIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">成色</view>
+        <picker mode="selector" range="{{conditionOptions}}" value="{{editForm.conditionIndex}}" bindchange="onConditionChange">
+          <view class="form-input">{{conditionOptions[editForm.conditionIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">本数</view>
+        <picker mode="selector" range="{{countOptions}}" value="{{editForm.countIndex}}" bindchange="onCountChange">
+          <view class="form-input">{{countOptions[editForm.countIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">售价</view>
+        <input class="form-input" type="digit" placeholder="请输入售价" 
+               value="{{editForm.price}}" bindinput="onPriceInput" />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">库存</view>
+        <input class="form-input" type="number" placeholder="请输入库存数量" 
+               value="{{editForm.stock}}" bindinput="onStockInput" />
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="onCloseEditModal">取消</view>
+      <view class="modal-btn confirm" bindtap="onSaveEdit">保存</view>
+    </view>
+  </view>
+</view>
+
+<!-- 添加商品弹窗 -->
+<view wx:if="{{showAddModal}}" class="modal-overlay" bindtap="onCloseAddModal">
+  <view class="edit-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <view class="modal-title">添加商品</view>
+      <view class="modal-close" bindtap="onCloseAddModal">×</view>
+    </view>
+    
+    <view class="modal-body">
+      <view class="form-item">
+        <view class="form-label">年龄段</view>
+        <picker mode="selector" range="{{ageGroupOptions}}" value="{{addForm.ageIndex}}" bindchange="onAddAgeChange">
+          <view class="form-input">{{ageGroupOptions[addForm.ageIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">成色</view>
+        <picker mode="selector" range="{{conditionOptions}}" value="{{addForm.conditionIndex}}" bindchange="onAddConditionChange">
+          <view class="form-input">{{conditionOptions[addForm.conditionIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">本数</view>
+        <picker mode="selector" range="{{countOptions}}" value="{{addForm.countIndex}}" bindchange="onAddCountChange">
+          <view class="form-input">{{countOptions[addForm.countIndex] || '请选择'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">售价</view>
+        <input class="form-input" type="digit" placeholder="请输入售价" 
+               value="{{addForm.price}}" bindinput="onAddPriceInput" />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">库存</view>
+        <input class="form-input" type="number" placeholder="请输入库存数量" 
+               value="{{addForm.stock}}" bindinput="onAddStockInput" />
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="onCloseAddModal">取消</view>
+      <view class="modal-btn confirm" bindtap="onSaveAdd">添加</view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,275 @@
+<!--pages/admin-settings/admin-settings.wxml-->
+<view class="admin-settings-page">
+  <!-- 页面标题 -->
+  <view class="page-title">
+    系统设置
+    <view class="save-btn" bindtap="onSave">保存</view>
+  </view>
+
+  <!-- 设置内容 -->
+  <scroll-view class="settings-content" scroll-y="true">
+    
+    <!-- 配送设置 -->
+    <view class="setting-section">
+      <view class="section-header">
+        <view class="section-icon">🚚</view>
+        <view class="section-title">配送设置</view>
+      </view>
+      
+      <view class="setting-item">
+        <view class="item-label">配送费用</view>
+        <view class="input-group">
+          <input class="setting-input" 
+                 type="digit" 
+                 value="{{settings.deliveryFee}}" 
+                 bindinput="onInputChange" 
+                 data-field="deliveryFee" 
+                 placeholder="0" />
+          <text class="input-unit">元</text>
+          <text class="delivery-fee-desc">设置为0表示包邮</text>
+        </view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">免邮门槛</view>
+        <view class="input-group">
+          <input class="setting-input" 
+                 type="digit" 
+                 value="{{settings.freeShippingThreshold}}" 
+                 bindinput="onInputChange" 
+                 data-field="freeShippingThreshold" 
+                 placeholder="50" />
+          <text class="input-unit">元</text>
+        </view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">发货时间</view>
+        <picker mode="selector" 
+                range="{{shippingTimeOptions}}" 
+                value="{{settings.shippingTimeIndex}}" 
+                bindchange="onPickerChange" 
+                data-field="shippingTime">
+          <view class="picker-display">{{shippingTimeOptions[settings.shippingTimeIndex]}}</view>
+        </picker>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">配送公司</view>
+        <picker mode="selector" 
+                range="{{deliveryCompanyOptions}}" 
+                value="{{settings.deliveryCompanyIndex}}" 
+                bindchange="onPickerChange" 
+                data-field="deliveryCompany">
+          <view class="picker-display">{{deliveryCompanyOptions[settings.deliveryCompanyIndex]}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 门店自取 -->
+    <view class="setting-section">
+      <view class="section-header">
+        <view class="section-icon">🏪</view>
+        <view class="section-title">门店自取</view>
+        <switch checked="{{settings.storePickupEnabled}}" 
+                bindchange="onSwitchChange" 
+                data-field="storePickupEnabled" 
+                color="#EF5BA6" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">门店名称</view>
+        <input class="setting-input full-width" 
+               value="{{settings.storeName}}" 
+               bindinput="onInputChange" 
+               data-field="storeName" 
+               placeholder="八爪鱼绘本馆" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">联系电话</view>
+        <input class="setting-input full-width" 
+               value="{{settings.storePhone}}" 
+               bindinput="onInputChange" 
+               data-field="storePhone" 
+               placeholder="0574-87343774" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">门店地址</view>
+        <textarea class="setting-textarea small" 
+                  value="{{settings.storeAddress}}" 
+                  bindinput="onInputChange" 
+                  data-field="storeAddress" 
+                  placeholder="宁波市海曙区文化路12号" 
+                  maxlength="200" />
+      </view>
+    </view>
+
+    <!-- 价格设置 -->
+    <view class="setting-section">
+      <view class="section-header">
+        <view class="section-icon">💰</view>
+        <view class="section-title">价格设置</view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">首单优惠</view>
+        <switch checked="{{settings.firstOrderDiscountEnabled}}" 
+                bindchange="onSwitchChange" 
+                data-field="firstOrderDiscountEnabled" 
+                color="#EF5BA6" />
+      </view>
+
+      <view class="setting-item" wx:if="{{settings.firstOrderDiscountEnabled}}">
+        <view class="item-label">立减</view>
+        <view class="input-group">
+          <input class="setting-input" 
+                 type="digit" 
+                 value="{{settings.firstOrderDiscount}}" 
+                 bindinput="onInputChange" 
+                 data-field="firstOrderDiscount" 
+                 placeholder="10" />
+          <text class="input-unit">元</text>
+        </view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">分享优惠券</view>
+        <switch checked="{{settings.shareCouponEnabled}}" 
+                bindchange="onSwitchChange" 
+                data-field="shareCouponEnabled" 
+                color="#EF5BA6" />
+      </view>
+
+      <view class="setting-item" wx:if="{{settings.shareCouponEnabled}}">
+        <view class="item-label">获得</view>
+        <view class="input-group">
+          <input class="setting-input" 
+                 type="digit" 
+                 value="{{settings.shareCouponAmount}}" 
+                 bindinput="onInputChange" 
+                 data-field="shareCouponAmount" 
+                 placeholder="5" />
+          <text class="input-unit">元券</text>
+        </view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">满减优惠</view>
+        <switch checked="{{settings.fullReductionEnabled}}" 
+                bindchange="onSwitchChange" 
+                data-field="fullReductionEnabled" 
+                color="#EF5BA6" />
+      </view>
+
+      <view class="setting-item" wx:if="{{settings.fullReductionEnabled}}">
+        <view class="item-label-inline">
+          <text>满</text>
+          <input class="setting-input inline" 
+                 type="digit" 
+                 value="{{settings.fullReductionThreshold}}" 
+                 bindinput="onInputChange" 
+                 data-field="fullReductionThreshold" 
+                 placeholder="100" />
+          <text class="input-unit">元减</text>
+          <input class="setting-input inline" 
+                 type="digit" 
+                 value="{{settings.fullReductionAmount}}" 
+                 bindinput="onInputChange" 
+                 data-field="fullReductionAmount" 
+                 placeholder="15" />
+          <text class="input-unit">元</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 系统配置 -->
+    <view class="setting-section">
+      <view class="section-header">
+        <view class="section-icon">⚙️</view>
+        <view class="section-title">系统配置</view>
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">客服微信</view>
+        <input class="setting-input full-width" 
+               value="{{settings.customerServiceWechat}}" 
+               bindinput="onInputChange" 
+               data-field="customerServiceWechat" 
+               placeholder="pictureboxes" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">客服电话</view>
+        <input class="setting-input full-width" 
+               value="{{settings.customerServicePhone}}" 
+               bindinput="onInputChange" 
+               data-field="customerServicePhone" 
+               placeholder="0574-87345055" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">服务时间</view>
+        <input class="setting-input full-width" 
+               value="{{settings.serviceTime}}" 
+               bindinput="onInputChange" 
+               data-field="serviceTime" 
+               placeholder="9:00-21:00" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">退换货政策</view>
+        <textarea class="setting-textarea small" 
+                  value="{{settings.returnPolicy}}" 
+                  bindinput="onInputChange" 
+                  data-field="returnPolicy" 
+                  placeholder="盲盒商品不支持退换货，请谨慎下单。" 
+                  maxlength="500" />
+      </view>
+
+      <view class="setting-item">
+        <view class="item-label">系统公告</view>
+        <switch checked="{{settings.systemNoticeEnabled}}" 
+                bindchange="onSwitchChange" 
+                data-field="systemNoticeEnabled" 
+                color="#EF5BA6" />
+      </view>
+
+      <view class="setting-item" wx:if="{{settings.systemNoticeEnabled}}">
+        <view class="item-label">公告内容</view>
+        <textarea class="setting-textarea small" 
+                  value="{{settings.systemNotice}}" 
+                  bindinput="onInputChange" 
+                  data-field="systemNotice" 
+                  placeholder="🎉 欢迎来到八爪鱼绘本馆！首单立减10元，分享得5元券！" 
+                  maxlength="200" />
+      </view>
+    </view>
+
+  </scroll-view>
+
+  <!-- 管理端底部导航 -->
+  <view class="admin-tabbar">
+    <view class="tab-item {{currentTab === 'home' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="home">
+      <view class="tab-icon">🏠</view>
+      <view class="tab-text">首页</view>
+    </view>
+    <view class="tab-item {{currentTab === 'products' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="products">
+      <view class="tab-icon">📦</view>
+      <view class="tab-text">商品</view>
+    </view>
+    <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="orders">
+      <view class="tab-icon">📋</view>
+      <view class="tab-text">订单</view>
+    </view>
+    <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="users">
+      <view class="tab-icon">👥</view>
+      <view class="tab-text">用户</view>
+    </view>
+    <view class="tab-item {{currentTab === 'settings' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="settings">
+      <view class="tab-icon">⚙️</view>
+      <view class="tab-text">设置</view>
+    </view>
+  </view>
+</view>

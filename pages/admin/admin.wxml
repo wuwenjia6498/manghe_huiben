@@ -1,0 +1,171 @@
+<!--pages/admin/admin.wxml-->
+<view class="admin-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <view class="navbar-left"></view>
+    <view class="navbar-center"></view>
+    <view class="navbar-right"></view>
+  </view>
+
+  <!-- 回退按钮 -->
+  <view class="floating-back-btn" bindtap="onBackTap">
+    <image src="/images/back-arrow.svg" class="back-arrow-icon" />
+  </view>
+
+  <!-- 页面内容 -->
+  <view class="admin-content">
+    <!-- 数据看板标题 -->
+    <view class="dashboard-header">
+      <view class="dashboard-title">数据看板</view>
+      <view class="dashboard-subtitle">全时监控业务关键指标</view>
+    </view>
+
+    <!-- 数据卡片区域（包含待处理事项） -->
+    <view class="data-cards-section">
+      <!-- 今日销售额 -->
+      <view class="data-card">
+        <view class="card-header">
+          <view class="card-title">今日销售额</view>
+        </view>
+        <view class="card-value">¥{{stats.todaySales}}</view>
+        <view class="card-change positive">
+          <text>+{{stats.salesGrowth}}%</text>
+        </view>
+      </view>
+
+      <!-- 今日订单 -->
+      <view class="data-card">
+        <view class="card-header">
+          <view class="card-title">今日订单</view>
+        </view>
+        <view class="card-value">{{stats.todayOrders}}</view>
+        <view class="card-change positive">
+          <text>+{{stats.ordersGrowth}}%</text>
+        </view>
+      </view>
+
+      <!-- 新增用户 -->
+      <view class="data-card">
+        <view class="card-header">
+          <view class="card-title">新增用户</view>
+        </view>
+        <view class="card-value">{{stats.newUsers}}</view>
+        <view class="card-change negative">
+          <text>-{{stats.usersChange}}%</text>
+        </view>
+      </view>
+
+      <!-- 待处理订单 -->
+      <view class="data-card">
+        <view class="card-header">
+          <view class="card-title">待处理订单</view>
+        </view>
+        <view class="card-value">{{stats.pendingOrders}}</view>
+        <view class="card-warning">需要关注</view>
+      </view>
+
+      <!-- 待发货订单 -->
+      <view class="data-card clickable" bindtap="onPendingOrdersTap">
+        <view class="card-header">
+          <view class="card-title">待发货订单</view>
+        </view>
+        <view class="card-value">{{stats.pendingShipment}}</view>
+        <view class="card-action">点击处理</view>
+      </view>
+
+      <!-- 库存预警 -->
+      <view class="data-card clickable" bindtap="onInventoryWarningTap">
+        <view class="card-header">
+          <view class="card-title">库存预警</view>
+        </view>
+        <view class="card-value">{{stats.lowInventory}}</view>
+        <view class="card-warning">需要补货</view>
+      </view>
+    </view>
+
+    <!-- 热门商品排行 -->
+    <view class="chart-section">
+      <view class="chart-card">
+        <view class="chart-header">
+          <view class="chart-title">热门商品排行</view>
+        </view>
+        <view class="pie-chart-container">
+          <canvas canvas-id="pieChart" class="pie-chart"></canvas>
+          <view class="chart-legend">
+            <view class="legend-item">
+              <view class="legend-color color-1"></view>
+              <text>3-6岁九成新</text>
+            </view>
+            <view class="legend-item">
+              <view class="legend-color color-2"></view>
+              <text>0-3岁全新</text>
+            </view>
+            <view class="legend-item">
+              <view class="legend-color color-3"></view>
+              <text>6岁以上七成新</text>
+            </view>
+            <view class="legend-item">
+              <view class="legend-color color-4"></view>
+              <text>其他</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快速统计卡片 -->
+    <view class="quick-stats-section">
+      <view class="section-title">业务概览</view>
+      <view class="quick-stats-grid">
+        <view class="quick-stat-item">
+          <view class="stat-info">
+            <view class="stat-value">¥12,456</view>
+            <view class="stat-label">本月收入</view>
+          </view>
+        </view>
+        <view class="quick-stat-item">
+          <view class="stat-info">
+            <view class="stat-value">128</view>
+            <view class="stat-label">总商品数</view>
+          </view>
+        </view>
+        <view class="quick-stat-item">
+          <view class="stat-info">
+            <view class="stat-value">1,234</view>
+            <view class="stat-label">总用户数</view>
+          </view>
+        </view>
+        <view class="quick-stat-item">
+          <view class="stat-info">
+            <view class="stat-value">456</view>
+            <view class="stat-label">总订单数</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 管理端底部导航 -->
+  <view class="admin-tabbar">
+    <view class="tab-item {{currentTab === 'home' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="home">
+      <view class="tab-icon">🏠</view>
+      <view class="tab-text">首页</view>
+    </view>
+    <view class="tab-item {{currentTab === 'products' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="products">
+      <view class="tab-icon">📦</view>
+      <view class="tab-text">商品</view>
+    </view>
+    <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="orders">
+      <view class="tab-icon">📋</view>
+      <view class="tab-text">订单</view>
+    </view>
+    <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="users">
+      <view class="tab-icon">👥</view>
+      <view class="tab-text">用户</view>
+    </view>
+    <view class="tab-item {{currentTab === 'settings' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="settings">
+      <view class="tab-icon">⚙️</view>
+      <view class="tab-text">设置</view>
+    </view>
+  </view>
+</view> 

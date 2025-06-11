@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "商品管理",
+  "navigationBarBackgroundColor": "#EF5BA6",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f8f8f8",
+  "disableScroll": false,
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
+} 

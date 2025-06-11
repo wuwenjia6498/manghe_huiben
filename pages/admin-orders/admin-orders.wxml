@@ -1,0 +1,108 @@
+<!--pages/admin-orders/admin-orders.wxml-->
+<view class="admin-orders-page">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-title">订单管理</view>
+    <view class="header-actions">
+      <text class="search-btn" bindtap="onSearchTap">🔍</text>
+      <text class="export-btn" bindtap="onExportTap">📊</text>
+    </view>
+  </view>
+
+  <!-- 订单状态筛选 -->
+  <view class="status-filter">
+    <view class="status-item {{currentFilter === 'all' ? 'active' : ''}}" 
+          data-filter="all" bindtap="onFilterChange">
+      <text class="status-text">全部</text>
+    </view>
+    <view class="status-item {{currentFilter === 'pending' ? 'active' : ''}}" 
+          data-filter="pending" bindtap="onFilterChange">
+      <text class="status-text">待发货</text>
+    </view>
+    <view class="status-item {{currentFilter === 'shipped' ? 'active' : ''}}" 
+          data-filter="shipped" bindtap="onFilterChange">
+      <text class="status-text">已发货</text>
+    </view>
+    <view class="status-item {{currentFilter === 'completed' ? 'active' : ''}}" 
+          data-filter="completed" bindtap="onFilterChange">
+      <text class="status-text">已完成</text>
+    </view>
+    <view class="status-item {{currentFilter === 'cancelled' ? 'active' : ''}}" 
+          data-filter="cancelled" bindtap="onFilterChange">
+      <text class="status-text">已取消</text>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="orders-section">
+    <block wx:if="{{filteredOrders.length > 0}}">
+      <view wx:for="{{filteredOrders}}" wx:key="id" class="order-card">
+        
+        <!-- 第一行：订单号和状态 -->
+        <view class="order-top-row">
+          <view class="order-basic-info">
+            <text class="order-id">订单号：{{item.orderNo}}</text>
+            <text class="order-time">{{item.createTime}}</text>
+          </view>
+          <view class="status-area">
+            <text class="order-status {{item.status}}">{{item.statusText}}</text>
+            <text class="status-edit-btn" data-id="{{item.id}}" bindtap="onEditStatus">修改</text>
+          </view>
+        </view>
+
+        <!-- 第二行：客户信息和金额 -->
+        <view class="order-customer-row">
+          <view class="customer-basic">
+            <text class="customer-name">{{item.customerName}}</text>
+            <text class="customer-phone">{{item.phone}}</text>
+          </view>
+          <text class="order-total">¥{{item.totalAmount}}</text>
+        </view>
+
+        <!-- 第三行：地址和操作按钮 -->
+        <view class="order-bottom-row">
+          <text class="customer-address">{{item.address}}</text>
+          <view class="order-actions">
+            <text class="action-btn secondary" 
+                  data-id="{{item.id}}" 
+                  bindtap="onViewDetail">
+              订单详情
+            </text>
+          </view>
+        </view>
+
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-state">
+      <text class="empty-icon">📦</text>
+      <text class="empty-text">暂无订单</text>
+      <text class="empty-desc">当前筛选条件下没有找到相关订单</text>
+    </view>
+  </view>
+
+  <!-- 管理端底部导航 -->
+  <view class="admin-tabbar">
+    <view class="tab-item {{currentTab === 'home' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="home">
+      <view class="tab-icon">🏠</view>
+      <view class="tab-text">首页</view>
+    </view>
+    <view class="tab-item {{currentTab === 'products' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="products">
+      <view class="tab-icon">📦</view>
+      <view class="tab-text">商品</view>
+    </view>
+    <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="orders">
+      <view class="tab-icon">📋</view>
+      <view class="tab-text">订单</view>
+    </view>
+    <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="users">
+      <view class="tab-icon">👥</view>
+      <view class="tab-text">用户</view>
+    </view>
+    <view class="tab-item {{currentTab === 'settings' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="settings">
+      <view class="tab-icon">⚙️</view>
+      <view class="tab-text">设置</view>
+    </view>
+  </view>
+</view> 

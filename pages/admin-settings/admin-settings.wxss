@@ -1,0 +1,476 @@
+/* pages/admin-settings/admin-settings.wxss */
+
+.admin-settings-page {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom) + 20rpx);
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* 页面标题 */
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1d1d1f;
+  background: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #3C3C43;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.save-btn {
+  background: #EF5BA6;
+  color: #ffffff;
+  padding: 12rpx 20rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(239, 91, 166, 0.3);
+}
+
+/* 设置内容 */
+.settings-content {
+  height: calc(100vh - 140rpx);
+  padding: 0 48rpx;
+  box-sizing: border-box;
+  padding-top: 16rpx;
+}
+
+/* 设置区块 */
+.setting-section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 区块标题 */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 24rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #F2F2F7;
+}
+
+.section-icon {
+  font-size: 24rpx;
+  margin-right: 12rpx;
+}
+
+.section-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+}
+
+/* 设置项 - 简洁一行布局，缩小间距 */
+.setting-item {
+  padding: 8rpx 24rpx;
+  border-bottom: 1rpx solid #F2F2F7;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44rpx;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+/* 价格设置区域更紧凑 */
+.setting-section:nth-child(3) .setting-item {
+  padding: 6rpx 24rpx;
+}
+
+.item-label {
+  font-size: 24rpx;
+  color: #1D1D1F;
+  font-weight: 400;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* 配送费用特殊布局 - 描述文字在右侧 */
+.delivery-fee-desc {
+  font-size: 20rpx;
+  color: #999999;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* 开关元素 */
+switch {
+  transform: scale(0.8);
+}
+
+/* 输入框布局 - 右对齐简洁样式 */
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  flex-shrink: 0;
+}
+
+/* 选择器、全宽输入框、文本域占用剩余空间但简化 */
+.picker-display {
+  flex: 1;
+  text-align: right;
+  color: #666666;
+  font-size: 24rpx;
+  padding: 0;
+  margin-left: 20rpx;
+}
+
+.setting-input.full-width {
+  flex: 1;
+  text-align: left;
+  background: #F8F9FA;
+  border: 1rpx solid #E5E5EA;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  color: #1D1D1F;
+  padding: 8rpx 12rpx;
+  margin-left: 20rpx;
+  min-height: 32rpx;
+}
+
+.setting-input.full-width:focus {
+  background: #ffffff;
+  border-color: #EF5BA6;
+  outline: none;
+}
+
+.setting-textarea {
+  flex: 1;
+  text-align: left;
+  background: #F8F9FA;
+  border: 1rpx solid #E5E5EA;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  color: #1D1D1F;
+  padding: 8rpx 12rpx;
+  margin-left: 20rpx;
+  height: 60rpx;
+  min-height: 60rpx;
+  resize: none;
+  line-height: 1.4;
+}
+
+.setting-textarea:focus {
+  background: #ffffff;
+  border-color: #EF5BA6;
+  outline: none;
+}
+
+/* 描述文字单独处理 - 放在下一行 */
+.item-desc {
+  font-size: 20rpx;
+  color: #999999;
+  margin-top: 4rpx;
+  display: block;
+  width: 100%;
+  line-height: 1.4;
+}
+
+/* 有描述文字的setting-item需要垂直布局 */
+.setting-item-with-desc {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 8rpx 24rpx;
+}
+
+.setting-item-with-desc .item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 1. 在input-group中的数字输入框 - 简化样式 */
+.input-group .setting-input {
+  background: transparent;
+  border: none;
+  font-size: 24rpx;
+  color: #1D1D1F;
+  text-align: right;
+  padding: 0;
+  width: auto;
+  min-width: 60rpx;
+  height: auto;
+  display: inline;
+  font-weight: 500;
+}
+
+/* 2. 全宽输入框焦点状态 */
+.setting-input.full-width:focus {
+  background: #ffffff;
+  border-color: #EF5BA6;
+  outline: none;
+}
+
+.setting-textarea:focus {
+  background: #ffffff;
+  border-color: #EF5BA6;
+  outline: none;
+}
+
+/* 3. 内联小数字输入框 - 保持原样用于满减设置 */
+.setting-input.inline {
+  background: #F2F2F7;
+  border-radius: 6rpx;
+  padding: 8rpx 12rpx;
+  font-size: 24rpx;
+  color: #1D1D1F;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  width: 100rpx;
+  min-width: 100rpx;
+  text-align: right;
+  flex-shrink: 0;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 1;
+}
+
+.input-unit {
+  font-size: 24rpx;
+  color: #666666;
+  font-weight: 400;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* 满减设置的内联布局 - 修复对齐 */
+.item-label-inline {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 24rpx;
+  color: #1D1D1F;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.item-label-inline text {
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: #666666;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* 选择器右箭头 */
+.picker-display::after {
+  content: '›';
+  font-size: 18rpx;
+  color: #C7C7CC;
+  margin-left: 8rpx;
+  transform: rotate(90deg);
+}
+
+/* 焦点状态 */
+.setting-input:focus {
+  background: #F8F9FA;
+  border-radius: 4rpx;
+  padding: 8rpx 12rpx;
+  outline: none;
+}
+
+.setting-input.inline:focus {
+  background: #ffffff;
+  border-color: #EF5BA6;
+  box-shadow: 0 0 0 2rpx rgba(239, 91, 166, 0.1);
+}
+
+/* 管理端底部导航 */
+.admin-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #e5e5e5;
+  display: flex;
+  z-index: 9999;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10000;
+}
+
+.tab-item:active {
+  background: #f8f8f8;
+}
+
+.tab-icon {
+  font-size: 44rpx;
+  transition: all 0.3s ease;
+}
+
+.tab-text {
+  font-size: 20rpx;
+  color: #999999;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active .tab-icon {
+  transform: scale(1.1);
+}
+
+.tab-item.active .tab-text {
+  color: #EF5BA6;
+  font-weight: 500;
+}
+
+/* 响应式设计 - 保护所有元素 */
+@media screen and (max-width: 750rpx) {
+  .page-title {
+    padding: 12rpx 24rpx;
+    font-size: 30rpx;
+  }
+  
+  .settings-content {
+    padding: 0 24rpx;
+    padding-top: 12rpx;
+  }
+  
+  .section-header {
+    padding: 14rpx 20rpx;
+  }
+  
+  .setting-item {
+    padding: 6rpx 20rpx;
+    min-height: 40rpx;
+  }
+  
+  .setting-item-with-desc {
+    padding: 6rpx 20rpx;
+  }
+  
+  .setting-section {
+    margin-bottom: 12rpx;
+  }
+  
+  .input-group .setting-input {
+    min-width: 180rpx;
+    max-width: 220rpx;
+    font-size: 24rpx;
+  }
+  
+  .setting-input.inline {
+    width: 120rpx;
+    min-width: 120rpx;
+    font-size: 24rpx;
+  }
+}
+
+@media screen and (max-width: 600rpx) {
+  .page-title {
+    padding: 12rpx 20rpx;
+    font-size: 28rpx;
+  }
+  
+  .settings-content {
+    padding: 0 20rpx;
+  }
+  
+  .section-header {
+    padding: 16rpx 18rpx;
+  }
+  
+  .setting-item {
+    padding: 16rpx 18rpx;
+  }
+  
+  .input-group .setting-input {
+    min-width: 160rpx;
+    max-width: 200rpx;
+    font-size: 22rpx;
+  }
+  
+  .setting-input.inline {
+    width: 100rpx;
+    min-width: 100rpx;
+    font-size: 22rpx;
+  }
+  
+  .item-label-inline {
+    font-size: 22rpx;
+  }
+  
+  .input-unit {
+    font-size: 22rpx;
+  }
+  
+  .picker-display {
+    font-size: 22rpx;
+  }
+}
+
+/* 交互效果 */
+.setting-item:active {
+  background: #F8F9FA;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+}
+
+.setting-input::placeholder,
+.setting-textarea::placeholder {
+  color: #C7C7CC;
+  font-size: 22rpx;
+}
+
+.setting-section:first-child {
+  margin-top: 8rpx;
+}
+
+.setting-section:last-child {
+  margin-bottom: 20rpx;
+} 

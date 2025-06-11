@@ -1,0 +1,134 @@
+<!--pages/admin-users/admin-users.wxml-->
+<view class="admin-users-page">
+  <!-- 页面标题 -->
+  <view class="page-title">
+    用户管理
+    <view class="title-actions">
+      <view class="search-icon" bindtap="onToggleSearch">
+        {{showSearch ? '✕' : '🔍'}}
+      </view>
+      <view class="export-icon" bindtap="onExportUsers">
+        📤
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="search-container" wx:if="{{showSearch}}">
+    <view class="search-box">
+      <input class="search-input" 
+             placeholder="搜索用户昵称、手机号" 
+             value="{{searchKeyword}}" 
+             bindinput="onSearchInput"
+             bindconfirm="onSearchConfirm" />
+      <view class="search-clear" wx:if="{{searchKeyword}}" bindtap="onClearSearch">✕</view>
+    </view>
+    <view class="search-cancel" bindtap="onCancelSearch">取消</view>
+  </view>
+
+  <!-- 用户状态筛选 -->
+  <view class="status-filter">
+    <view class="status-item {{currentFilter === 'all' ? 'active' : ''}}" 
+          data-filter="all" bindtap="onFilterChange">
+      <text class="status-text">全部用户</text>
+    </view>
+    <view class="status-item {{currentFilter === 'active' ? 'active' : ''}}" 
+          data-filter="active" bindtap="onFilterChange">
+      <text class="status-text">VIP用户</text>
+    </view>
+    <view class="status-item {{currentFilter === 'inactive' ? 'active' : ''}}" 
+          data-filter="inactive" bindtap="onFilterChange">
+      <text class="status-text">普通用户</text>
+    </view>
+    <view class="status-item {{currentFilter === 'blocked' ? 'active' : ''}}" 
+          data-filter="blocked" bindtap="onFilterChange">
+      <text class="status-text">已封禁</text>
+    </view>
+  </view>
+
+  <!-- 用户列表 -->
+  <view class="users-list">
+    <view class="user-card" wx:for="{{filteredUsers}}" wx:key="id">
+      <view class="user-content">
+        <!-- 用户头部信息 -->
+        <view class="user-header">
+          <view class="user-info">
+            <view class="user-avatar">
+              <image src="{{item.avatar || '/images/default-avatar.png'}}" 
+                     class="avatar-img" />
+            </view>
+            <view class="user-basic">
+              <view class="user-name">{{item.nickname || '未设置昵称'}}</view>
+              <view class="user-phone">{{item.phone || '未绑定手机'}}</view>
+            </view>
+          </view>
+          <view class="user-status {{item.status}}">
+            <text class="status-text">{{item.statusText}}</text>
+            <view class="edit-btn" bindtap="onEditUserStatus" data-user="{{item}}">
+              修改
+            </view>
+          </view>
+        </view>
+
+        <!-- 用户详细信息 -->
+        <view class="user-details">
+          <view class="detail-row">
+            <text class="label">注册时间：</text>
+            <text class="value">{{item.registerTime}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">最后登录：</text>
+            <text class="value">{{item.lastLoginTime}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">订单数量：</text>
+            <text class="value highlight">{{item.orderCount}}单</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">消费金额：</text>
+            <text class="value highlight">¥{{item.totalAmount}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{filteredUsers.length === 0}}">
+      <view class="empty-icon">👥</view>
+      <view class="empty-text">暂无用户数据</view>
+      <view class="empty-desc">{{searchKeyword ? '未找到相关用户' : '系统中还没有用户'}}</view>
+    </view>
+  </view>
+
+  <!-- 状态修改弹窗 -->
+  <action-sheet hidden="{{!showStatusSheet}}" bindchange="onStatusSheetClose">
+    <action-sheet-item bindtap="onChangeStatus" data-status="active">设为VIP</action-sheet-item>
+    <action-sheet-item bindtap="onChangeStatus" data-status="inactive">设为普通</action-sheet-item>
+    <action-sheet-item bindtap="onChangeStatus" data-status="blocked">封禁用户</action-sheet-item>
+    <action-sheet-cancel>取消</action-sheet-cancel>
+  </action-sheet>
+
+  <!-- 管理端底部导航 -->
+  <view class="admin-tabbar">
+    <view class="tab-item {{currentTab === 'home' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="home">
+      <view class="tab-icon">🏠</view>
+      <view class="tab-text">首页</view>
+    </view>
+    <view class="tab-item {{currentTab === 'products' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="products">
+      <view class="tab-icon">📦</view>
+      <view class="tab-text">商品</view>
+    </view>
+    <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="orders">
+      <view class="tab-icon">📋</view>
+      <view class="tab-text">订单</view>
+    </view>
+    <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="users">
+      <view class="tab-icon">👥</view>
+      <view class="tab-text">用户</view>
+    </view>
+    <view class="tab-item {{currentTab === 'settings' ? 'active' : ''}}" bindtap="onTabSwitch" data-tab="settings">
+      <view class="tab-icon">⚙️</view>
+      <view class="tab-text">设置</view>
+    </view>
+  </view>
+</view>
