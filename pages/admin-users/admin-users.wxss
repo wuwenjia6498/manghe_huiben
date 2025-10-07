@@ -56,7 +56,7 @@
 
 .search-input {
   width: 100%;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #3C3C43;
   padding-right: 50rpx;
 }
@@ -79,7 +79,7 @@
 
 .search-cancel {
   color: #EF5BA6;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -114,7 +114,7 @@
 }
 
 .status-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 500;
   color: #3C3C43;
   white-space: nowrap;
@@ -142,7 +142,7 @@
   display: flex;
   align-items: center;
   gap: 8rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #3C3C43;
   padding: 8rpx;
   border-radius: 8rpx;
@@ -166,7 +166,7 @@
   color: #8E8E93;
   padding: 12rpx 16rpx;
   border-radius: 8rpx;
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -189,7 +189,7 @@
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: flex-start;
-  padding: 24rpx;
+  padding: 20rpx 24rpx;
   gap: 16rpx;
 }
 
@@ -218,7 +218,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .user-info {
@@ -226,6 +226,7 @@
   align-items: flex-start;
   gap: 16rpx;
   flex: 1;
+  min-width: 0;
 }
 
 .user-avatar {
@@ -237,6 +238,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .avatar-img {
@@ -247,10 +249,11 @@
 
 .user-basic {
   flex: 1;
+  min-width: 0;
 }
 
 .user-name {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: #1D1D1F;
   margin-bottom: 6rpx;
@@ -258,7 +261,7 @@
 }
 
 .user-phone {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8E8E93;
   line-height: 1.2;
 }
@@ -267,15 +270,17 @@
 .user-status {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
+  flex-shrink: 0;
 }
 
 .user-status .status-text {
-  font-size: 20rpx;
-  padding: 4rpx 10rpx;
+  font-size: 22rpx;
+  padding: 4rpx 8rpx;
   border-radius: 8rpx;
   font-weight: 500;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .user-status.active .status-text {
@@ -294,7 +299,7 @@
 }
 
 .edit-btn {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #EF5BA6;
   font-weight: 500;
   padding: 4rpx 8rpx;
@@ -302,6 +307,7 @@
   border-radius: 6rpx;
   background: rgba(239, 91, 166, 0.05);
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .edit-btn:active {
@@ -317,8 +323,10 @@
 .detail-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 8rpx;
-  font-size: 22rpx;
+  font-size: 26rpx;
+  min-height: 32rpx;
 }
 
 .detail-row:last-child {
@@ -329,11 +337,17 @@
   color: #8E8E93;
   width: 120rpx;
   flex-shrink: 0;
+  font-size: 24rpx;
 }
 
 .value {
   color: #3C3C43;
   flex: 1;
+  text-align: right;
+  font-size: 24rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .value.highlight {
@@ -360,16 +374,50 @@
 }
 
 .empty-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: #3C3C43;
   margin-bottom: 12rpx;
 }
 
 .empty-desc {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8E8E93;
   text-align: center;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 32rpx;
+  background: #ffffff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.loading-icon {
+  font-size: 60rpx;
+  margin-bottom: 20rpx;
+  animation: rotate 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #EF5BA6;
+  text-align: center;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 管理端底部导航 */

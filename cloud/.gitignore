@@ -1,0 +1,11 @@
+# 忽略微信开发者工具自动生成的多余文件夹
+all/
+cloud1-*/
+cloudfunctionTemplate/
+
+# 忽略 node_modules
+functions/*/node_modules/
+
+# 忽略 package-lock.json (可选)
+# functions/*/package-lock.json
+

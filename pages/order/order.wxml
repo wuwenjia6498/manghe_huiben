@@ -49,7 +49,6 @@
       
       <view class="goods-list">
         <view class="goods-item" wx:for="{{orderItems}}" wx:key="id">
-          <image src="{{item.coverUrl}}" class="goods-image" />
           <view class="goods-info">
             <view class="goods-name">{{item.name}}</view>
             <view class="goods-tags">
@@ -74,6 +73,12 @@
         <view class="section-title">配送方式</view>
       </view>
       
+      <!-- 免邮提示 -->
+      <view wx:if="{{showFreeShippingTip}}" class="free-shipping-tip">
+        <text class="tip-icon">💰</text>
+        <text class="tip-text">{{freeShippingTipText}}</text>
+      </view>
+      
       <view class="delivery-options">
         <view class="delivery-option {{deliveryType === 'express' ? 'selected' : ''}}" bindtap="onSelectDelivery" data-type="express">
           <view class="radio-btn">
@@ -81,7 +86,7 @@
           </view>
           <view class="option-info">
             <view class="option-title">快递配送</view>
-            <view class="option-desc">预计1-3天送达</view>
+            <view class="option-desc">{{shippingTime}} · {{deliveryCompany}}</view>
           </view>
         </view>
         
@@ -91,7 +96,7 @@
           </view>
           <view class="option-info">
             <view class="option-title">门店自取</view>
-            <view class="option-desc">营业时间到店自取</view>
+            <view class="option-desc">营业时间到店自取 · 免运费</view>
           </view>
         </view>
       </view>

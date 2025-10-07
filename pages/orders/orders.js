@@ -6,7 +6,11 @@ Page({
   data: {
     currentTab: 'all', // 当前选中的标签页
     orderList: [], // 订单列表
-    allOrders: [] // 所有订单数据（用于筛选）
+    allOrders: [], // 所有订单数据（用于筛选）
+    loading: true, // 加载状态
+    page: 1,
+    pageSize: 10,
+    hasMore: true
   },
 
   /**
@@ -61,6 +65,10 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh() {
+    this.setData({
+      page: 1,
+      hasMore: true
+    });
     this.loadOrderData();
     wx.stopPullDownRefresh();
   },
@@ -69,7 +77,9 @@ Page({
    * 页面上拉触底事件的处理函数
    */
   onReachBottom() {
-
+    if (this.data.hasMore && !this.data.loading) {
+      this.loadMoreOrders();
+    }
   },
 
   /**
@@ -85,106 +95,162 @@ Page({
   /**
    * 加载订单数据
    */
-  loadOrderData() {
-    // 模拟订单数据
-    const mockOrders = [
-      {
-        id: 1,
-        orderNo: '202501010001',
-        status: 'shipping',
-        statusText: '待收货',
-        createTime: '2025-01-01 14:30',
-        totalAmount: 29.00,
-        goods: [
-          {
-            id: 1,
-            name: '3-6岁绘本盲盒·九成新',
-            age: '3-6岁',
-            condition: '九成新',
-            count: 30,
-            price: 54,
-            quantity: 1,
-            coverUrl: 'https://picsum.photos/200/150?random=1',
-            averagePrice: '1.8'
-          }
-        ]
-      },
-      {
-        id: 2,
-        orderNo: '202412280002',
-        status: 'completed',
-        statusText: '已完成',
-        createTime: '2024-12-28 16:45',
-        totalAmount: 75.00,
-        goods: [
-          {
-            id: 2,
-            name: '0-3岁绘本盲盒·七成新',
-            age: '0-3岁',
-            condition: '七成新',
-            count: 20,
-            price: 30,
-            quantity: 2,
-            coverUrl: 'https://picsum.photos/200/150?random=2',
-            averagePrice: '1.5'
-          },
-          {
-            id: 3,
-            name: '6岁以上绘本盲盒·九成新',
-            age: '6岁以上',
-            condition: '九成新',
-            count: 20,
-            price: 45,
-            quantity: 1,
-            coverUrl: 'https://picsum.photos/200/150?random=3',
-            averagePrice: '2.25'
-          }
-        ]
-      },
-      {
-        id: 3,
-        orderNo: '202412250003',
-        status: 'pending',
-        statusText: '待发货',
-        createTime: '2024-12-25 09:15',
-        totalAmount: 54.00,
-        goods: [
-          {
-            id: 4,
-            name: '3-6岁绘本盲盒·全新',
-            age: '3-6岁',
-            condition: '全新',
-            count: 10,
-            price: 54,
-            quantity: 1,
-            coverUrl: 'https://picsum.photos/200/150?random=4',
-            averagePrice: '5.4'
-          }
-        ]
+  async loadOrderData() {
+    this.setData({ loading: true });
+    
+    try {
+      console.log('开始加载订单数据...');
+      const res = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'getOrders',
+          page: 1,
+          pageSize: this.data.pageSize,
+          status: this.data.currentTab === 'all' ? '' : this.data.currentTab
+        }
+      });
+
+      console.log('获取订单数据结果:', res);
+
+      if (res.result && res.result.success) {
+        const orderData = res.result.data;
+        const orders = orderData.orders || [];
+        
+        console.log('获取到订单数据:', orders.length, '个订单');
+
+        // 转换订单数据格式
+        const formattedOrders = orders.map(order => this.formatOrderForUI(order));
+
+        this.setData({
+          allOrders: formattedOrders,
+          orderList: formattedOrders,
+          loading: false,
+          hasMore: orders.length >= this.data.pageSize,
+          page: 1
+        });
+      } else {
+        console.error('获取订单失败:', res.result?.message);
+        wx.showToast({
+          title: res.result?.message || '订单加载失败',
+          icon: 'none'
+        });
+        
+        this.setData({
+          allOrders: [],
+          orderList: [],
+          loading: false
+        });
       }
-    ];
-
-    this.setData({
-      allOrders: mockOrders
-    });
-
-    this.filterOrders();
+    } catch (error) {
+      console.error('加载订单数据出错:', error);
+      wx.showToast({
+        title: '网络错误，请重试',
+        icon: 'none'
+      });
+      
+      this.setData({
+        allOrders: [],
+        orderList: [],
+        loading: false
+      });
+    }
   },
 
   /**
-   * 根据当前选中的标签筛选订单
+   * 加载更多订单
    */
-  filterOrders() {
-    const { currentTab, allOrders } = this.data;
-    let filteredOrders = allOrders;
+  async loadMoreOrders() {
+    if (this.data.loading || !this.data.hasMore) return;
+    
+    this.setData({ loading: true });
+    const nextPage = this.data.page + 1;
+    
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'getOrders',
+          page: nextPage,
+          pageSize: this.data.pageSize,
+          status: this.data.currentTab === 'all' ? '' : this.data.currentTab
+        }
+      });
 
-    if (currentTab !== 'all') {
-      filteredOrders = allOrders.filter(order => order.status === currentTab);
+      if (res.result && res.result.success) {
+        const orderData = res.result.data;
+        const orders = orderData.orders || [];
+        
+        if (orders.length > 0) {
+          const formattedOrders = orders.map(order => this.formatOrderForUI(order));
+          const newAllOrders = [...this.data.allOrders, ...formattedOrders];
+          
+          this.setData({
+            allOrders: newAllOrders,
+            orderList: newAllOrders,
+            page: nextPage,
+            hasMore: orders.length >= this.data.pageSize
+          });
+        } else {
+          this.setData({ hasMore: false });
+        }
+      }
+    } catch (error) {
+      console.error('加载更多订单失败:', error);
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'none'
+      });
+    } finally {
+      this.setData({ loading: false });
     }
+  },
 
-    this.setData({
-      orderList: filteredOrders
-    });
+  /**
+   * 格式化订单数据用于UI显示
+   */
+  formatOrderForUI(orderData) {
+    // 状态映射
+    const statusMap = {
+      'pending': { text: '待发货', color: 'pending' },
+      'paid': { text: '待发货', color: 'pending' },
+      'shipped': { text: '待收货', color: 'shipping' },
+      'completed': { text: '已完成', color: 'completed' },
+      'cancelled': { text: '已取消', color: 'cancelled' }
+    };
+
+    const statusInfo = statusMap[orderData.status] || { text: '未知状态', color: 'pending' };
+
+    return {
+      id: orderData._id,
+      orderNo: orderData.orderNo,
+      status: orderData.status,
+      statusText: statusInfo.text,
+      createTime: this.formatTime(orderData.createTime),
+      totalAmount: Math.round(orderData.totalAmount),
+      goods: orderData.products.map(product => ({
+        id: product.productId,
+        name: `${product.ageRange}${product.condition}${product.count}本装绘本盲盒`,
+        age: product.ageRange,
+        condition: product.condition,
+        count: product.count,
+        price: Math.round(product.price),
+        quantity: product.quantity,
+        averagePrice: Math.round(product.price / parseInt(product.count))
+      }))
+    };
+  },
+
+  /**
+   * 格式化时间
+   */
+  formatTime(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
   },
 
   /**
@@ -200,9 +266,11 @@ Page({
   onTabChange(e) {
     const tab = e.currentTarget.dataset.tab;
     this.setData({
-      currentTab: tab
+      currentTab: tab,
+      page: 1,
+      hasMore: true
     });
-    this.filterOrders();
+    this.loadOrderData();
   },
 
   /**
@@ -210,10 +278,8 @@ Page({
    */
   onOrderDetail(e) {
     const order = e.currentTarget.dataset.order;
-    // 将订单数据转为JSON字符串并编码
-    const orderData = encodeURIComponent(JSON.stringify(order));
     wx.navigateTo({
-      url: `/pages/order-detail/order-detail?orderData=${orderData}`
+      url: `/pages/order-detail/order-detail?orderId=${order.id}`
     });
   },
 
@@ -222,54 +288,10 @@ Page({
    */
   onBuyAgain(e) {
     const order = e.currentTarget.dataset.order;
-    
-    // 将订单商品加入购物车
-    let cart = wx.getStorageSync('cart') || [];
-    
-    order.goods.forEach(goods => {
-      // 检查购物车中是否已有相同商品
-      const existIndex = cart.findIndex(item => 
-        item.productId === goods.id && 
-        item.age === goods.age && 
-        item.condition === goods.condition &&
-        item.count === goods.count
-      );
-      
-      if (existIndex >= 0) {
-        // 如果已存在，增加数量
-        cart[existIndex].quantity += goods.quantity;
-      } else {
-        // 如果不存在，添加新商品
-        cart.push({
-          id: Date.now() + Math.random(), // 生成唯一ID
-          productId: goods.id,
-          name: goods.name,
-          age: goods.age,
-          condition: goods.condition,
-          count: goods.count,
-          price: goods.price,
-          quantity: goods.quantity,
-          selected: false,
-          coverUrl: goods.coverUrl,
-          averagePrice: goods.averagePrice,
-          description: '再次购买'
-        });
-      }
-    });
-    
-    // 保存购物车
-    wx.setStorageSync('cart', cart);
-    
+    // TODO: 实现再次购买逻辑
     wx.showToast({
-      title: '已加入购物车',
-      icon: 'success',
-      success: () => {
-        setTimeout(() => {
-          wx.switchTab({
-            url: '/pages/cart/cart'
-          });
-        }, 1500);
-      }
+      title: '功能开发中',
+      icon: 'none'
     });
   },
 
@@ -278,29 +300,39 @@ Page({
    */
   onConfirmReceive(e) {
     const order = e.currentTarget.dataset.order;
-    
     wx.showModal({
       title: '确认收货',
-      content: '确认已收到商品吗？确认后订单将完成。',
-      success: (res) => {
+      content: '确认已收到商品吗？',
+      success: async (res) => {
         if (res.confirm) {
-          // 更新订单状态
-          const { allOrders } = this.data;
-          const orderIndex = allOrders.findIndex(item => item.id === order.id);
-          if (orderIndex >= 0) {
-            allOrders[orderIndex].status = 'completed';
-            allOrders[orderIndex].statusText = '已完成';
-            
-            this.setData({
-              allOrders
+          try {
+            const result = await wx.cloud.callFunction({
+              name: 'order',
+              data: {
+                action: 'confirmReceive',
+                orderId: order.id
+              }
             });
-            this.filterOrders();
+
+            if (result.result && result.result.success) {
+              wx.showToast({
+                title: '确认收货成功',
+                icon: 'success'
+              });
+              this.loadOrderData();
+            } else {
+              wx.showToast({
+                title: result.result?.message || '确认收货失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            console.error('确认收货失败:', error);
+            wx.showToast({
+              title: '操作失败，请重试',
+              icon: 'none'
+            });
           }
-          
-          wx.showToast({
-            title: '收货成功',
-            icon: 'success'
-          });
         }
       }
     });
@@ -311,25 +343,39 @@ Page({
    */
   onCancelOrder(e) {
     const order = e.currentTarget.dataset.order;
-    
     wx.showModal({
       title: '取消订单',
       content: '确定要取消这个订单吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          // 从订单列表中移除
-          const { allOrders } = this.data;
-          const filteredOrders = allOrders.filter(item => item.id !== order.id);
-          
-          this.setData({
-            allOrders: filteredOrders
-          });
-          this.filterOrders();
-          
-          wx.showToast({
-            title: '订单已取消',
-            icon: 'success'
-          });
+          try {
+            const result = await wx.cloud.callFunction({
+              name: 'order',
+              data: {
+                action: 'cancelOrder',
+                orderId: order.id
+              }
+            });
+
+            if (result.result && result.result.success) {
+              wx.showToast({
+                title: '订单已取消',
+                icon: 'success'
+              });
+              this.loadOrderData();
+            } else {
+              wx.showToast({
+                title: result.result?.message || '取消订单失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            console.error('取消订单失败:', error);
+            wx.showToast({
+              title: '操作失败，请重试',
+              icon: 'none'
+            });
+          }
         }
       }
     });

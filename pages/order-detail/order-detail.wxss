@@ -252,14 +252,6 @@
   padding-bottom: 0;
 }
 
-.goods-image {
-  width: 110rpx;
-  height: 82rpx;
-  border-radius: var(--border-radius-base);
-  margin-right: var(--spacing-xs);
-  flex-shrink: 0;
-}
-
 .goods-info {
   flex: 1;
 }
@@ -274,6 +266,7 @@
 
 .goods-tags {
   display: flex;
+  align-items: center;
   gap: var(--spacing-xs);
   margin-bottom: var(--spacing-xs);
   flex-wrap: wrap;
@@ -287,6 +280,13 @@
   border-radius: 20rpx;
   border: 1rpx solid rgba(239, 91, 166, 0.2);
   font-weight: 500;
+}
+
+.tag-separator {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin: 0 -4rpx;
 }
 
 .goods-desc {

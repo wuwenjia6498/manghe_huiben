@@ -18,234 +18,60 @@ Page({
     showStatusSheet: false,
     currentUser: null,
     
-    // 用户列表数据
-    users: [
-      {
-        id: 'u001',
-        nickname: '张小明',
-        phone: '138****8888',
-        avatar: '/images/avatar1.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-15 10:30',
-        lastLoginTime: '2024-01-20 14:25',
-        orderCount: 12,
-        totalAmount: '2,580.00'
-      },
-      {
-        id: 'u002',
-        nickname: '李美丽',
-        phone: '139****6666',
-        avatar: '/images/avatar2.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-10 09:15',
-        lastLoginTime: '2024-01-19 16:40',
-        orderCount: 8,
-        totalAmount: '1,350.00'
-      },
-      {
-        id: 'u003',
-        nickname: '王大强',
-        phone: '136****9999',
-        avatar: '/images/avatar3.png',
-        status: 'inactive',
-        statusText: '普通用户',
-        registerTime: '2023-12-05 14:20',
-        lastLoginTime: '2023-12-28 11:10',
-        orderCount: 3,
-        totalAmount: '459.00'
-      },
-      {
-        id: 'u004',
-        nickname: '陈小花',
-        phone: '137****7777',
-        avatar: '/images/avatar4.png',
-        status: 'blocked',
-        statusText: '已封禁',
-        registerTime: '2023-11-20 16:45',
-        lastLoginTime: '2024-01-05 13:22',
-        orderCount: 0,
-        totalAmount: '0.00'
-      },
-      {
-        id: 'u005',
-        nickname: '赵小龙',
-        phone: '135****5555',
-        avatar: '/images/avatar5.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-18 11:30',
-        lastLoginTime: '2024-01-20 15:45',
-        orderCount: 15,
-        totalAmount: '3,280.00'
-      },
-      {
-        id: 'u006',
-        nickname: '刘晓雯',
-        phone: '152****1234',
-        avatar: '/images/avatar6.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-12 08:45',
-        lastLoginTime: '2024-01-20 09:30',
-        orderCount: 6,
-        totalAmount: '890.00'
-      },
-      {
-        id: 'u007',
-        nickname: '周大伟',
-        phone: '159****8765',
-        avatar: '/images/avatar7.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2023-10-28 15:20',
-        lastLoginTime: '2024-01-19 20:15',
-        orderCount: 28,
-        totalAmount: '5,680.00'
-      },
-      {
-        id: 'u008',
-        nickname: '孙小美',
-        phone: '186****3456',
-        avatar: '/images/avatar8.png',
-        status: 'inactive',
-        statusText: '普通用户',
-        registerTime: '2023-09-15 12:30',
-        lastLoginTime: '2023-11-20 14:25',
-        orderCount: 2,
-        totalAmount: '198.00'
-      },
-      {
-        id: 'u009',
-        nickname: '林志强',
-        phone: '147****7890',
-        avatar: '/images/avatar9.png',
-        status: 'blocked',
-        statusText: '已封禁',
-        registerTime: '2023-08-05 10:15',
-        lastLoginTime: '2023-12-30 16:40',
-        orderCount: 1,
-        totalAmount: '49.90'
-      },
-      {
-        id: 'u010',
-        nickname: '吴佳佳',
-        phone: '173****2468',
-        avatar: '/images/avatar10.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-08 14:50',
-        lastLoginTime: '2024-01-20 11:20',
-        orderCount: 4,
-        totalAmount: '320.00'
-      },
-      {
-        id: 'u011',
-        nickname: '马小军',
-        phone: '182****1357',
-        avatar: '/images/avatar11.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2023-12-20 09:40',
-        lastLoginTime: '2024-01-20 18:30',
-        orderCount: 18,
-        totalAmount: '2,890.00'
-      },
-      {
-        id: 'u012',
-        nickname: '杨雪梅',
-        phone: '155****9876',
-        avatar: '/images/avatar12.png',
-        status: 'inactive',
-        statusText: '普通用户',
-        registerTime: '2023-07-12 16:25',
-        lastLoginTime: '2023-10-15 13:45',
-        orderCount: 5,
-        totalAmount: '678.00'
-      },
-      {
-        id: 'u013',
-        nickname: '黄小帅',
-        phone: '134****5432',
-        avatar: '/images/avatar13.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-20 10:15',
-        lastLoginTime: '2024-01-20 19:45',
-        orderCount: 1,
-        totalAmount: '128.00'
-      },
-      {
-        id: 'u014',
-        nickname: '郑丽华',
-        phone: '198****6543',
-        avatar: '/images/avatar14.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2023-11-08 11:30',
-        lastLoginTime: '2024-01-19 15:20',
-        orderCount: 22,
-        totalAmount: '4,560.00'
-      },
-      {
-        id: 'u015',
-        nickname: '徐大海',
-        phone: '176****7654',
-        avatar: '/images/avatar15.png',
-        status: 'blocked',
-        statusText: '已封禁',
-        registerTime: '2023-06-20 14:45',
-        lastLoginTime: '2023-12-25 10:30',
-        orderCount: 3,
-        totalAmount: '156.50'
-      },
-      {
-        id: 'u016',
-        nickname: '何小薇',
-        phone: '166****8901',
-        avatar: '/images/avatar16.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2024-01-16 13:20',
-        lastLoginTime: '2024-01-20 12:40',
-        orderCount: 3,
-        totalAmount: '245.00'
-      },
-      {
-        id: 'u017',
-        nickname: '谢大明',
-        phone: '191****2345',
-        avatar: '/images/avatar17.png',
-        status: 'inactive',
-        statusText: '普通用户',
-        registerTime: '2023-05-15 09:30',
-        lastLoginTime: '2023-08-20 16:15',
-        orderCount: 7,
-        totalAmount: '834.00'
-      },
-      {
-        id: 'u018',
-        nickname: '袁小颖',
-        phone: '165****3456',
-        avatar: '/images/avatar18.png',
-        status: 'active',
-        statusText: 'VIP用户',
-        registerTime: '2023-12-01 15:45',
-        lastLoginTime: '2024-01-20 14:50',
-        orderCount: 9,
-        totalAmount: '1,180.00'
-      }
-    ],
+    // 用户列表数据 - 改为从数据库获取
+    users: [],
+    allUsers: [], // 用于搜索和筛选
     
-    filteredUsers: []
+    // 加载状态
+    loading: false
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad(options) {
-    this.filterUsers();
+  onLoad: function (options) {
+    console.log('🚀 用户管理页面加载');
+    
+    // 首先验证管理员身份
+    this.checkAdminStatus();
+  },
+
+  /**
+   * 验证管理员身份
+   */
+  checkAdminStatus: function() {
+    console.log('🔐 验证管理员身份...');
+    
+    wx.cloud.callFunction({
+      name: 'auth',
+      data: {
+        action: 'checkAdmin'
+      }
+    }).then(res => {
+      console.log('👑 管理员身份验证结果:', res.result);
+      
+      if (res.result && res.result.success && res.result.data.isAdmin) {
+        console.log('✅ 管理员身份验证通过');
+        // 验证通过，加载用户数据
+        this.loadUsers();
+      } else {
+        console.log('❌ 非管理员身份');
+        wx.showToast({
+          title: '需要管理员权限',
+          icon: 'none'
+        });
+        // 可以跳转回首页或登录页
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 2000);
+      }
+    }).catch(err => {
+      console.error('❌ 验证管理员身份失败:', err);
+      wx.showToast({
+        title: '验证失败，请重试',
+        icon: 'none'
+      });
+    });
   },
 
   /**
@@ -310,27 +136,31 @@ Page({
     });
   },
 
+  /**
+   * 筛选用户列表
+   */
   filterUsers() {
-    const { users, currentFilter, searchKeyword } = this.data;
-    
-    let filtered = users;
-    
-    // 按状态筛选
-    if (currentFilter !== 'all') {
-      filtered = filtered.filter(user => user.status === currentFilter);
+    const { allUsers, currentFilter, searchKeyword } = this.data;
+    let filteredUsers = [];
+
+    // 先按状态筛选
+    if (currentFilter === 'all') {
+      filteredUsers = allUsers;
+    } else {
+      filteredUsers = allUsers.filter(user => user.status === currentFilter);
     }
-    
-    // 按关键词搜索
+
+    // 再按搜索关键词筛选
     if (searchKeyword.trim()) {
-      const keyword = searchKeyword.trim().toLowerCase();
-      filtered = filtered.filter(user => 
-        (user.nickname && user.nickname.toLowerCase().includes(keyword)) ||
-        (user.phone && user.phone.includes(keyword))
-      );
+      filteredUsers = filteredUsers.filter(user => {
+        const keyword = searchKeyword.toLowerCase();
+        return user.nickname.toLowerCase().includes(keyword) ||
+               user.phone.toLowerCase().includes(keyword);
+      });
     }
-    
+
     this.setData({
-      filteredUsers: filtered
+      users: filteredUsers
     });
   },
 
@@ -396,14 +226,14 @@ Page({
    * 导出用户数据
    */
   onExportUsers() {
-    const { filteredUsers } = this.data;
+    const { users } = this.data;
     wx.showModal({
       title: '导出确认',
-      content: `确定要导出当前筛选的${filteredUsers.length}个用户数据吗？`,
+      content: `确定要导出当前筛选的${users.length}个用户数据吗？`,
       success: (res) => {
         if (res.confirm) {
           // 这里应该调用API导出数据
-          console.log('导出用户数据:', filteredUsers);
+          console.log('导出用户数据:', users);
           wx.showToast({
             title: '导出成功',
             icon: 'success'
@@ -448,7 +278,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    this.loadUsers();
   },
 
   /**
@@ -487,5 +317,131 @@ Page({
    */
   onShareAppMessage() {
 
-  }
+  },
+
+  /**
+   * 加载用户数据
+   */
+  loadUsers: function() {
+    this.setData({
+      loading: true
+    });
+
+    console.log('🔄 开始加载用户数据...');
+
+    // 调用 admin 云函数获取用户列表
+    wx.cloud.callFunction({
+      name: 'admin',
+      data: {
+        action: 'getUsers',
+        page: 1,
+        pageSize: 100  // 获取更多用户以便测试
+      }
+    }).then(res => {
+      console.log('📊 用户数据加载响应:', res);
+      
+      if (res.result && res.result.success) {
+        // 正确解析云函数返回的数据结构
+        const responseData = res.result.data || {};
+        const userData = responseData.list || [];
+        const total = responseData.total || 0;
+        
+        console.log('✅ 成功获取用户数据:', userData.length, '个用户，总计:', total);
+        
+        // 格式化用户数据
+        const formattedUsers = userData.map(user => this.formatUserForDisplay(user));
+        
+        this.setData({
+          allUsers: formattedUsers,
+          users: formattedUsers,
+          loading: false
+        });
+        
+        console.log('🎯 用户数据设置完成，当前显示:', formattedUsers.length, '个用户');
+        
+        if (formattedUsers.length === 0) {
+          wx.showToast({
+            title: '暂无用户数据',
+            icon: 'none'
+          });
+        }
+      } else {
+        console.error('❌ 获取用户数据失败:', res.result);
+        this.setData({
+          loading: false
+        });
+        wx.showToast({
+          title: '获取用户数据失败',
+          icon: 'none'
+        });
+      }
+    }).catch(err => {
+      console.error('❌ 调用用户管理云函数失败:', err);
+      this.setData({
+        loading: false
+      });
+      wx.showToast({
+        title: '网络错误，请重试',
+        icon: 'none'
+      });
+    });
+  },
+
+  /**
+   * 格式化用户数据用于显示
+   */
+  formatUserForDisplay(user) {
+    console.log('🔧 格式化用户数据:', user);
+    
+    // 计算用户状态
+    let status = 'active';
+    let statusText = '普通用户';
+    
+    // 这里可以根据实际业务逻辑判断用户类型
+    // 比如根据订单数量、消费金额等判断是否为VIP用户
+    if (user.orderCount >= 10 || user.totalAmount >= 1000) {
+      statusText = 'VIP用户';
+    }
+    
+    if (user.status === 'blocked') {
+      status = 'blocked';
+      statusText = '已封禁';
+    } else if (user.status === 'inactive') {
+      status = 'inactive';
+      statusText = '非活跃用户';
+    }
+
+    const formattedUser = {
+      id: user._id,
+      nickname: user.nickName || user.nickname || '未知用户',
+      phone: user.phoneNumber || user.phone || '未绑定',
+      avatar: user.avatarUrl || user.avatar || '/images/default-avatar.png',
+      status: status,
+      statusText: statusText,
+      registerTime: this.formatTime(user.createTime),
+      lastLoginTime: this.formatTime(user.updateTime || user.lastLoginTime || user.createTime),
+      orderCount: user.orderCount || 0,
+      totalAmount: (user.totalAmount || 0).toFixed(2),
+      openid: user.openid || '未知'
+    };
+    
+    console.log('✅ 格式化后的用户数据:', formattedUser);
+    return formattedUser;
+  },
+
+  /**
+   * 格式化时间
+   */
+  formatTime(date) {
+    if (!date) return '未知';
+    
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  },
 })

@@ -8,7 +8,8 @@ Page({
     cartList: [],
     isAllSelected: false,
     selectedCount: 0,
-    totalPrice: 0
+    totalPrice: 0,
+    isLoggedIn: false
   },
 
   /**
@@ -36,7 +37,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    this.loadCartData();
+    this.checkLoginStatus();
   },
 
   /**
@@ -79,58 +80,138 @@ Page({
   },
 
   /**
+   * 检查登录状态
+   */
+  checkLoginStatus() {
+    const loginInfo = wx.getStorageSync('loginInfo');
+    const isLoggedIn = loginInfo && loginInfo.isLoggedIn;
+    
+    this.setData({
+      isLoggedIn: isLoggedIn
+    });
+    
+    if (!isLoggedIn) {
+      // 未登录，清空购物车数据
+      this.setData({
+        cartList: []
+      });
+      this.calculateTotal();
+      return false;
+    }
+    
+    // 已登录，加载购物车数据
+    this.loadCartData();
+    return true;
+  },
+
+  /**
+   * 显示登录提示
+   */
+  showLoginTip() {
+    wx.showModal({
+      title: '需要登录',
+      content: '购物车功能需要登录后使用，是否立即登录？',
+      success: (res) => {
+        if (res.confirm) {
+          this.performLogin();
+        }
+      }
+    });
+  },
+
+  /**
+   * 执行登录操作
+   */
+  performLogin() {
+    wx.getUserProfile({
+      desc: '用于完善会员资料',
+      success: (res) => {
+        console.log('获取用户信息成功:', res);
+        
+        // 调用微信登录
+        wx.login({
+          success: (loginRes) => {
+            console.log('微信登录成功:', loginRes);
+            
+            // 模拟登录成功
+            const userInfo = {
+              name: res.userInfo.nickName || '微信用户',
+              status: '微信用户 · 普通会员',
+              avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
+            };
+            
+            // 保存登录信息
+            const loginInfo = {
+              isLoggedIn: true,
+              userInfo: userInfo,
+              loginTime: Date.now(),
+              openid: 'mock_openid_' + Date.now() // 模拟openid
+            };
+            
+            wx.setStorageSync('loginInfo', loginInfo);
+            
+            // 更新当前页面状态
+            this.setData({
+              isLoggedIn: true
+            });
+            
+            // 重新加载购物车数据
+            this.loadCartData();
+            
+            wx.showToast({
+              title: '登录成功',
+              icon: 'success'
+            });
+          },
+          fail: (error) => {
+            console.error('微信登录失败:', error);
+            wx.showToast({
+              title: '登录失败',
+              icon: 'error'
+            });
+          }
+        });
+      },
+      fail: (error) => {
+        console.error('获取用户信息失败:', error);
+        wx.showToast({
+          title: '取消授权',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  /**
    * 加载购物车数据
    */
   loadCartData() {
     let cart = wx.getStorageSync('cart') || [];
     
-    // 添加一些示例数据用于演示（实际项目中从本地存储或服务器获取）
-    if (cart.length === 0) {
-      cart = [
-        {
-          id: 1,
-          productId: 1,
-          name: '3-6岁绘本盲盒·九成新',
-          age: '3-6岁',
-          condition: '九成新',
-          count: 30,
-          price: 54,
-          quantity: 1,
-          selected: false,
-          coverUrl: 'https://picsum.photos/200/150?random=1',
-          averagePrice: '1.8',
-          description: '超值推荐'
-        },
-        {
-          id: 2,
-          productId: 2,
-          name: '0-3岁绘本盲盒·七成新',
-          age: '0-3岁',
-          condition: '七成新',
-          count: 20,
-          price: 30,
-          quantity: 2,
-          selected: true,
-          coverUrl: 'https://picsum.photos/200/150?random=2',
-          averagePrice: '1.5',
-          description: '启蒙精选'
-        },
-        {
-          id: 3,
-          productId: 3,
-          name: '6岁以上绘本盲盒·九成新',
-          age: '6岁以上',
-          condition: '九成新',
-          count: 20,
-          price: 45,
-          quantity: 1,
-          selected: true,
-          coverUrl: 'https://picsum.photos/200/150?random=3',
-          averagePrice: '2.25',
-          description: '进阶精选'
-        }
-      ];
-    }
+    // 确保每个商品都有必要的字段
+    cart = cart.map(item => {
+      // 确保有选中状态
+      if (item.selected === undefined) {
+        item.selected = false;
+      }
+      
+      // 确保有id字段，如果没有则使用productId
+      if (!item.id && item.productId) {
+        item.id = item.productId;
+      }
+      
+      // 计算平均价格
+      if (!item.averagePrice && item.price && item.count) {
+        item.averagePrice = (item.price / item.count).toFixed(2);
+      }
+      
+      // 确保有描述字段
+      if (!item.description) {
+        item.description = '精选推荐';
+      }
+      
+      return item;
+    });
 
     this.setData({
       cartList: cart
@@ -246,9 +327,14 @@ Page({
   },
 
   /**
-   * 选择/取消选择商品
+   * 选择商品
    */
   onSelectItem(e) {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const index = e.currentTarget.dataset.index;
     const cartList = this.data.cartList;
     
@@ -266,6 +352,11 @@ Page({
    * 全选/取消全选
    */
   onSelectAll() {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const { cartList, isAllSelected } = this.data;
     const newSelectState = !isAllSelected;
     
@@ -282,9 +373,14 @@ Page({
   },
 
   /**
-   * 增加商品数量
+   * 增加数量
    */
   onIncreaseQuantity(e) {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const index = e.currentTarget.dataset.index;
     const cartList = this.data.cartList;
     
@@ -299,9 +395,14 @@ Page({
   },
 
   /**
-   * 减少商品数量
+   * 减少数量
    */
   onDecreaseQuantity(e) {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const index = e.currentTarget.dataset.index;
     const cartList = this.data.cartList;
     
@@ -321,12 +422,16 @@ Page({
    * 删除商品
    */
   onDeleteItem(e) {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const index = e.currentTarget.dataset.index;
-    const item = this.data.cartList[index];
     
     wx.showModal({
       title: '确认删除',
-      content: `确定要删除"${item.name}"吗？`,
+      content: '确定要删除这个商品吗？',
       success: (res) => {
         if (res.confirm) {
           const cartList = this.data.cartList;
@@ -340,7 +445,7 @@ Page({
           this.saveCartData();
           
           wx.showToast({
-            title: '已删除',
+            title: '删除成功',
             icon: 'success'
           });
         }
@@ -361,8 +466,20 @@ Page({
    * 去选择盲盒
    */
   onGoToBlindbox() {
+    console.log('点击选择盲盒按钮');
+    
     wx.switchTab({
-      url: '/pages/product-detail/product-detail'
+      url: '/pages/product-detail/product-detail',
+      success: () => {
+        console.log('跳转到商品详情页成功');
+      },
+      fail: (error) => {
+        console.error('跳转到商品详情页失败:', error);
+        wx.showToast({
+          title: '跳转失败，请重试',
+          icon: 'none'
+        });
+      }
     });
   },
 
@@ -370,6 +487,11 @@ Page({
    * 去结算
    */
   onCheckout() {
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
     const { cartList, selectedCount } = this.data;
     
     if (selectedCount === 0) {

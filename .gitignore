@@ -1,0 +1,34 @@
+# 微信小程序
+node_modules/
+miniprogram_npm/
+.DS_Store
+
+# 微信开发者工具自动生成的文件夹
+cloud/all/
+cloud/cloud1-*/
+cloud/cloudfunctionTemplate/
+
+# 云函数
+cloud/functions/*/node_modules/
+cloud/functions/*/package-lock.json
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+Thumbs.db
+.DS_Store
+
+# 私有配置（如果不想共享）
+# project.private.config.json
+

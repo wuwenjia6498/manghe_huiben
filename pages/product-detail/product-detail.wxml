@@ -12,93 +12,93 @@
 
   <!-- 商品主图区域 -->
   <view class="product-hero">
-    <image src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" class="hero-image" mode="aspectFill" />
-    
-    <!-- 浮动后退按钮 -->
-    <view class="floating-back-btn" bindtap="onBackTap">
-      <image src="/images/back-arrow.svg" class="back-arrow-icon" />
-    </view>
+    <!-- 背景图片 -->
+    <image src="/images/product-detail-banner.jpg" class="hero-bg-image" mode="aspectFill" />
     
     <view class="hero-overlay">
       <view class="hero-content">
         <view class="brand-info">
           <view class="brand-icon">📚</view>
-          <text class="brand-name">绘本盲盒</text>
+          <text class="brand-name">{{productInfo.name}}</text>
         </view>
-        <view class="product-subtitle">精选优质绘本，随机组合</view>
+        <view class="product-subtitle">{{productInfo.subtitle}}</view>
       </view>
     </view>
   </view>
 
-  <!-- 价格信息 -->
+  <!-- 价格显示 -->
   <view class="price-section">
-    <view class="current-price">¥{{currentPrice}}</view>
-    <view class="original-price">¥{{originalPrice}}</view>
+    <view class="current-price" wx:if="{{currentPrice > 0}}">¥{{currentPrice}}</view>
+    <view class="current-price placeholder" wx:else>请选择配置</view>
+    <view class="original-price" wx:if="{{originalPrice > 0}}">¥{{originalPrice}}</view>
   </view>
 
-  <!-- 商品配置选项 -->
-  <view class="config-section">
-    
-    <!-- 选择年龄段 -->
-    <view class="config-item">
-      <view class="config-header">
-        <view class="config-icon">🎂</view>
-        <view class="config-title">选择年龄段</view>
+  <!-- 加载状态 -->
+  <view class="loading-mask" wx:if="{{priceLoading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 商品选项 -->
+  <view class="options-container">
+    <!-- 年龄段选择 -->
+    <view class="option-card">
+      <view class="option-title-row">
+        <text class="option-emoji">🧒</text>
+        <text class="option-name">选择年龄段</text>
       </view>
-      <view class="config-desc">为您的孩子适合的年龄段</view>
-      <view class="option-list">
+      <view class="option-subtitle">为您的孩子选择合适的年龄段</view>
+      <view class="option-buttons">
         <view 
-          class="option-tag {{selectedAge === item.value ? 'selected' : ''}}" 
-          wx:for="{{ageOptions}}" 
-          wx:key="value"
-          bindtap="onSelectAge"
-          data-value="{{item.value}}"
+          wx:for="{{availableOptions.ageRanges}}" 
+          wx:key="*this"
+          class="option-btn {{selectedAgeRange === item ? 'active' : ''}}"
+          data-age="{{item}}"
+          bindtap="onAgeRangeSelect"
         >
-          {{item.label}}
+          {{item}}岁
         </view>
       </view>
     </view>
 
-    <!-- 选择新旧程度 -->
-    <view class="config-item">
-      <view class="config-header">
-        <view class="config-icon">⭐</view>
-        <view class="config-title">选择新旧程度</view>
+    <!-- 成色选择 -->
+    <view class="option-card">
+      <view class="option-title-row">
+        <text class="option-emoji">⭐</text>
+        <text class="option-name">选择新旧程度</text>
       </view>
-      <view class="config-desc">不同品相，不同价格</view>
-      <view class="option-list">
+      <view class="option-subtitle">不同品相，不同价格</view>
+      <view class="option-buttons">
         <view 
-          class="option-tag {{selectedCondition === item.value ? 'selected' : ''}}" 
-          wx:for="{{conditionOptions}}" 
-          wx:key="value"
-          bindtap="onSelectCondition"
-          data-value="{{item.value}}"
+          wx:for="{{availableConditions}}" 
+          wx:key="*this"
+          class="option-btn {{selectedCondition === item ? 'active' : ''}} {{!selectedAgeRange ? 'disabled' : ''}}"
+          data-condition="{{item}}"
+          bindtap="{{selectedAgeRange ? 'onConditionSelect' : ''}}"
         >
-          {{item.label}}
+          {{item}}
         </view>
       </view>
     </view>
 
-    <!-- 选择本数 -->
-    <view class="config-item">
-      <view class="config-header">
-        <view class="config-icon">📖</view>
-        <view class="config-title">选择本数</view>
+    <!-- 本数选择 -->
+    <view class="option-card">
+      <view class="option-title-row">
+        <text class="option-emoji">🗂️</text>
+        <text class="option-name">选择本数</text>
       </view>
-      <view class="config-desc">更多本数更超值，平均单本价格更低</view>
-      <view class="option-list">
+      <view class="option-subtitle">更多本数更超值，平均单本价格更低</view>
+      <view class="option-buttons">
         <view 
-          class="option-tag {{selectedCount === item.value ? 'selected' : ''}}" 
-          wx:for="{{countOptions}}" 
-          wx:key="value"
-          bindtap="onSelectCount"
-          data-value="{{item.value}}"
+          wx:for="{{availableQuantities}}" 
+          wx:key="*this"
+          class="option-btn {{selectedQuantity === item ? 'active' : ''}} {{!selectedAgeRange || !selectedCondition ? 'disabled' : ''}}"
+          data-quantity="{{item}}"
+          bindtap="{{selectedAgeRange && selectedCondition ? 'onQuantitySelect' : ''}}"
         >
-          {{item.label}}
+          {{item}}
         </view>
       </view>
     </view>
-
   </view>
 
   <!-- 成新度说明 -->
@@ -127,8 +127,8 @@
         <text class="service-text">随机发货，盲盒内容为惊喜组合</text>
       </view>
       <view class="service-item">
-        <view class="service-icon warning">⏰</view>
-        <text class="service-text">48小时内发货</text>
+        <view class="service-icon">⏰</view>
+        <text class="service-text">{{shippingTime}}</text>
       </view>
       <view class="service-item">
         <view class="service-icon error">❌</view>
@@ -138,18 +138,6 @@
         <view class="service-icon info">💬</view>
         <text class="service-text">如有质量问题，请联系客服处理</text>
       </view>
-    </view>
-  </view>
-
-  <!-- 价格信息 -->
-  <view class="price-info-section">
-    <view class="info-header">
-      <view class="info-icon">🏷️</view>
-      <text class="info-title">价格信息</text>
-    </view>
-    <view class="final-price">
-      <view class="price-current">¥{{currentPrice}}</view>
-      <view class="price-original">¥{{originalPrice}}</view>
     </view>
   </view>
 

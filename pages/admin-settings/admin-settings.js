@@ -9,7 +9,7 @@ Page({
     
     // 选择器选项
     shippingTimeOptions: ['24小时内发货', '48小时内发货', '72小时内发货', '7天内发货'],
-    deliveryCompanyOptions: ['顺丰速运', '中通快递', '圆通速递', '申通快递', '韵达快递'],
+    deliveryCompanyOptions: ['顺丰速运', '中通快递', '圆通速递', '申通快递', '韵达快递', '公司配送人员'],
     
     // 设置数据
     settings: {
@@ -47,8 +47,48 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad(options) {
+  async onLoad(options) {
+    // 检查管理员权限
+    const hasPermission = await this.checkAdminPermission();
+    if (!hasPermission) {
+      wx.showModal({
+        title: '权限不足',
+        content: '您没有管理员权限，无法访问此页面',
+        showCancel: false,
+        success: () => {
+          wx.navigateBack();
+        }
+      });
+      return;
+    }
+    
     this.loadSettings();
+  },
+
+  /**
+   * 检查管理员权限
+   */
+  async checkAdminPermission() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'auth',
+        data: {
+          action: 'checkAdmin'
+        }
+      });
+
+      console.log('权限检查结果:', res);
+      
+      if (res.result && res.result.success) {
+        return true;
+      } else {
+        console.log('管理员权限验证失败:', res.result?.message);
+        return false;
+      }
+    } catch (error) {
+      console.error('权限检查失败:', error);
+      return false;
+    }
   },
 
   /**
@@ -106,10 +146,26 @@ Page({
   /**
    * 加载设置数据
    */
-  loadSettings() {
-    // 这里应该从服务器加载设置数据
-    // 现在使用默认数据模拟
-    console.log('加载设置数据');
+  async loadSettings() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'admin',
+        data: {
+          action: 'getSettings'
+        }
+      });
+
+      if (res.result.success && res.result.data) {
+        this.setData({
+          settings: res.result.data
+        });
+        
+        // 更新本地存储
+        wx.setStorageSync('adminSettings', res.result.data);
+      }
+    } catch (error) {
+      console.error('加载设置失败:', error);
+    }
   },
 
   /**
@@ -170,76 +226,61 @@ Page({
   /**
    * 保存设置
    */
-  onSave() {
+  async saveSettings() {
     const { settings } = this.data;
     
-    // 验证必填项
-    if (!settings.storeName && settings.storePickupEnabled) {
-      wx.showToast({
-        title: '请填写门店名称',
-        icon: 'none'
-      });
-      return;
-    }
+    console.log('准备保存设置:', settings);
     
-    if (!settings.storePhone && settings.storePickupEnabled) {
-      wx.showToast({
-        title: '请填写联系电话',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // 验证数字格式
-    if (settings.deliveryFee && isNaN(Number(settings.deliveryFee))) {
-      wx.showToast({
-        title: '配送费用格式错误',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    if (settings.freeShippingThreshold && isNaN(Number(settings.freeShippingThreshold))) {
-      wx.showToast({
-        title: '免邮门槛格式错误',
-        icon: 'none'
-      });
-      return;
-    }
-
-    // 显示保存确认
-    wx.showModal({
-      title: '保存确认',
-      content: '确定要保存当前设置吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.saveSettings();
-        }
-      }
-    });
-  },
-
-  /**
-   * 保存设置到服务器
-   */
-  saveSettings() {
-    const { settings } = this.data;
-    
-    // 这里应该调用API保存设置
-    console.log('保存设置:', settings);
-    
-    // 模拟保存过程
     wx.showLoading({
       title: '保存中...'
     });
-    
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '保存成功',
-        icon: 'success'
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'admin',
+        data: {
+          action: 'updateSettings',
+          settings: settings
+        }
       });
-    }, 1000);
+
+      console.log('云函数调用结果:', res);
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        wx.showToast({
+          title: '保存成功',
+          icon: 'success'
+        });
+        
+        // 更新本地存储
+        wx.setStorageSync('adminSettings', settings);
+        console.log('设置已保存到本地存储');
+      } else {
+        console.error('保存失败:', res.result);
+        wx.showToast({
+          title: res.result?.message || '保存失败',
+          icon: 'error'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('保存设置异常:', error);
+      
+      // 显示更详细的错误信息
+      let errorMessage = '网络错误';
+      if (error.errMsg) {
+        errorMessage = error.errMsg;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      wx.showModal({
+        title: '保存失败',
+        content: `错误详情: ${errorMessage}`,
+        showCancel: false
+      });
+    }
   },
 
   /**
@@ -376,6 +417,58 @@ Page({
       title: '设置预览',
       content: previewText,
       showCancel: false
+    });
+  },
+
+  /**
+   * 保存设置
+   */
+  onSave() {
+    const { settings } = this.data;
+    
+    // 验证必填项
+    if (!settings.storeName && settings.storePickupEnabled) {
+      wx.showToast({
+        title: '请填写门店名称',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (!settings.storePhone && settings.storePickupEnabled) {
+      wx.showToast({
+        title: '请填写联系电话',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 验证数字格式
+    if (settings.deliveryFee && isNaN(Number(settings.deliveryFee))) {
+      wx.showToast({
+        title: '配送费用格式错误',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (settings.freeShippingThreshold && isNaN(Number(settings.freeShippingThreshold))) {
+      wx.showToast({
+        title: '免邮门槛格式错误',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 显示保存确认
+    wx.showModal({
+      title: '保存确认',
+      content: '确定要保存当前设置吗？',
+      success: (res) => {
+        if (res.confirm) {
+          this.saveSettings();
+        }
+      }
     });
   },
 

@@ -4,13 +4,21 @@ Page({
    * 页面的初始数据
    */
   data: {
-    addressList: []
+    addressList: [],
+    fromOrder: false // 是否从订单页面进入
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    // 检查是否从订单页面进入
+    if (options.from === 'order') {
+      this.setData({
+        fromOrder: true
+      });
+    }
+    
     // 加载地址列表
     this.loadAddressList();
   },
@@ -229,5 +237,44 @@ Page({
       title: '收货地址管理 - 绘本盲盒',
       path: '/pages/address/address'
     };
+  },
+
+  /**
+   * 选择地址（从订单页面进入时使用）
+   */
+  onSelectAddress(e) {
+    console.log('地址选择事件触发');
+    console.log('fromOrder 状态:', this.data.fromOrder);
+    
+    if (!this.data.fromOrder) {
+      console.log('不是从订单页面进入，忽略选择事件');
+      return;
+    }
+    
+    const address = e.currentTarget.dataset.address;
+    console.log('选中的地址:', address);
+    
+    if (!address) {
+      console.error('地址数据为空');
+      wx.showToast({
+        title: '地址数据错误',
+        icon: 'error'
+      });
+      return;
+    }
+    
+    // 将选中的地址保存到全局存储
+    wx.setStorageSync('selectedAddress', address);
+    console.log('地址已保存到存储');
+    
+    // 返回订单页面
+    wx.navigateBack({
+      success: () => {
+        console.log('地址选择完成，返回订单页面');
+      },
+      fail: (error) => {
+        console.error('返回订单页面失败:', error);
+      }
+    });
   }
 }) 

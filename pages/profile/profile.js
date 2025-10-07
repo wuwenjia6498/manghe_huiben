@@ -224,6 +224,18 @@ Page({
           // 清除登录信息
           wx.removeStorageSync('loginInfo');
           
+          // 清除购物车数据
+          wx.removeStorageSync('cart');
+          wx.removeStorageSync('cartCount');
+          
+          // 清除订单数据
+          wx.removeStorageSync('orderData');
+          
+          // 清除tabBar徽章
+          wx.removeTabBarBadge({
+            index: 2
+          });
+          
           // 更新页面状态
           this.setData({
             isLoggedIn: false

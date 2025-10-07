@@ -63,8 +63,8 @@
       </view>
       
       <view class="express-info">
-        <text class="express-company">圆通速递</text>
-        <text class="express-number">YT2024122500001</text>
+        <text class="express-company">{{orderInfo.shippingCompany}}</text>
+        <text class="express-number">{{orderInfo.trackingNumber || 'YT2024122500001'}}</text>
       </view>
     </view>
 
@@ -90,7 +90,6 @@
       
       <view class="goods-list">
         <view class="goods-item" wx:for="{{orderInfo.goods}}" wx:key="id">
-          <image src="{{item.coverUrl}}" class="goods-image" />
           <view class="goods-info">
             <view class="goods-name">{{item.name}}</view>
             <view class="goods-tags">

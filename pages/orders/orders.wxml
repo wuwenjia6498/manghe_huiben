@@ -26,16 +26,16 @@
       全部
     </view>
     <view 
-      class="tab-item {{currentTab === 'pending' ? 'active' : ''}}"
+      class="tab-item {{currentTab === 'paid' ? 'active' : ''}}"
       bindtap="onTabChange"
-      data-tab="pending"
+      data-tab="paid"
     >
       待发货
     </view>
     <view 
-      class="tab-item {{currentTab === 'shipping' ? 'active' : ''}}"
+      class="tab-item {{currentTab === 'shipped' ? 'active' : ''}}"
       bindtap="onTabChange"
-      data-tab="shipping"
+      data-tab="shipped"
     >
       待收货
     </view>
@@ -55,7 +55,10 @@
         <!-- 订单头部 -->
         <view class="order-header">
           <view class="order-info">
-            <text class="order-number">订单号：{{item.orderNo}}</text>
+            <view class="order-number-row">
+              <text class="order-icon">📦</text>
+              <text class="order-number">订单号：{{item.orderNo}}</text>
+            </view>
             <text class="order-time">{{item.createTime}}</text>
           </view>
           <view class="order-status {{item.status}}">{{item.statusText}}</view>
@@ -64,7 +67,6 @@
         <!-- 商品列表 -->
         <view class="goods-list">
           <view class="goods-item" wx:for="{{item.goods}}" wx:key="id" wx:for-item="goods">
-            <image src="{{goods.coverUrl}}" class="goods-image" />
             <view class="goods-info">
               <view class="goods-name">{{goods.name}}</view>
               <view class="goods-tags">
@@ -101,7 +103,7 @@
             再次购买
           </view>
           <view 
-            wx:elif="{{item.status === 'shipping'}}"
+            wx:elif="{{item.status === 'shipped'}}"
             class="action-btn primary" 
             bindtap="onConfirmReceive" 
             data-order="{{item}}"
@@ -109,7 +111,7 @@
             确认收货
           </view>
           <view 
-            wx:elif="{{item.status === 'pending'}}"
+            wx:elif="{{item.status === 'paid' || item.status === 'pending'}}"
             class="action-btn secondary" 
             bindtap="onCancelOrder" 
             data-order="{{item}}"

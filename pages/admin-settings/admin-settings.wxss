@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16rpx 48rpx;
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: #1d1d1f;
   background: #f8f9fa;
@@ -42,7 +42,7 @@
   color: #ffffff;
   padding: 12rpx 20rpx;
   border-radius: 16rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 600;
   box-shadow: 0 4rpx 12rpx rgba(239, 91, 166, 0.3);
 }
@@ -75,13 +75,13 @@
 }
 
 .section-icon {
-  font-size: 24rpx;
+  font-size: 26rpx;
   margin-right: 12rpx;
 }
 
 .section-title {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: #1D1D1F;
 }
@@ -107,7 +107,7 @@
 }
 
 .item-label {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   font-weight: 400;
   flex-shrink: 0;
@@ -116,7 +116,7 @@
 
 /* 配送费用特殊布局 - 描述文字在右侧 */
 .delivery-fee-desc {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #999999;
   margin-left: 8rpx;
   flex-shrink: 0;
@@ -141,7 +141,7 @@ switch {
   flex: 1;
   text-align: right;
   color: #666666;
-  font-size: 24rpx;
+  font-size: 26rpx;
   padding: 0;
   margin-left: 20rpx;
 }
@@ -152,7 +152,7 @@ switch {
   background: #F8F9FA;
   border: 1rpx solid #E5E5EA;
   border-radius: 6rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   padding: 8rpx 12rpx;
   margin-left: 20rpx;
@@ -171,7 +171,7 @@ switch {
   background: #F8F9FA;
   border: 1rpx solid #E5E5EA;
   border-radius: 6rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   padding: 8rpx 12rpx;
   margin-left: 20rpx;
@@ -189,7 +189,7 @@ switch {
 
 /* 描述文字单独处理 - 放在下一行 */
 .item-desc {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #999999;
   margin-top: 4rpx;
   display: block;
@@ -216,7 +216,7 @@ switch {
 .input-group .setting-input {
   background: transparent;
   border: none;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   text-align: right;
   padding: 0;
@@ -245,7 +245,7 @@ switch {
   background: #F2F2F7;
   border-radius: 6rpx;
   padding: 8rpx 12rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   border: 2rpx solid transparent;
   transition: all 0.3s ease;
@@ -262,7 +262,7 @@ switch {
 }
 
 .input-unit {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #666666;
   font-weight: 400;
   white-space: nowrap;
@@ -277,7 +277,7 @@ switch {
   display: flex;
   align-items: center;
   gap: 6rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1D1D1F;
   width: 100%;
   flex-wrap: nowrap;
@@ -371,7 +371,7 @@ switch {
 @media screen and (max-width: 750rpx) {
   .page-title {
     padding: 12rpx 24rpx;
-    font-size: 30rpx;
+    font-size: 34rpx;
   }
   
   .settings-content {
@@ -399,20 +399,20 @@ switch {
   .input-group .setting-input {
     min-width: 180rpx;
     max-width: 220rpx;
-    font-size: 24rpx;
+    font-size: 26rpx;
   }
   
   .setting-input.inline {
     width: 120rpx;
     min-width: 120rpx;
-    font-size: 24rpx;
+    font-size: 26rpx;
   }
 }
 
 @media screen and (max-width: 600rpx) {
   .page-title {
     padding: 12rpx 20rpx;
-    font-size: 28rpx;
+    font-size: 32rpx;
   }
   
   .settings-content {
@@ -430,25 +430,25 @@ switch {
   .input-group .setting-input {
     min-width: 160rpx;
     max-width: 200rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
   }
   
   .setting-input.inline {
     width: 100rpx;
     min-width: 100rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
   }
   
   .item-label-inline {
-    font-size: 22rpx;
+    font-size: 24rpx;
   }
   
   .input-unit {
-    font-size: 22rpx;
+    font-size: 24rpx;
   }
   
   .picker-display {
-    font-size: 22rpx;
+    font-size: 24rpx;
   }
 }
 
@@ -464,7 +464,7 @@ switch {
 .setting-input::placeholder,
 .setting-textarea::placeholder {
   color: #C7C7CC;
-  font-size: 22rpx;
+  font-size: 24rpx;
 }
 
 .setting-section:first-child {

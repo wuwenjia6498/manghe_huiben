@@ -11,11 +11,6 @@
       
       <!-- 内容层 -->
       <view class="banner-content">
-        <!-- 顶部装饰图标 -->
-        <view class="decorative-icons">
-          <view class="icon-book">📚</view>
-        </view>
-        
         <!-- 主标题区域 -->
         <view class="title-section">
           <view class="book-icon">📚</view>
@@ -72,8 +67,6 @@
   
   <!-- 底部优惠提示 -->
   <view class="promotion-banner">
-    <view class="promo-icon">🎁</view>
-    <text class="promo-text">首单立减10元，分享再得5元优惠</text>
-    <view class="promo-note">仅余3天</view>
+    <text class="promo-text">{{promoText}}</text>
   </view>
 </view> 

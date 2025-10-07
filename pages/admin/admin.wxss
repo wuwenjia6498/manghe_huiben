@@ -304,6 +304,14 @@
 }
 
 .legend-color.color-4 {
+  background: #10b981;
+}
+
+.legend-color.color-5 {
+  background: #8b5cf6;
+}
+
+.legend-color.color-6 {
   background: #d1d5db;
 }
 

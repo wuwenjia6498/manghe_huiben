@@ -9,24 +9,23 @@ Page({
     productInfo: {
       id: 1,
       name: '绘本盲盒',
-      subtitle: '精选优质绘本，随机组合',
-      coverUrl: 'https://picsum.photos/600/400?random=1'
+      subtitle: '精选优质绘本，随机组合'
     },
 
     // 当前选中的配置
-    selectedAge: '3-6岁',
-    selectedCondition: '九成新',
-    selectedCount: 30,
+    selectedAge: '0-3',
+    selectedCondition: '全新',
+    selectedCount: 10,
 
     // 当前价格
-    currentPrice: 54,
-    originalPrice: 119,
+    currentPrice: 35,
+    originalPrice: 60,
 
     // 年龄选项
     ageOptions: [
-      { label: '0-3岁', value: '0-3岁' },
-      { label: '3-6岁', value: '3-6岁' },
-      { label: '6岁以上', value: '6岁以上' }
+      { label: '0-3岁', value: '0-3' },
+      { label: '3-6岁', value: '3-6' },
+      { label: '6-12岁', value: '6-12' }
     ],
 
     // 新旧程度选项
@@ -52,34 +51,18 @@ Page({
       { condition: '五成新', description: '明显使用痕迹，不影响阅读内容' }
     ],
 
-    // 价格映射表
-    priceMap: {
-      '0-3岁': {
-        '全新': { 10: 35, 20: 60, 30: 85 },
-        '九成新': { 10: 25, 20: 45, 30: 60 },
-        '七成新': { 10: 18, 20: 32, 30: 45 },
-        '五成新': { 10: 12, 20: 22, 30: 32 }
-      },
-      '3-6岁': {
-        '全新': { 10: 45, 20: 80, 30: 110 },
-        '九成新': { 10: 32, 20: 58, 30: 80 },
-        '七成新': { 10: 24, 20: 42, 30: 58 },
-        '五成新': { 10: 16, 20: 28, 30: 40 }
-      },
-      '6岁以上': {
-        '全新': { 10: 40, 20: 70, 30: 95 },
-        '九成新': { 10: 28, 20: 50, 30: 70 },
-        '七成新': { 10: 20, 20: 36, 30: 50 },
-        '五成新': { 10: 14, 20: 24, 30: 34 }
-      }
-    },
-
-    // 原价映射表
-    originalPriceMap: {
-      10: 60,
-      20: 120,
-      30: 180
-    }
+    // 从数据库加载的商品价格映射
+    productPriceMap: {},
+    
+    // 商品详细信息映射
+    productMap: {},
+    
+    // 数据加载状态
+    priceLoading: true,
+    
+    // 系统设置信息
+    shippingTime: '48小时内发货', // 发货时间
+    deliveryCompany: '顺丰速运' // 配送公司
   },
 
   /**
@@ -91,8 +74,11 @@ Page({
       this.loadProductInfo(options.id);
     }
     
-    // 初始化价格
-    this.updatePrice();
+    // 加载系统设置
+    this.loadSystemSettings();
+    
+    // 加载商品价格数据
+    this.loadProductPrices();
   },
 
   /**
@@ -145,8 +131,7 @@ Page({
   onShareAppMessage() {
     return {
       title: `绘本盲盒 - ${this.data.selectedAge} ${this.data.selectedCondition} ${this.data.selectedCount}本装`,
-      path: `/pages/product-detail/product-detail?id=${this.data.productInfo.id}`,
-      imageUrl: this.data.productInfo.coverUrl
+      path: `/pages/product-detail/product-detail?id=${this.data.productInfo.id}`
     };
   },
 
@@ -162,51 +147,216 @@ Page({
   },
 
   /**
-   * 更新价格
+   * 从数据库加载商品价格数据
    */
-  updatePrice() {
-    const { selectedAge, selectedCondition, selectedCount, priceMap, originalPriceMap } = this.data;
+  async loadProductPrices() {
+    try {
+      this.setData({
+        priceLoading: true
+      });
+
+      console.log('开始加载商品价格数据...');
+
+      const res = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'getProducts',
+          pageSize: 100
+        }
+      });
+
+      console.log('云函数返回结果:', res);
+
+      if (res.result.success) {
+        const data = res.result.data;
+        const products = data.products || [];
+        
+        console.log('获取到商品数据:', products.length, '个商品');
+
+        // 构建价格映射表和商品映射表
+        const priceMap = {};
+        const productMap = {};
+        const availableOptions = {
+          ageRanges: new Set(),
+          conditions: new Set(),
+          quantities: new Set()
+        };
+        
+        // 首先收集所有可用的选项
+        products.forEach(product => {
+          if (product.status === 'active') {
+            availableOptions.ageRanges.add(product.ageRange);
+            availableOptions.conditions.add(product.conditionName);
+            availableOptions.quantities.add(product.quantityName);
+          }
+        });
+
+        // 构建选项组合的有效性映射
+        const validCombinations = new Set();
+        products.forEach(product => {
+          if (product.status === 'active') {
+            const key = `${product.ageRange}-${product.conditionName}-${product.quantityName}`;
+            validCombinations.add(key);
+          }
+        });
+
+        // 构建价格和商品映射
+        products.forEach(product => {
+          if (product.status === 'active') {
+            const ageRange = product.ageRange;
+            const condition = product.conditionName;
+            const quantity = product.quantityName;
+            
+            if (!priceMap[ageRange]) {
+              priceMap[ageRange] = {};
+            }
+            if (!priceMap[ageRange][condition]) {
+              priceMap[ageRange][condition] = {};
+            }
+            
+            if (!productMap[ageRange]) {
+              productMap[ageRange] = {};
+            }
+            if (!productMap[ageRange][condition]) {
+              productMap[ageRange][condition] = {};
+            }
+            
+            // 提取数字部分作为key
+            const quantityNum = parseInt(quantity.replace(/[^0-9]/g, ''));
+            priceMap[ageRange][condition][quantityNum] = product.price;
+            productMap[ageRange][condition][quantityNum] = product;
+            
+            console.log(`添加价格映射: ${ageRange} -> ${condition} -> ${quantityNum} = ¥${product.price}`);
+          }
+        });
+
+        // 更新页面数据
+        this.setData({
+          priceMap,
+          productMap,
+          availableOptions: {
+            ageRanges: Array.from(availableOptions.ageRanges).sort(),
+            conditions: Array.from(availableOptions.conditions).sort(),
+            quantities: Array.from(availableOptions.quantities).sort((a, b) => {
+              const numA = parseInt(a.replace(/[^0-9]/g, ''));
+              const numB = parseInt(b.replace(/[^0-9]/g, ''));
+              return numA - numB;
+            })
+          },
+          validCombinations: Array.from(validCombinations),
+          priceLoading: false
+        });
+
+        // 初始化选中状态
+        this.initializeSelection();
+      } else {
+        throw new Error('获取商品数据失败');
+      }
+    } catch (error) {
+      console.error('加载商品价格失败:', error);
+      this.setData({
+        priceLoading: false
+      });
+      wx.showToast({
+        title: '加载商品信息失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 初始化选中状态
+   */
+  initializeSelection() {
+    const { availableOptions, validCombinations } = this.data;
     
-    const currentPrice = priceMap[selectedAge]?.[selectedCondition]?.[selectedCount] || 54;
-    const originalPrice = originalPriceMap[selectedCount] || 119;
+    // 默认选中第一个可用的年龄段
+    if (availableOptions.ageRanges.length > 0) {
+      this.setData({
+        selectedAgeRange: availableOptions.ageRanges[0]
+      });
+      this.updateAvailableOptions();
+    }
+  },
+
+  /**
+   * 更新可用的选项
+   */
+  updateAvailableOptions() {
+    const { selectedAgeRange, selectedCondition, validCombinations } = this.data;
     
-    this.setData({
-      currentPrice,
-      originalPrice
+    // 根据已选择的选项，过滤出可用的选项
+    const availableConditions = this.data.availableOptions.conditions.filter(condition => {
+      if (!selectedAgeRange) return true;
+      const key = `${selectedAgeRange}-${condition}-`;
+      return validCombinations.some(combo => combo.startsWith(key));
     });
+
+    const availableQuantities = this.data.availableOptions.quantities.filter(quantity => {
+      if (!selectedAgeRange || !selectedCondition) return true;
+      const key = `${selectedAgeRange}-${selectedCondition}-${quantity}`;
+      return validCombinations.includes(key);
+    });
+
+    this.setData({
+      availableConditions,
+      availableQuantities
+    });
+
+    // 如果当前选中的选项不再可用，重置选择
+    if (selectedCondition && !availableConditions.includes(selectedCondition)) {
+      this.setData({ selectedCondition: '' });
+    }
+    if (this.data.selectedQuantity && !availableQuantities.includes(this.data.selectedQuantity)) {
+      this.setData({ selectedQuantity: '' });
+    }
   },
 
   /**
    * 选择年龄段
    */
-  onSelectAge(e) {
-    const value = e.currentTarget.dataset.value;
+  onAgeRangeSelect(e) {
+    const ageRange = e.currentTarget.dataset.age;
     this.setData({
-      selectedAge: value
+      selectedAgeRange: ageRange,
+      selectedCondition: '',
+      selectedQuantity: ''
     });
-    this.updatePrice();
+    this.updateAvailableOptions();
+    // 选择年龄段后清空价格
+    this.setData({
+      currentPrice: 0,
+      originalPrice: 0
+    });
   },
 
   /**
-   * 选择新旧程度
+   * 选择成色
    */
-  onSelectCondition(e) {
-    const value = e.currentTarget.dataset.value;
+  onConditionSelect(e) {
+    const condition = e.currentTarget.dataset.condition;
     this.setData({
-      selectedCondition: value
+      selectedCondition: condition,
+      selectedQuantity: ''
     });
-    this.updatePrice();
+    this.updateAvailableOptions();
+    // 选择成色后清空价格
+    this.setData({
+      currentPrice: 0,
+      originalPrice: 0
+    });
   },
 
   /**
    * 选择本数
    */
-  onSelectCount(e) {
-    const value = e.currentTarget.dataset.value;
+  onQuantitySelect(e) {
+    const quantity = e.currentTarget.dataset.quantity;
     this.setData({
-      selectedCount: value
+      selectedQuantity: quantity
     });
-    this.updatePrice();
+    // 选择本数后更新价格
+    this.updateCurrentPrice();
   },
 
   /**
@@ -227,21 +377,143 @@ Page({
   },
 
   /**
+   * 获取当前选择组合对应的商品
+   */
+  getCurrentProduct() {
+    const { selectedAgeRange, selectedCondition, selectedQuantity, productMap } = this.data;
+    if (!selectedAgeRange || !selectedCondition || !selectedQuantity) return null;
+    
+    const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
+    return productMap[selectedAgeRange]?.[selectedCondition]?.[quantityNum];
+  },
+
+  /**
+   * 检查登录状态
+   */
+  checkLoginStatus() {
+    const loginInfo = wx.getStorageSync('loginInfo');
+    return loginInfo && loginInfo.isLoggedIn;
+  },
+
+  /**
+   * 显示登录提示
+   */
+  showLoginTip() {
+    wx.showModal({
+      title: '需要登录',
+      content: '此功能需要登录后使用，是否立即登录？',
+      success: (res) => {
+        if (res.confirm) {
+          this.performLogin();
+        }
+      }
+    });
+  },
+
+  /**
+   * 执行登录操作
+   */
+  performLogin() {
+    wx.getUserProfile({
+      desc: '用于完善会员资料',
+      success: (res) => {
+        console.log('获取用户信息成功:', res);
+        
+        // 调用微信登录
+        wx.login({
+          success: (loginRes) => {
+            console.log('微信登录成功:', loginRes);
+            
+            // 模拟登录成功
+            const userInfo = {
+              name: res.userInfo.nickName || '微信用户',
+              status: '微信用户 · 普通会员',
+              avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
+            };
+            
+            // 保存登录信息
+            const loginInfo = {
+              isLoggedIn: true,
+              userInfo: userInfo,
+              loginTime: Date.now(),
+              openid: 'mock_openid_' + Date.now() // 模拟openid
+            };
+            
+            wx.setStorageSync('loginInfo', loginInfo);
+            
+            wx.showToast({
+              title: '登录成功',
+              icon: 'success'
+            });
+          },
+          fail: (error) => {
+            console.error('微信登录失败:', error);
+            wx.showToast({
+              title: '登录失败',
+              icon: 'error'
+            });
+          }
+        });
+      },
+      fail: (error) => {
+        console.error('获取用户信息失败:', error);
+        wx.showToast({
+          title: '取消授权',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  /**
    * 加入购物车
    */
   onAddToCart() {
-    const { selectedAge, selectedCondition, selectedCount, currentPrice, productInfo } = this.data;
+    // 检查登录状态
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
+    const { selectedAgeRange, selectedCondition, selectedQuantity, currentPrice } = this.data;
+    
+    if (!selectedAgeRange || !selectedCondition || !selectedQuantity) {
+      wx.showToast({
+        title: '请选择完整的商品规格',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (currentPrice <= 0) {
+      wx.showToast({
+        title: '请稍等价格加载',
+        icon: 'none'
+      });
+      return;
+    }
+
+    const currentProduct = this.getCurrentProduct();
+    if (!currentProduct) {
+      wx.showToast({
+        title: '商品信息加载中',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
     
     // 构建商品信息
     const cartItem = {
-      productId: productInfo.id,
-      name: `${productInfo.name} - ${selectedAge} ${selectedCondition} ${selectedCount}本装`,
-      age: selectedAge,
+      productId: currentProduct._id,
+      name: currentProduct.name,
+      age: selectedAgeRange,
       condition: selectedCondition,
-      count: selectedCount,
+      count: quantityNum,
       price: currentPrice,
-      coverUrl: productInfo.coverUrl,
-      quantity: 1
+      quantity: 1,
+      originalProductData: currentProduct
     };
 
     // 保存到本地存储
@@ -249,10 +521,7 @@ Page({
     
     // 检查是否已存在相同配置的商品
     const existingIndex = cart.findIndex(item => 
-      item.productId === cartItem.productId &&
-      item.age === cartItem.age &&
-      item.condition === cartItem.condition &&
-      item.count === cartItem.count
+      item.productId === cartItem.productId
     );
 
     if (existingIndex >= 0) {
@@ -284,18 +553,51 @@ Page({
    * 立即购买
    */
   onBuyNow() {
-    const { selectedAge, selectedCondition, selectedCount, currentPrice, productInfo } = this.data;
+    // 检查登录状态
+    if (!this.checkLoginStatus()) {
+      this.showLoginTip();
+      return;
+    }
+    
+    const { selectedAgeRange, selectedCondition, selectedQuantity, currentPrice } = this.data;
+    
+    if (!selectedAgeRange || !selectedCondition || !selectedQuantity) {
+      wx.showToast({
+        title: '请选择完整的商品规格',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (currentPrice <= 0) {
+      wx.showToast({
+        title: '请稍等价格加载',
+        icon: 'none'
+      });
+      return;
+    }
+
+    const currentProduct = this.getCurrentProduct();
+    if (!currentProduct) {
+      wx.showToast({
+        title: '商品信息加载中',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
     
     // 构建订单商品信息
     const orderItem = {
-      productId: productInfo.id,
-      name: `${productInfo.name} - ${selectedAge} ${selectedCondition} ${selectedCount}本装`,
-      age: selectedAge,
+      productId: currentProduct._id,
+      name: currentProduct.name,
+      age: selectedAgeRange,
       condition: selectedCondition,
-      count: selectedCount,
+      count: quantityNum,
       price: currentPrice,
-      coverUrl: productInfo.coverUrl,
-      quantity: 1
+      quantity: 1,
+      originalProductData: currentProduct
     };
 
     // 跳转到订单确认页
@@ -303,5 +605,94 @@ Page({
     wx.navigateTo({
       url: '/pages/order/order?type=buy'
     });
+  },
+
+  /**
+   * 加载系统设置
+   */
+  loadSystemSettings() {
+    // 先从本地存储获取设置
+    const settings = wx.getStorageSync('adminSettings');
+    if (settings) {
+      this.applySystemSettings(settings);
+    }
+    
+    // 从云函数获取最新设置
+    wx.cloud.callFunction({
+      name: 'admin',
+      data: {
+        action: 'getSettings'
+      }
+    }).then(res => {
+      if (res.result.success && res.result.data) {
+        const adminSettings = res.result.data;
+        console.log('商品详情页获取到系统设置:', adminSettings);
+        
+        // 应用设置
+        this.applySystemSettings(adminSettings);
+        
+        // 保存到本地存储
+        wx.setStorageSync('adminSettings', adminSettings);
+      }
+    }).catch(err => {
+      console.log('获取系统设置失败:', err);
+    });
+  },
+
+  /**
+   * 应用系统设置
+   */
+  applySystemSettings(settings) {
+    const updateData = {};
+    
+    // 应用发货时间
+    if (settings.shippingTimeIndex !== undefined) {
+      const shippingTimeOptions = ['24小时内发货', '48小时内发货', '72小时内发货', '7天内发货'];
+      updateData.shippingTime = shippingTimeOptions[settings.shippingTimeIndex] || '48小时内发货';
+    }
+    
+    // 应用配送公司
+    if (settings.deliveryCompanyIndex !== undefined) {
+      const deliveryCompanyOptions = ['顺丰速运', '中通快递', '圆通速递', '申通快递', '韵达快递', '公司配送人员'];
+      updateData.deliveryCompany = deliveryCompanyOptions[settings.deliveryCompanyIndex] || '顺丰速运';
+    }
+    
+    console.log('商品详情页应用系统设置:', updateData);
+    this.setData(updateData);
+  },
+
+  /**
+   * 更新当前价格
+   */
+  updateCurrentPrice() {
+    const { selectedAgeRange, selectedCondition, selectedQuantity, priceMap } = this.data;
+    
+    if (selectedAgeRange && selectedCondition && selectedQuantity) {
+      const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
+      const price = priceMap[selectedAgeRange]?.[selectedCondition]?.[quantityNum];
+      
+      if (price) {
+        const currentPrice = Math.round(price); // 确保价格为整数
+        const originalPrice = Math.round(price * 1.4); // 原价为现价的1.4倍，确保为整数
+        
+        this.setData({
+          currentPrice,
+          originalPrice,
+          // 同时更新旧的字段名，保持兼容性
+          selectedAge: selectedAgeRange,
+          selectedCondition: selectedCondition,
+          selectedCount: quantityNum
+        });
+        
+        console.log('价格更新:', {
+          selectedAgeRange,
+          selectedCondition,
+          selectedQuantity,
+          quantityNum,
+          currentPrice,
+          originalPrice
+        });
+      }
+    }
   }
 })

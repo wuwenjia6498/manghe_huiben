@@ -24,17 +24,19 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad(options) {
+  async onLoad(options) {
     // 获取系统信息，设置状态栏高度
     const systemInfo = wx.getSystemInfoSync();
     const statusBarHeight = systemInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     // 检查管理员权限
-    this.checkAdminPermission();
+    const hasPermission = await this.checkAdminPermission();
     
-    // 加载统计数据
-    this.loadStats();
+    // 只有权限验证通过才加载统计数据
+    if (hasPermission) {
+      this.loadStats();
+    }
   },
 
   /**
@@ -100,42 +102,153 @@ Page({
   /**
    * 检查管理员权限
    */
-  checkAdminPermission() {
-    const adminFlag = wx.getStorageSync('adminAccess');
-    if (!adminFlag) {
+  async checkAdminPermission() {
+    try {
+      console.log('🔐 检查管理员权限...');
+      
+      const res = await wx.cloud.callFunction({
+        name: 'auth',
+        data: {
+          action: 'checkAdmin'
+        }
+      });
+
+      console.log('👑 管理员权限检查结果:', res.result);
+
+      if (res.result && res.result.success && res.result.data.isAdmin) {
+        console.log('✅ 管理员权限验证通过');
+        // 设置管理员标记
+        wx.setStorageSync('adminAccess', true);
+        return true;
+      } else {
+        console.log('❌ 非管理员身份');
+        wx.showModal({
+          title: '权限不足',
+          content: '您没有访问管理后台的权限',
+          showCancel: false,
+          success: () => {
+            wx.switchTab({
+              url: '/pages/home/home'
+            });
+          }
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ 权限验证失败:', error);
       wx.showModal({
-        title: '权限不足',
-        content: '您没有访问管理后台的权限',
+        title: '权限验证失败',
+        content: '无法验证管理员权限，请重试',
         showCancel: false,
         success: () => {
-          wx.navigateBack();
+          wx.switchTab({
+            url: '/pages/home/home'
+          });
         }
       });
       return false;
     }
-    return true;
   },
 
   /**
    * 加载统计数据
    */
-  loadStats() {
-    // 模拟数据，实际项目中从服务器获取
-    const stats = {
-      todaySales: '1,345',
-      salesGrowth: '12.5',
-      todayOrders: 37,
-      ordersGrowth: '8.3',
-      newUsers: 12,
-      usersChange: '3.2',
-      pendingOrders: 8,
-      pendingShipment: 8,
-      lowInventory: 2
-    };
+  async loadStats() {
+    try {
+      // 显示加载提示
+      wx.showLoading({
+        title: '加载统计数据...'
+      });
+
+      // 调用admin云函数获取统计数据
+      const res = await wx.cloud.callFunction({
+        name: 'admin',
+        data: {
+          action: 'getStats'
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result.success) {
+        const data = res.result.data;
+        
+        // 计算统计指标
+        const stats = {
+          todaySales: this.formatCurrency(data.todaySales || 0),
+          monthSales: this.formatCurrency(data.monthSales || 0),
+          salesGrowth: data.salesGrowth || '0',
+          todayOrders: data.todayOrderCount || 0,
+          ordersGrowth: data.ordersGrowth || '0',
+          newUsers: data.todayNewUsers || 0,
+          usersChange: data.usersChange || '0',
+          pendingOrders: data.pendingOrderCount || 0,
+          pendingShipment: data.pendingShipmentCount || 0,
+          lowInventory: data.lowInventoryCount || 0,
+          totalProducts: data.productCount || 0,
+          totalUsers: data.userCount || 0,
+          totalOrders: data.orderCount || 0,
+          // 原始数据，供其他地方使用
+          rawData: data
+        };
+        
+        this.setData({
+          stats
+        });
+
+        console.log('📊 管理后台统计数据加载成功:', stats);
+        
+        // 数据加载完成后重新绘制饼图
+        setTimeout(() => {
+          this.drawPieChart();
+        }, 100);
+      } else {
+        throw new Error(res.result.message || '获取统计数据失败');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('❌ 加载统计数据失败:', error);
+      
+      // 使用默认数据
+      const defaultStats = {
+        todaySales: '0',
+        salesGrowth: '0',
+        todayOrders: 0,
+        ordersGrowth: '0',
+        newUsers: 0,
+        usersChange: '0',
+        pendingOrders: 0,
+        pendingShipment: 0,
+        lowInventory: 0,
+        totalProducts: 0,
+        totalUsers: 0,
+        totalOrders: 0
+      };
+      
+      this.setData({
+        stats: defaultStats
+      });
+
+      wx.showToast({
+        title: '统计数据加载失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 格式化货币
+   */
+  formatCurrency(amount) {
+    const num = parseFloat(amount) || 0;
     
-    this.setData({
-      stats
-    });
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'k';
+    } else {
+      return num.toFixed(0);
+    }
   },
 
   /**
@@ -147,12 +260,49 @@ Page({
     const centerX = 150;
     const centerY = 150;
     
-    const data = [
-      { value: 35, color: '#22d3ee', label: '3-6岁九成新' },
-      { value: 25, color: '#fb923c', label: '0-3岁全新' },
-      { value: 30, color: '#ef4444', label: '6岁以上七成新' },
-      { value: 10, color: '#d1d5db', label: '其他' }
-    ];
+    // 使用真实的统计数据
+    const { stats } = this.data;
+    const rawData = stats.rawData || {};
+    
+    // 如果有真实数据，使用真实数据；否则使用默认数据
+    let data = [];
+    if (rawData.categoryStats) {
+      // 从真实数据构建饼图数据
+      data = Object.entries(rawData.categoryStats).map(([key, value], index) => {
+        const colors = ['#22d3ee', '#fb923c', '#ef4444', '#10b981', '#8b5cf6', '#d1d5db'];
+        return {
+          value: value,
+          color: colors[index % colors.length],
+          label: key
+        };
+      });
+    } else {
+      // 使用默认示例数据
+      data = [
+        { value: 35, color: '#22d3ee', label: '3-6岁九成新' },
+        { value: 25, color: '#fb923c', label: '0-3岁全新' },
+        { value: 30, color: '#ef4444', label: '6岁以上七成新' },
+        { value: 10, color: '#d1d5db', label: '其他' }
+      ];
+    }
+    
+    // 如果没有数据，显示空状态
+    if (data.length === 0 || data.every(item => item.value === 0)) {
+      // 绘制空状态圆圈
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.setFillStyle('#f3f4f6');
+      ctx.fill();
+      
+      // 绘制中心圆
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
+      ctx.setFillStyle('#ffffff');
+      ctx.fill();
+      
+      ctx.draw();
+      return;
+    }
     
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let currentAngle = -Math.PI / 2; // 从12点钟位置开始

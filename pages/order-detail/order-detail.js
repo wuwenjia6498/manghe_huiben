@@ -11,7 +11,11 @@ Page({
    */
   onLoad(options) {
     // 获取传递的订单信息
-    if (options.orderData) {
+    if (options.orderId) {
+      // 通过订单ID从数据库加载
+      this.loadOrderById(options.orderId);
+    } else if (options.orderData) {
+      // 通过传递的订单数据加载（兼容旧版本）
       try {
         const orderInfo = JSON.parse(decodeURIComponent(options.orderData));
         this.setData({
@@ -33,6 +37,157 @@ Page({
   },
 
   /**
+   * 通过订单ID从数据库加载订单信息
+   */
+  async loadOrderById(orderId) {
+    try {
+      wx.showLoading({
+        title: '加载中...'
+      });
+
+      const res = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'getOrderById',
+          orderId: orderId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result.success) {
+        const orderData = res.result.data;
+        console.log('加载到的订单数据:', orderData);
+        
+        // 转换订单数据格式
+        const orderInfo = this.convertDatabaseOrderToUI(orderData);
+        this.setData({
+          orderInfo: orderInfo
+        });
+      } else {
+        wx.showToast({
+          title: res.result.message || '订单加载失败',
+          icon: 'error'
+        });
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 2000);
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('加载订单详情失败:', error);
+      wx.showToast({
+        title: '网络错误',
+        icon: 'error'
+      });
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 2000);
+    }
+  },
+
+  /**
+   * 将数据库订单数据转换为UI显示格式
+   */
+  convertDatabaseOrderToUI(orderData) {
+    // 状态映射
+    const statusMap = {
+      'pending': { text: '待发货', desc: '您的订单正在准备中，我们会尽快为您发货' },
+      'paid': { text: '待发货', desc: '您的订单已付款，正在准备发货' },
+      'shipped': { text: '待收货', desc: '您的包裹正在路上，请耐心等待' },
+      'completed': { text: '已完成', desc: '订单已完成，感谢您的购买' },
+      'cancelled': { text: '已取消', desc: '订单已取消' }
+    };
+
+    const statusInfo = statusMap[orderData.status] || { text: '未知状态', desc: '' };
+
+    // 从数据库订单数据中获取真实的金额信息
+    const orderAmount = Math.round(orderData.orderAmount || orderData.totalAmount);
+    const deliveryFee = Math.round(orderData.deliveryFee || 0);
+    const firstDiscount = Math.round(orderData.firstDiscount || 0);
+    const fullDiscount = Math.round(orderData.fullDiscount || 0);
+    const totalAmount = Math.round(orderData.totalAmount);
+
+    console.log('订单金额信息:', {
+      orderAmount,
+      deliveryFee,
+      firstDiscount,
+      fullDiscount,
+      totalAmount
+    });
+
+    return {
+      id: orderData._id,
+      orderNo: orderData.orderNo,
+      status: orderData.status,
+      statusText: statusInfo.text,
+      statusDesc: statusInfo.desc,
+      createTime: this.formatTime(orderData.createTime),
+      address: orderData.address,
+      deliveryType: orderData.deliveryType || 'express',
+      remark: orderData.remark || '',
+      
+      // 商品信息
+      goods: orderData.products.map(product => ({
+        id: product.productId,
+        name: product.name,
+        age: product.ageRange,
+        condition: product.condition,
+        count: product.count + '本装',
+        price: Math.round(product.price),
+        quantity: product.quantity,
+        averagePrice: Math.round(product.price / parseInt(product.count))
+      })),
+      
+      // 金额信息 - 从数据库读取真实数据
+      goodsAmount: orderAmount,
+      deliveryFee: deliveryFee,
+      firstDiscount: firstDiscount,
+      fullDiscount: fullDiscount,
+      discountAmount: firstDiscount + fullDiscount, // 总优惠金额
+      totalAmount: totalAmount,
+      
+      // 物流信息
+      trackingNumber: orderData.trackingNo || '',
+      shippingCompany: this.getShippingCompanyName(orderData.deliveryType)
+    };
+  },
+
+  /**
+   * 根据配送方式获取配送公司名称
+   */
+  getShippingCompanyName(deliveryType) {
+    if (deliveryType === 'pickup') {
+      return '门店自取';
+    }
+    
+    // 从系统设置中获取配送公司
+    const settings = wx.getStorageSync('adminSettings');
+    if (settings && settings.deliveryCompanyIndex !== undefined) {
+      const companies = ['顺丰速运', '中通快递', '圆通速递', '申通快递', '韵达快递', '公司配送人员'];
+      return companies[settings.deliveryCompanyIndex] || '圆通速递';
+    }
+    
+    return '圆通速递';
+  },
+
+  /**
+   * 格式化时间
+   */
+  formatTime(date) {
+    if (!date) return '';
+    
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  },
+
+  /**
    * 增强订单信息，添加额外字段
    */
   enhanceOrderInfo(orderInfo) {
@@ -43,11 +198,22 @@ Page({
       detail: '广东省深圳市南山区科技园南区深南大道9988号'
     };
 
-    // 添加费用明细
-    orderInfo.goodsAmount = orderInfo.totalAmount + 5; // 假设有5元优惠
-    orderInfo.deliveryFee = 0; // 包邮
-    orderInfo.discountAmount = 5; // 优惠金额
-    orderInfo.deliveryType = 'express'; // 配送方式
+    // 使用真实的费用明细而不是硬编码
+    const orderAmount = Math.round(orderInfo.totalAmount);
+    const deliveryFee = Math.round(orderInfo.deliveryFee || 0);
+    const discountAmount = Math.round((orderInfo.firstDiscount || 0) + (orderInfo.fullDiscount || 0));
+    
+    orderInfo.goodsAmount = orderAmount + discountAmount - deliveryFee; // 商品原价
+    orderInfo.deliveryFee = deliveryFee; // 使用真实运费
+    orderInfo.discountAmount = discountAmount; // 使用真实优惠金额
+    orderInfo.deliveryType = orderInfo.deliveryType || 'express'; // 配送方式
+
+    console.log('增强订单信息:', {
+      goodsAmount: orderInfo.goodsAmount,
+      deliveryFee: orderInfo.deliveryFee,
+      discountAmount: orderInfo.discountAmount,
+      totalAmount: orderInfo.totalAmount
+    });
 
     return orderInfo;
   },

@@ -21,10 +21,7 @@
     <!-- 联系人信息 -->
     <view class="form-section">
       <view class="form-item">
-        <view class="form-label">
-          <text class="label-text">收货人</text>
-          <text class="required">*</text>
-        </view>
+        <view class="label required">收货人</view>
         <input 
           class="form-input" 
           type="text" 
@@ -36,10 +33,7 @@
       </view>
       
       <view class="form-item">
-        <view class="form-label">
-          <text class="label-text">手机号</text>
-          <text class="required">*</text>
-        </view>
+        <view class="label required">手机号</view>
         <input 
           class="form-input" 
           type="number" 
@@ -53,24 +47,28 @@
 
     <!-- 地址信息 -->
     <view class="form-section">
-      <view class="form-item location-item" bindtap="onSelectLocation">
-        <view class="form-label">
-          <text class="label-text">所在地区</text>
-          <text class="required">*</text>
-        </view>
-        <view class="location-selector">
-          <text class="location-text {{formData.region ? '' : 'placeholder'}}">
-            {{formData.region || '请选择省市区'}}
-          </text>
-          <text class="arrow">></text>
-        </view>
+      <!-- 省市区选择 -->
+      <view class="form-item location-item">
+        <view class="label required">所在地区</view>
+        <picker 
+          class="location-picker"
+          mode="multiSelector" 
+          range="{{regionData}}" 
+          range-key="name"
+          value="{{regionIndex}}"
+          bindchange="onRegionChange"
+          bindcolumnchange="onRegionColumnChange">
+          <view class="location-selector">
+            <text class="location-text {{formData.region.province ? '' : 'location-placeholder'}}">
+              {{formData.region.province ? (formData.region.province + ' ' + (formData.region.city || '') + ' ' + (formData.region.district || '')) : '请选择省市区'}}
+            </text>
+            <text class="arrow">></text>
+          </view>
+        </picker>
       </view>
       
       <view class="form-item">
-        <view class="form-label">
-          <text class="label-text">详细地址</text>
-          <text class="required">*</text>
-        </view>
+        <view class="label required">详细地址</view>
         <textarea 
           class="form-textarea" 
           placeholder="街道、楼牌号等详细信息" 

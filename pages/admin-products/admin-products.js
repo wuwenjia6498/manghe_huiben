@@ -9,124 +9,19 @@ Page({
     
     // 统计数据
     statistics: {
-      total: 9,
-      active: 7,
-      inactive: 2
+      total: 0,
+      active: 0,
+      inactive: 0
     },
 
     // 当前筛选条件
     currentFilter: '',
 
-    // 年龄段数据
-    ageGroups: [
-      {
-        id: 'age_001',
-        age_group: '0-3岁',
-        icon: '👶',
-        label: '萌趣',
-        status: 'active',
-        skus: [
-          {
-            id: 'sku_001',
-            age_group: '0-3岁',
-            condition: '全新',
-            book_count: 10,
-            price: 30.0,
-            stock: 50,
-            stock_status: 'normal',
-            status: 'active'
-          },
-          {
-            id: 'sku_002',
-            age_group: '0-3岁',
-            condition: '全新',
-            book_count: 20,
-            price: 57.0,
-            stock: 30,
-            stock_status: 'normal',
-            status: 'active'
-          },
-          {
-            id: 'sku_003',
-            age_group: '0-3岁',
-            condition: '九成新',
-            book_count: 10,
-            price: 24.0,
-            stock: 15,
-            stock_status: 'low',
-            status: 'active'
-          }
-        ]
-      },
-      {
-        id: 'age_002',
-        age_group: '3-6岁',
-        icon: '👦',
-        label: '推荐',
-        status: 'active',
-        skus: [
-          {
-            id: 'sku_004',
-            age_group: '3-6岁',
-            condition: '全新',
-            book_count: 20,
-            price: 57.0,
-            stock: 40,
-            stock_status: 'normal',
-            status: 'active'
-          },
-          {
-            id: 'sku_005',
-            age_group: '3-6岁',
-            condition: '九成新',
-            book_count: 20,
-            price: 48.0,
-            stock: 35,
-            stock_status: 'normal',
-            status: 'active'
-          },
-          {
-            id: 'sku_006',
-            age_group: '3-6岁',
-            condition: '七成新',
-            book_count: 30,
-            price: 54.0,
-            stock: 8,
-            stock_status: 'low',
-            status: 'active'
-          }
-        ]
-      },
-      {
-        id: 'age_003',
-        age_group: '6岁以上',
-        icon: '🎓',
-        label: '精选',
-        status: 'inactive',
-        skus: [
-          {
-            id: 'sku_007',
-            age_group: '6岁以上',
-            condition: '全新',
-            book_count: 30,
-            price: 81.0,
-            stock: 0,
-            stock_status: 'out',
-            status: 'inactive'
-          },
-          {
-            id: 'sku_008',
-            age_group: '6岁以上',
-            condition: '九成新',
-            book_count: 20,
-            price: 48.0,
-            stock: 0,
-            stock_status: 'out',
-            status: 'inactive'
-          }
-        ]
-      }
-    ],
+    // 搜索关键词
+    searchKeyword: '',
+
+    // 年龄段数据（将从数据库加载）
+    ageGroups: [],
 
     // 筛选后的年龄段数据
     filteredAgeGroups: [],
@@ -152,16 +47,19 @@ Page({
     },
 
     // 选项数据
-    ageGroupOptions: ['0-3岁', '3-6岁', '6岁以上'],
-    conditionOptions: ['三成', '五成', '七成', '九成', '全新'],
-    countOptions: ['5本装', '10本装', '15本装', '20本装', '25本装', '30本装', '50本装']
+    ageGroupOptions: ['0-3岁', '3-6岁', '6-12岁'],
+    conditionOptions: ['全新', '九成新', '七成新', '五成新'],
+    countOptions: ['5本装', '10本装', '15本装', '20本装', '30本装', '50本装'],
+    
+    // 加载状态
+    loading: false
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    this.initializeData();
+    this.loadProductsFromDatabase();
   },
 
   /**
@@ -192,7 +90,7 @@ Page({
    * 筛选数据
    */
   filterData() {
-    const { ageGroups, currentFilter } = this.data;
+    const { ageGroups, currentFilter, searchKeyword } = this.data;
     let filteredAgeGroups = [];
 
     if (currentFilter === '') {
@@ -217,6 +115,35 @@ Page({
     } else {
       // 按年龄段筛选，显示该年龄段的所有SKU
       filteredAgeGroups = ageGroups.filter(group => group.age_group === currentFilter);
+    }
+
+    // 如果有搜索关键词，进行搜索过滤
+    if (searchKeyword && searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filteredAgeGroups = filteredAgeGroups.map(group => {
+        // 检查年龄段是否匹配
+        const ageMatch = group.age_group.toLowerCase().includes(keyword);
+        
+        // 筛选匹配的SKU
+        const matchedSkus = group.skus.filter(sku => {
+          const conditionMatch = sku.condition.toLowerCase().includes(keyword);
+          const countMatch = sku.book_count.toString().includes(keyword) || 
+                           `${sku.book_count}本`.includes(keyword) ||
+                           `${sku.book_count}本装`.includes(keyword);
+          const priceMatch = sku.price.toString().includes(keyword);
+          
+          return conditionMatch || countMatch || priceMatch;
+        });
+
+        // 如果年龄段匹配或有匹配的SKU，返回该组
+        if (ageMatch || matchedSkus.length > 0) {
+          return {
+            ...group,
+            skus: ageMatch ? group.skus : matchedSkus
+          };
+        }
+        return null;
+      }).filter(group => group !== null);
     }
 
     // 为每个SKU设置库存状态
@@ -340,16 +267,39 @@ Page({
   /**
    * 切换SKU状态
    */
-  onToggleSku(e) {
+  async onToggleSku(e) {
     const sku = e.currentTarget.dataset.sku;
     const newStatus = sku.status === 'active' ? 'inactive' : 'active';
     
-    this.updateSkuStatus(sku.id, newStatus);
-    
-    wx.showToast({
-      title: `已${newStatus === 'active' ? '上架' : '下架'}`,
-      icon: 'success'
-    });
+    try {
+      // 调用云函数更新商品状态
+      const result = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'updateProductStatus',
+          productId: sku.id,
+          status: newStatus
+        }
+      });
+
+      if (result.result && result.result.success) {
+        // 更新本地数据
+        this.updateSkuStatus(sku.id, newStatus);
+        
+        wx.showToast({
+          title: `已${newStatus === 'active' ? '上架' : '下架'}`,
+          icon: 'success'
+        });
+      } else {
+        throw new Error(result.result?.message || '更新状态失败');
+      }
+    } catch (error) {
+      console.error('更新商品状态失败:', error);
+      wx.showToast({
+        title: '操作失败，请重试',
+        icon: 'none'
+      });
+    }
   },
 
   /**
@@ -363,13 +313,38 @@ Page({
       content: `确定要删除 ${sku.condition} ${sku.book_count}本装 商品吗？删除后无法恢复。`,
       confirmText: '删除',
       confirmColor: '#ff4d4f',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          this.deleteSku(sku.id);
-          wx.showToast({
-            title: '删除成功',
-            icon: 'success'
-          });
+          try {
+            // 调用云函数删除商品
+            const result = await wx.cloud.callFunction({
+              name: 'product',
+              data: {
+                action: 'deleteProduct',
+                productId: sku.id
+              }
+            });
+
+            if (result.result && result.result.success) {
+              // 删除成功后更新本地数据
+              this.deleteSku(sku.id);
+              wx.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+            } else {
+              wx.showToast({
+                title: result.result?.message || '删除失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            console.error('删除商品失败:', error);
+            wx.showToast({
+              title: '删除失败，请重试',
+              icon: 'none'
+            });
+          }
         }
       }
     });
@@ -524,7 +499,7 @@ Page({
   /**
    * 保存编辑
    */
-  onSaveEdit() {
+  async onSaveEdit() {
     const { editForm, ageGroupOptions, conditionOptions, countOptions } = this.data;
     
     // 验证表单
@@ -536,7 +511,7 @@ Page({
       return;
     }
 
-    const price = parseFloat(editForm.price);
+    const price = Math.round(parseFloat(editForm.price)); // 确保价格为整数
     const stock = parseInt(editForm.stock);
 
     if (isNaN(price) || price <= 0) {
@@ -559,38 +534,66 @@ Page({
     const countText = countOptions[editForm.countIndex];
     const bookCount = parseInt(countText.replace('本装', ''));
 
-    // 更新SKU数据
-    const { ageGroups } = this.data;
-    const updatedAgeGroups = ageGroups.map(group => ({
-      ...group,
-      skus: group.skus.map(sku => {
-        if (sku.id === editForm.id) {
-          return {
-            ...sku,
-            age_group: ageGroupOptions[editForm.ageIndex],
-            condition: conditionOptions[editForm.conditionIndex],
-            book_count: bookCount,
-            price,
-            stock,
-            stock_status: this.getStockStatus(stock)
-          };
+    try {
+      // 调用云函数更新商品
+      const result = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'updateProduct',
+          productId: editForm.id,
+          product: {
+            ageRange: ageGroupOptions[editForm.ageIndex].replace('岁', ''),
+            conditionName: conditionOptions[editForm.conditionIndex],
+            quantityName: `${bookCount}本装`,
+            price: price,
+            stock: stock
+          }
         }
-        return sku;
-      })
-    }));
+      });
 
-    this.setData({
-      ageGroups: updatedAgeGroups,
-      showEditModal: false
-    });
+      if (result.result && result.result.success) {
+        // 更新本地数据
+        const { ageGroups } = this.data;
+        const updatedAgeGroups = ageGroups.map(group => ({
+          ...group,
+          skus: group.skus.map(sku => {
+            if (sku.id === editForm.id) {
+              return {
+                ...sku,
+                age_group: ageGroupOptions[editForm.ageIndex],
+                condition: conditionOptions[editForm.conditionIndex],
+                book_count: bookCount,
+                price: price, // 确保本地显示的价格也是整数
+                stock,
+                stock_status: this.getStockStatus(stock)
+              };
+            }
+            return sku;
+          })
+        }));
 
-    this.filterData();
-    this.refreshStatistics();
+        this.setData({
+          ageGroups: updatedAgeGroups,
+          showEditModal: false
+        });
 
-    wx.showToast({
-      title: '修改成功',
-      icon: 'success'
-    });
+        this.filterData();
+        this.refreshStatistics();
+
+        wx.showToast({
+          title: '修改成功',
+          icon: 'success'
+        });
+      } else {
+        throw new Error(result.result?.message || '更新失败');
+      }
+    } catch (error) {
+      console.error('更新商品失败:', error);
+      wx.showToast({
+        title: '更新失败，请重试',
+        icon: 'none'
+      });
+    }
   },
 
   /**
@@ -705,8 +708,7 @@ Page({
   /**
    * 保存新商品
    */
-  onSaveAdd() {
-    console.log('保存新商品按钮被点击');
+  async onSaveAdd() {
     const { addForm, ageGroupOptions, conditionOptions, countOptions } = this.data;
     
     // 验证表单
@@ -718,7 +720,7 @@ Page({
       return;
     }
 
-    const price = parseFloat(addForm.price);
+    const price = Math.round(parseFloat(addForm.price)); // 确保价格为整数
     const stock = parseInt(addForm.stock);
 
     if (isNaN(price) || price <= 0) {
@@ -743,51 +745,197 @@ Page({
     const countText = countOptions[addForm.countIndex];
     const bookCount = parseInt(countText.replace('本装', ''));
 
-    // 生成新的SKU ID
-    const { ageGroups } = this.data;
-    let maxId = 0;
-    ageGroups.forEach(group => {
-      group.skus.forEach(sku => {
-        const id = parseInt(sku.id.replace('sku_', ''));
-        if (id > maxId) maxId = id;
+    try {
+      // 调用云函数添加商品
+      const result = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'addProduct',
+          product: {
+            ageRange: ageGroup.replace('岁', ''),
+            conditionName: condition,
+            quantityName: `${bookCount}本装`,
+            price: price, // 确保保存到数据库的价格为整数
+            stock: stock,
+            status: 'active',
+            name: `${ageGroup}${condition}${bookCount}本装绘本盲盒`,
+            description: `专为${ageGroup}儿童精选的${condition}品质${bookCount}本装绘本盲盒，超值惊喜等你开启！`,
+            tags: [ageGroup.replace('岁', ''), condition, `${bookCount}本装`, '绘本', '盲盒'],
+            features: [
+              `适合${ageGroup}儿童阅读`,
+              `${condition}品质保证`,
+              `${bookCount}本装超值装`,
+              '精选优质绘本'
+            ]
+          }
+        }
       });
-    });
-    const newSkuId = `sku_${String(maxId + 1).padStart(3, '0')}`;
 
-    // 创建新SKU
-    const newSku = {
-      id: newSkuId,
-      age_group: ageGroup,
-      condition,
-      book_count: bookCount,
-      price,
-      stock,
-      stock_status: this.getStockStatus(stock),
-      status: 'active'
+      if (result.result && result.result.success) {
+        // 重新加载商品数据
+        await this.loadProductsFromDatabase();
+        
+        this.setData({
+          showAddModal: false
+        });
+
+        wx.showToast({
+          title: '添加成功',
+          icon: 'success'
+        });
+      } else {
+        throw new Error(result.result?.message || '添加失败');
+      }
+    } catch (error) {
+      console.error('添加商品失败:', error);
+      wx.showToast({
+        title: '添加失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 从数据库加载商品数据
+   */
+  async loadProductsFromDatabase() {
+    try {
+      this.setData({ loading: true });
+      
+      wx.showLoading({
+        title: '加载商品数据...'
+      });
+
+      // 调用product云函数获取所有产品（包括已下架的）
+      const res = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'getProducts',
+          pageSize: 100, // 获取更多商品，足够包含36个盲盒商品
+          // 移除status参数，获取所有状态的商品
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result.success) {
+        const data = res.result.data;
+        const products = data.products || []; // 修正：获取products数组
+        console.log('📦 获取到的商品数据:', products);
+        console.log('📊 商品总数:', data.total);
+        
+        // 将商品数据转换为管理页面需要的格式
+        const ageGroups = this.convertProductsToAgeGroups(products);
+        
+        this.setData({
+          ageGroups: ageGroups,
+          loading: false
+        });
+        
+        // 初始化筛选和统计
+        this.filterData();
+        this.refreshStatistics();
+        
+      } else {
+        throw new Error(res.result.message || '获取商品数据失败');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('❌ 加载商品数据失败:', error);
+      
+      this.setData({ loading: false });
+      
+      wx.showToast({
+        title: '加载商品失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 将商品数据转换为年龄段分组格式
+   */
+  convertProductsToAgeGroups(products) {
+    const ageGroupMap = {
+      '0-3': { id: 'age_001', name: '0-3岁', icon: '👶', label: '萌趣' },
+      '3-6': { id: 'age_002', name: '3-6岁', icon: '👦', label: '推荐' },
+      '6-12': { id: 'age_003', name: '6-12岁', icon: '🎓', label: '精选' }
     };
 
-    // 添加到对应年龄段
-    const updatedAgeGroups = ageGroups.map(group => {
-      if (group.age_group === ageGroup) {
-        return {
-          ...group,
-          skus: [...group.skus, newSku]
+    const groups = [];
+    
+    // 为每个年龄段创建分组
+    Object.keys(ageGroupMap).forEach(ageRange => {
+      const groupInfo = ageGroupMap[ageRange];
+      
+      // 筛选该年龄段的商品
+      const ageProducts = products.filter(product => product.ageRange === ageRange);
+      
+      if (ageProducts.length > 0) {
+        const group = {
+          id: groupInfo.id,
+          age_group: groupInfo.name,
+          icon: groupInfo.icon,
+          label: groupInfo.label,
+          status: 'active',
+          skus: []
         };
+
+        // 将商品转换为SKU格式
+        ageProducts.forEach(product => {
+          const sku = {
+            id: product._id,
+            age_group: groupInfo.name,
+            condition: product.conditionName,
+            book_count: parseInt(product.quantityName.replace('本装', '')),
+            price: Math.round(product.price), // 确保价格为整数
+            stock: product.stock,
+            stock_status: this.getStockStatus(product.stock),
+            status: product.status === 'active' ? 'active' : 'inactive',
+            // 保留原始产品数据
+            originalProduct: product
+          };
+          
+          group.skus.push(sku);
+        });
+
+        groups.push(group);
       }
-      return group;
     });
 
+    return groups;
+  },
+
+  /**
+   * 搜索输入事件
+   */
+  onSearchInput(e) {
+    const searchKeyword = e.detail.value;
     this.setData({
-      ageGroups: updatedAgeGroups,
-      showAddModal: false
+      searchKeyword
     });
-
+    // 实时搜索
     this.filterData();
-    this.refreshStatistics();
+  },
 
-    wx.showToast({
-      title: '添加成功',
-      icon: 'success'
+  /**
+   * 搜索确认事件
+   */
+  onSearchConfirm(e) {
+    const searchKeyword = e.detail.value;
+    this.setData({
+      searchKeyword
     });
+    this.filterData();
+  },
+
+  /**
+   * 清除搜索
+   */
+  onClearSearch() {
+    this.setData({
+      searchKeyword: ''
+    });
+    this.filterData();
   },
 }); 

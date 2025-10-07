@@ -11,7 +11,7 @@
       <image src="/images/back-arrow-gray.svg" class="back-arrow-icon" />
     </view>
     <view class="address-title-section">
-      <text class="address-title">收货地址</text>
+      <text class="address-title">{{fromOrder ? '选择收货地址' : '收货地址'}}</text>
     </view>
     <view class="address-placeholder"></view>
   </view>
@@ -21,7 +21,20 @@
     <view wx:if="{{addressList.length > 0}}" class="address-list">
       <view class="address-item" wx:for="{{addressList}}" wx:key="id">
         <!-- 地址信息 -->
-        <view class="address-info">
+        <view wx:if="{{fromOrder}}" class="address-info" bindtap="onSelectAddress" data-address="{{item}}">
+          <view class="address-top">
+            <view class="name-phone">
+              <text class="name">{{item.name}}</text>
+              <text class="phone">{{item.phone}}</text>
+            </view>
+            <view wx:if="{{item.isDefault}}" class="default-tag">默认</view>
+            <view class="select-icon">></view>
+          </view>
+          
+          <view class="address-detail">{{item.detail}}</view>
+        </view>
+        
+        <view wx:else class="address-info">
           <view class="address-top">
             <view class="name-phone">
               <text class="name">{{item.name}}</text>

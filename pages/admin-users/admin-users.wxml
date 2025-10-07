@@ -48,7 +48,7 @@
 
   <!-- 用户列表 -->
   <view class="users-list">
-    <view class="user-card" wx:for="{{filteredUsers}}" wx:key="id">
+    <view class="user-card" wx:for="{{users}}" wx:key="id">
       <view class="user-content">
         <!-- 用户头部信息 -->
         <view class="user-header">
@@ -93,10 +93,16 @@
     </view>
 
     <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{filteredUsers.length === 0}}">
+    <view class="empty-state" wx:if="{{users.length === 0 && !loading}}">
       <view class="empty-icon">👥</view>
       <view class="empty-text">暂无用户数据</view>
       <view class="empty-desc">{{searchKeyword ? '未找到相关用户' : '系统中还没有用户'}}</view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{loading}}">
+      <view class="loading-icon">⏳</view>
+      <view class="loading-text">正在加载用户数据...</view>
     </view>
   </view>
 

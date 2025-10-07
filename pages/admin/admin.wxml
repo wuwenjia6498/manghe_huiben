@@ -22,14 +22,14 @@
 
     <!-- 数据卡片区域（包含待处理事项） -->
     <view class="data-cards-section">
-      <!-- 今日销售额 -->
+      <!-- 今日收入 -->
       <view class="data-card">
         <view class="card-header">
-          <view class="card-title">今日销售额</view>
+          <view class="card-title">今日收入</view>
         </view>
         <view class="card-value">¥{{stats.todaySales}}</view>
-        <view class="card-change positive">
-          <text>+{{stats.salesGrowth}}%</text>
+        <view class="card-change {{stats.salesGrowth >= 0 ? 'positive' : 'negative'}}">
+          <text>{{stats.salesGrowth >= 0 ? '+' : ''}}{{stats.salesGrowth}}%</text>
         </view>
       </view>
 
@@ -39,8 +39,8 @@
           <view class="card-title">今日订单</view>
         </view>
         <view class="card-value">{{stats.todayOrders}}</view>
-        <view class="card-change positive">
-          <text>+{{stats.ordersGrowth}}%</text>
+        <view class="card-change {{stats.ordersGrowth >= 0 ? 'positive' : 'negative'}}">
+          <text>{{stats.ordersGrowth >= 0 ? '+' : ''}}{{stats.ordersGrowth}}%</text>
         </view>
       </view>
 
@@ -50,8 +50,8 @@
           <view class="card-title">新增用户</view>
         </view>
         <view class="card-value">{{stats.newUsers}}</view>
-        <view class="card-change negative">
-          <text>-{{stats.usersChange}}%</text>
+        <view class="card-change {{stats.usersChange >= 0 ? 'positive' : 'negative'}}">
+          <text>{{stats.usersChange >= 0 ? '+' : ''}}{{stats.usersChange}}%</text>
         </view>
       </view>
 
@@ -87,26 +87,20 @@
     <view class="chart-section">
       <view class="chart-card">
         <view class="chart-header">
-          <view class="chart-title">热门商品排行</view>
+          <view class="chart-title">商品类别分布</view>
         </view>
         <view class="pie-chart-container">
           <canvas canvas-id="pieChart" class="pie-chart"></canvas>
-          <view class="chart-legend">
+          <view class="chart-legend" wx:if="{{stats.rawData && stats.rawData.categoryStats && stats.rawData.categoryStats.length > 0}}">
+            <view class="legend-item" wx:for="{{stats.rawData.categoryStats}}" wx:key="name">
+              <view class="legend-color color-{{index + 1}}"></view>
+              <text>{{item.name}} ({{item.value}})</text>
+            </view>
+          </view>
+          <view class="chart-legend" wx:else>
             <view class="legend-item">
               <view class="legend-color color-1"></view>
-              <text>3-6岁九成新</text>
-            </view>
-            <view class="legend-item">
-              <view class="legend-color color-2"></view>
-              <text>0-3岁全新</text>
-            </view>
-            <view class="legend-item">
-              <view class="legend-color color-3"></view>
-              <text>6岁以上七成新</text>
-            </view>
-            <view class="legend-item">
-              <view class="legend-color color-4"></view>
-              <text>其他</text>
+              <text>暂无数据</text>
             </view>
           </view>
         </view>
@@ -119,25 +113,25 @@
       <view class="quick-stats-grid">
         <view class="quick-stat-item">
           <view class="stat-info">
-            <view class="stat-value">¥12,456</view>
+            <view class="stat-value">¥{{stats.monthSales}}</view>
             <view class="stat-label">本月收入</view>
           </view>
         </view>
         <view class="quick-stat-item">
           <view class="stat-info">
-            <view class="stat-value">128</view>
+            <view class="stat-value">{{stats.totalProducts}}</view>
             <view class="stat-label">总商品数</view>
           </view>
         </view>
         <view class="quick-stat-item">
           <view class="stat-info">
-            <view class="stat-value">1,234</view>
+            <view class="stat-value">{{stats.totalUsers}}</view>
             <view class="stat-label">总用户数</view>
           </view>
         </view>
         <view class="quick-stat-item">
           <view class="stat-info">
-            <view class="stat-value">456</view>
+            <view class="stat-value">{{stats.totalOrders}}</view>
             <view class="stat-label">总订单数</view>
           </view>
         </view>

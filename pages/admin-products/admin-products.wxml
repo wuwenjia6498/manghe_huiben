@@ -27,6 +27,24 @@
     </view>
   </view>
 
+  <!-- 搜索框 -->
+  <view class="search-section">
+    <view class="search-container">
+      <view class="search-icon">🔍</view>
+      <input 
+        class="search-input" 
+        placeholder="搜索年龄段、成色、本数..." 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+        confirm-type="search"
+      />
+      <view wx:if="{{searchKeyword}}" class="search-clear" bindtap="onClearSearch">
+        <text>×</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 筛选器 -->
   <view class="filter-section">
     <scroll-view class="filter-scroll" scroll-x="true">
@@ -116,8 +134,13 @@
 
   <!-- 空状态 -->
   <view wx:if="{{filteredAgeGroups.length === 0}}" class="empty-state">
-    <view class="empty-text">暂无商品数据</view>
-    <view class="empty-desc">点击右上角添加按钮创建商品</view>
+    <view wx:if="{{searchKeyword}}" class="empty-text">未找到相关商品</view>
+    <view wx:else class="empty-text">暂无商品数据</view>
+    <view wx:if="{{searchKeyword}}" class="empty-desc">
+      <text>搜索"{{searchKeyword}}"没有找到匹配的商品</text>
+      <text class="clear-search-text" bindtap="onClearSearch">清除搜索</text>
+    </view>
+    <view wx:else class="empty-desc">点击右上角添加按钮创建商品</view>
   </view>
   
   <!-- 管理端底部导航 -->

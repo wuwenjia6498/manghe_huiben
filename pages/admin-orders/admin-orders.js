@@ -8,11 +8,11 @@ Page({
     
     // 统计数据
     statistics: {
-      total: 50,        // 总订单
-      pending: 16,      // 待发货
-      shipped: 24,      // 已发货
-      completed: 8,     // 已完成
-      cancelled: 2      // 已取消
+      total: 0,        // 总订单
+      pending: 0,      // 待发货
+      shipped: 0,      // 已发货
+      completed: 0,    // 已完成
+      cancelled: 0     // 已取消
     },
 
     // 当前筛选条件
@@ -27,123 +27,27 @@ Page({
     searchKeyword: '',
     searchFocus: false,
 
-    // 订单列表
-    orders: [
-      {
-        id: '2024123001',
-        orderNo: '2024123001',
-        customerName: '李小明',
-        phone: '138****5678',
-        address: '北京市朝阳区某街道某小区xxx号楼xxx单元',
-        status: 'pending',
-        statusText: '待发货',
-        createTime: '2024-12-23 14:32',
-        totalAmount: 48.0,
-        paymentMethod: '微信支付',
-        ageGroup: '3-6岁',
-        condition: '九成新',
-        bookCount: 20,
-        quantity: 1,
-        selected: false
-      },
-      {
-        id: '2024122089',
-        orderNo: '2024122089',
-        customerName: '王小红',
-        phone: 'SF1234567890',
-        address: '上海市浦东新区某路某号',
-        status: 'shipped',
-        statusText: '已发货',
-        createTime: '2024-12-22 16:45',
-        totalAmount: 30.0,
-        paymentMethod: '支付宝',
-        ageGroup: '0-3岁',
-        condition: '全新',
-        bookCount: 10,
-        quantity: 1,
-        shippingStatus: '已从北京分拣中心发出，预计明日到达',
-        trackingNumber: 'SF1234567890',
-        selected: false
-      },
-      {
-        id: '2024121055',
-        orderNo: '2024121055',
-        customerName: '张三丰',
-        phone: '138****5678',
-        address: '广州市天河区某大厦',
-        status: 'completed',
-        statusText: '已完成',
-        createTime: '2024-12-21 10:30',
-        totalAmount: 64.8,
-        paymentMethod: '微信支付',
-        ageGroup: '6岁以上',
-        condition: '七成新',
-        bookCount: 30,
-        quantity: 1,
-        selected: false
-      },
-      {
-        id: '2024122001',
-        orderNo: '2024122001',
-        customerName: '刘晓华',
-        phone: '139****8765',
-        address: '深圳市南山区科技园某路666号',
-        status: 'paid',
-        statusText: '已付款',
-        createTime: '2024-12-20 09:15',
-        totalAmount: 52.5,
-        paymentMethod: '微信支付',
-        ageGroup: '3-6岁',
-        condition: '八成新',
-        bookCount: 25,
-        quantity: 1,
-        selected: false
-      },
-      {
-        id: '2024121588',
-        orderNo: '2024121588',
-        customerName: '陈美丽',
-        phone: '137****4321',
-        address: '杭州市西湖区某街道123号',
-        status: 'cancelled',
-        statusText: '已取消',
-        createTime: '2024-12-15 20:45',
-        totalAmount: 0,
-        paymentMethod: '支付宝',
-        ageGroup: '0-3岁',
-        condition: '全新',
-        bookCount: 15,
-        quantity: 1,
-        selected: false
-      },
-      {
-        id: '2024122456',
-        orderNo: '2024122456',
-        customerName: '赵大明',
-        phone: '186****9999',
-        address: '成都市锦江区某商城B座',
-        status: 'pending',
-        statusText: '待发货',
-        createTime: '2024-12-24 11:20',
-        totalAmount: 39.9,
-        paymentMethod: '微信支付',
-        ageGroup: '6岁以上',
-        condition: '九成新',
-        bookCount: 18,
-        quantity: 1,
-        selected: false
-      }
-    ],
-
+    // 订单列表 - 移除模拟数据
+    orders: [],
+    
     // 筛选后的订单列表
-    filteredOrders: []
+    filteredOrders: [],
+    
+    // 加载状态
+    loading: true,
+    
+    // 分页信息
+    page: 1,
+    pageSize: 20,
+    hasMore: true
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    this.filterOrders();
+    // 移除初始筛选，等待数据加载完成
+    console.log('订单管理页面加载');
   },
 
   /**
@@ -160,7 +64,6 @@ Page({
    */
   onShow() {
     this.loadOrders();
-    this.updateStatistics();
   },
 
   /**
@@ -194,13 +97,126 @@ Page({
   /**
    * 加载订单数据
    */
-  loadOrders() {
-    // 这里可以调用API获取订单数据
-    // 目前使用模拟数据
+  async loadOrders() {
     this.setData({
-      orders: this.data.orders
+      loading: true
     });
-    this.filterOrders();
+
+    try {
+      console.log('开始加载管理端订单数据...');
+
+      const res = await wx.cloud.callFunction({
+        name: 'admin',
+        data: {
+          action: 'getOrders',
+          page: this.data.page,
+          pageSize: this.data.pageSize
+        }
+      });
+
+      console.log('云函数返回结果:', res);
+
+      if (res.result && res.result.success) {
+        const orderData = res.result.data || {};
+        const orders = orderData.list || [];
+        
+        console.log('获取到订单数据:', orders.length, '个订单');
+
+        // 转换订单数据格式
+        const formattedOrders = orders.map(order => this.formatOrderForAdmin(order));
+
+        this.setData({
+          orders: formattedOrders,
+          loading: false,
+          hasMore: orders.length >= this.data.pageSize
+        });
+
+        this.filterOrders();
+        this.updateStatistics();
+      } else {
+        console.error('获取订单失败:', res.result?.message);
+        wx.showToast({
+          title: res.result?.message || '订单加载失败',
+          icon: 'none'
+        });
+        
+        // 设置空数据
+        this.setData({
+          orders: [],
+          loading: false
+        });
+        this.filterOrders();
+        this.updateStatistics();
+      }
+
+    } catch (error) {
+      console.error('加载订单数据出错:', error);
+      wx.showToast({
+        title: '网络错误，请重试',
+        icon: 'none'
+      });
+      
+      // 设置空数据
+      this.setData({
+        orders: [],
+        loading: false
+      });
+      this.filterOrders();
+      this.updateStatistics();
+    }
+  },
+
+  /**
+   * 格式化订单数据用于管理端显示
+   */
+  formatOrderForAdmin(order) {
+    // 状态映射
+    const statusMap = {
+      'pending': '待发货',
+      'paid': '待发货',
+      'shipped': '已发货',
+      'completed': '已完成',
+      'cancelled': '已取消'
+    };
+
+    // 提取主要商品信息用于显示
+    const mainProduct = order.products[0];
+    
+    return {
+      id: order._id,
+      orderNo: order.orderNo,
+      customerName: order.address?.name || '未知用户',
+      phone: order.address?.phone || '未知号码',
+      address: order.address?.detail || '未知地址',
+      status: order.status,
+      statusText: statusMap[order.status] || '未知状态',
+      createTime: this.formatTime(order.createTime),
+      totalAmount: order.totalAmount,
+      paymentMethod: '微信支付',
+      ageGroup: mainProduct?.ageRange || '未知',
+      condition: mainProduct?.condition || '未知',
+      bookCount: mainProduct?.count || 0,
+      quantity: order.products.reduce((sum, p) => sum + p.quantity, 0),
+      selected: false,
+      trackingNumber: order.trackingNo || '',
+      shippingStatus: order.shippingStatus || ''
+    };
+  },
+
+  /**
+   * 格式化时间
+   */
+  formatTime(date) {
+    if (!date) return '';
+    
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hour}:${minute}`;
   },
 
   /**
@@ -561,7 +577,7 @@ Page({
   onViewDetail(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/order-detail/order-detail?id=${orderId}`
+      url: `/pages/order-detail/order-detail?orderId=${orderId}`
     });
   },
 

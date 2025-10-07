@@ -3,7 +3,7 @@
 .address-container {
   background: var(--secondary-color);
   min-height: 100vh;
-  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
+  padding-bottom: 100rpx; /* 减少底部间距 */
 }
 
 /* 自定义导航栏 */
@@ -24,14 +24,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-base) var(--spacing-lg);
+  padding: 24rpx var(--spacing-lg); /* 减少垂直间距 */
   margin-top: calc(88rpx + var(--status-bar-height, 44rpx));
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
 
 .address-back-btn {
-  width: 68rpx;
-  height: 68rpx;
+  width: 60rpx; /* 减小按钮尺寸 */
+  height: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,8 +43,8 @@
 }
 
 .back-arrow-icon {
-  width: 32rpx;
-  height: 32rpx;
+  width: 28rpx; /* 减小图标尺寸 */
+  height: 28rpx;
 }
 
 .address-title-section {
@@ -54,31 +54,31 @@
 
 .address-title {
   color: var(--text-primary);
-  font-size: var(--font-size-lg);
+  font-size: 32rpx; /* 减小标题字体 */
   font-weight: 600;
 }
 
 .address-placeholder {
-  width: 68rpx;
-  height: 68rpx;
+  width: 60rpx;
+  height: 60rpx;
 }
 
 /* 地址内容区域 */
 .address-content {
-  padding: var(--spacing-base);
+  padding: 20rpx; /* 减少外边距 */
 }
 
 /* 地址列表 */
 .address-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-base);
+  gap: 16rpx; /* 减少地址项间距 */
 }
 
 .address-item {
   background: #ffffff;
   border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
+  padding: 24rpx 20rpx; /* 减少内边距 */
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
   position: relative;
 }
@@ -93,40 +93,40 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 12rpx; /* 减少间距 */
 }
 
 .name-phone {
   display: flex;
   align-items: center;
-  gap: var(--spacing-base);
+  gap: 16rpx; /* 减少间距 */
 }
 
 .name {
-  font-size: var(--font-size-lg);
+  font-size: 30rpx; /* 减小字体 */
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .phone {
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 减小字体 */
   color: var(--text-secondary);
 }
 
 .default-tag {
   background: var(--primary-color);
   color: #ffffff;
-  font-size: var(--font-size-xs);
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
+  font-size: 20rpx; /* 减小字体 */
+  padding: 4rpx 12rpx; /* 减少内边距 */
+  border-radius: 16rpx; /* 减小圆角 */
   font-weight: 500;
 }
 
 .address-detail {
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 减小字体 */
   color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: var(--spacing-base);
+  line-height: 1.4; /* 减少行高 */
+  margin-bottom: 16rpx; /* 减少间距 */
 }
 
 /* 地址操作 */
@@ -134,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: var(--spacing-sm);
+  padding-top: 12rpx; /* 减少间距 */
   border-top: 1rpx solid var(--border-color);
 }
 
@@ -146,8 +146,8 @@
 .default-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-sm);
+  gap: 8rpx; /* 减少间距 */
+  font-size: 24rpx; /* 减小字体 */
   color: var(--text-secondary);
   transition: all 0.3s ease;
 }
@@ -157,8 +157,8 @@
 }
 
 .radio-btn {
-  width: 32rpx;
-  height: 32rpx;
+  width: 28rpx; /* 减小尺寸 */
+  height: 28rpx;
   border: 2rpx solid var(--border-color);
   border-radius: 50%;
   display: flex;
@@ -172,8 +172,8 @@
 }
 
 .radio-inner {
-  width: 16rpx;
-  height: 16rpx;
+  width: 14rpx; /* 减小尺寸 */
+  height: 14rpx;
   border-radius: 50%;
   background: transparent;
   transition: all 0.3s ease;
@@ -185,15 +185,15 @@
 
 .action-right {
   display: flex;
-  gap: var(--spacing-base);
+  gap: 12rpx; /* 减少间距 */
 }
 
 .edit-btn, .delete-btn {
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 24rpx; /* 减小字体 */
+  padding: 8rpx 16rpx; /* 减少内边距 */
   border-radius: var(--border-radius-base);
   transition: all 0.3s ease;
-  min-width: 80rpx;
+  min-width: 60rpx; /* 减小最小宽度 */
   text-align: center;
 }
 
@@ -225,25 +225,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xxl) var(--spacing-base);
+  padding: 80rpx 20rpx; /* 减少内边距 */
   text-align: center;
-  margin-top: 200rpx;
+  margin-top: 120rpx; /* 减少顶部间距 */
 }
 
 .empty-icon {
-  font-size: 120rpx;
-  margin-bottom: var(--spacing-lg);
+  font-size: 100rpx; /* 减小图标尺寸 */
+  margin-bottom: 20rpx; /* 减少间距 */
   opacity: 0.6;
 }
 
 .empty-text {
-  font-size: var(--font-size-lg);
+  font-size: 30rpx; /* 减小字体 */
   color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 12rpx; /* 减少间距 */
 }
 
 .empty-desc {
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 减小字体 */
   color: var(--text-secondary);
 }
 
@@ -254,7 +254,7 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  padding: var(--spacing-base) var(--spacing-lg);
+  padding: 16rpx var(--spacing-lg); /* 减少内边距 */
   box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 999;
 }
@@ -262,15 +262,15 @@
 .add-address-btn {
   background: var(--primary-color);
   color: #ffffff;
-  font-size: var(--font-size-base);
+  font-size: 28rpx; /* 减小字体 */
   font-weight: 500;
-  padding: var(--spacing-base) 0;
+  padding: 20rpx 0; /* 减少内边距 */
   border-radius: var(--border-radius-lg);
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
+  gap: 8rpx; /* 减少间距 */
   transition: all 0.3s ease;
 }
 
@@ -280,6 +280,57 @@
 }
 
 .add-icon {
-  font-size: var(--font-size-lg);
+  font-size: 28rpx; /* 减小字体 */
   font-weight: normal;
+}
+
+/* 选择图标（从订单页面进入时显示） */
+.select-icon {
+  color: var(--primary-color);
+  font-size: 28rpx; /* 减小字体 */
+  font-weight: bold;
+}
+
+/* 从订单页面进入时的地址项样式 */
+.address-info[bindtap] {
+  cursor: pointer;
+}
+
+.address-info[bindtap]:active {
+  background: rgba(239, 91, 166, 0.05);
+  border-radius: var(--border-radius-base);
+  margin: -6rpx; /* 减少外边距 */
+  padding: 6rpx; /* 减少内边距 */
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .name {
+    font-size: 28rpx;
+  }
+  
+  .phone {
+    font-size: 24rpx;
+  }
+  
+  .address-detail {
+    font-size: 24rpx;
+  }
+  
+  .default-btn {
+    font-size: 22rpx;
+  }
+  
+  .edit-btn, .delete-btn {
+    font-size: 22rpx;
+    padding: 6rpx 12rpx;
+  }
+  
+  .empty-text {
+    font-size: 28rpx;
+  }
+  
+  .empty-desc {
+    font-size: 24rpx;
+  }
 } 

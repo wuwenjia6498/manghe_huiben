@@ -3,7 +3,7 @@
 .address-edit-container {
   background: var(--secondary-color);
   min-height: 100vh;
-  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
+  padding-bottom: 100rpx; /* 减少底部间距 */
 }
 
 /* 自定义导航栏 */
@@ -24,14 +24,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-base) var(--spacing-lg);
+  padding: 24rpx var(--spacing-lg); /* 减少垂直间距 */
   margin-top: calc(88rpx + var(--status-bar-height, 44rpx));
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
 
 .address-edit-back-btn {
-  width: 68rpx;
-  height: 68rpx;
+  width: 60rpx; /* 减小按钮尺寸 */
+  height: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,8 +43,8 @@
 }
 
 .back-arrow-icon {
-  width: 32rpx;
-  height: 32rpx;
+  width: 28rpx; /* 减小图标尺寸 */
+  height: 28rpx;
 }
 
 .address-edit-title-section {
@@ -54,29 +54,29 @@
 
 .address-edit-title {
   color: var(--text-primary);
-  font-size: var(--font-size-lg);
+  font-size: 32rpx; /* 减小标题字体 */
   font-weight: 600;
 }
 
 .address-edit-placeholder {
-  width: 68rpx;
-  height: 68rpx;
+  width: 60rpx;
+  height: 60rpx;
 }
 
 /* 表单内容 */
 .form-content {
-  padding: var(--spacing-base);
+  padding: 20rpx; /* 减少外边距 */
 }
 
 .form-section {
   background: #ffffff;
   border-radius: var(--border-radius-lg);
-  margin-bottom: var(--spacing-base);
+  margin-bottom: 20rpx; /* 减少间距 */
   overflow: hidden;
 }
 
 .form-item {
-  padding: var(--spacing-lg) var(--spacing-base);
+  padding: 24rpx 20rpx; /* 进一步减少内边距 */
   border-bottom: 1rpx solid var(--border-color);
 }
 
@@ -84,14 +84,30 @@
   border-bottom: none;
 }
 
+/* 简化的标签样式 */
+.label {
+  font-size: 26rpx; /* 进一步减小字体 */
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 12rpx; /* 减少间距 */
+  display: block;
+}
+
+.label.required::after {
+  content: " *";
+  color: #ff4757;
+  font-size: 26rpx;
+}
+
+/* 移除原有的 form-label 样式 */
 .form-label {
   display: flex;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 16rpx; /* 减少间距 */
 }
 
 .label-text {
-  font-size: var(--font-size-base);
+  font-size: 28rpx; /* 减小字体 */
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -99,62 +115,122 @@
 .required {
   color: #ff4757;
   margin-left: 4rpx;
-  font-size: var(--font-size-base);
+  font-size: 28rpx; /* 减小字体 */
 }
 
 .form-input {
   width: 100%;
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 进一步减小字体 */
   color: var(--text-primary);
-  padding: var(--spacing-sm) 0;
+  padding: 8rpx 0; /* 进一步减少内边距 */
   border: none;
   outline: none;
 }
 
 .form-input::placeholder {
   color: var(--text-placeholder);
+  font-size: 26rpx;
 }
 
 .form-textarea {
   width: 100%;
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 进一步减小字体 */
   color: var(--text-primary);
-  padding: var(--spacing-sm) 0;
+  padding: 8rpx 0; /* 进一步减少内边距 */
   border: none;
   outline: none;
-  min-height: 80rpx;
-  line-height: 1.5;
+  min-height: 50rpx; /* 进一步减少最小高度 */
+  line-height: 1.4;
 }
 
 .form-textarea::placeholder {
   color: var(--text-placeholder);
+  font-size: 26rpx;
 }
 
 /* 地址选择器 */
 .location-item {
   cursor: pointer;
+  width: 100%;
+}
+
+.location-picker {
+  width: 100%;
 }
 
 .location-selector {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) 0;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 26rpx; /* 进一步减小字体 */
+  color: var(--text-primary);
+  text-align: left;
 }
 
 .location-text {
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
   flex: 1;
+  text-align: left;
+  color: var(--text-primary);
 }
 
-.location-text.placeholder {
+.location-placeholder {
   color: var(--text-placeholder);
 }
 
 .arrow {
-  color: var(--text-placeholder);
-  font-size: var(--font-size-base);
+  font-size: 20rpx; /* 进一步减小箭头大小 */
+  color: var(--text-secondary);
+  margin-left: 12rpx; /* 进一步减少间距 */
+  transition: transform 0.3s ease;
+}
+
+.arrow.active {
+  transform: rotate(90deg);
+}
+
+/* 选择器弹窗样式优化 */
+picker {
+  width: 100%;
+}
+
+picker .wx-picker-action {
+  background-color: var(--bg-secondary);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+picker .wx-picker-item {
+  height: 70rpx; /* 减少高度 */
+  line-height: 70rpx;
+  font-size: 26rpx; /* 减小字体 */
+  color: var(--text-primary);
+}
+
+picker .wx-picker-item.wx-picker-item_active {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .location-selector {
+    font-size: 24rpx;
+  }
+  
+  .arrow {
+    font-size: 18rpx;
+  }
+  
+  .form-input, .form-textarea, .label {
+    font-size: 24rpx;
+  }
+  
+  .default-label {
+    font-size: 24rpx;
+  }
 }
 
 /* 默认地址设置 */
@@ -162,11 +238,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg) var(--spacing-base);
+  padding: 28rpx 20rpx; /* 与表单项保持一致 */
 }
 
 .default-label {
-  font-size: var(--font-size-base);
+  font-size: 26rpx; /* 与其他标签保持一致 */
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -177,7 +253,7 @@
 }
 
 .default-switch {
-  transform: scale(0.8);
+  transform: scale(0.7); /* 进一步缩小开关 */
 }
 
 /* 底部保存按钮 */
@@ -187,7 +263,7 @@
   left: 0;
   right: 0;
   background: #ffffff;
-  padding: var(--spacing-base) var(--spacing-lg);
+  padding: 16rpx var(--spacing-lg); /* 进一步减少内边距 */
   box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 999;
 }
@@ -195,9 +271,9 @@
 .save-btn {
   background: var(--primary-color);
   color: #ffffff;
-  font-size: var(--font-size-base);
+  font-size: 28rpx; /* 适中的字体大小 */
   font-weight: 500;
-  padding: var(--spacing-base) 0;
+  padding: 20rpx 0; /* 进一步减少内边距 */
   border-radius: var(--border-radius-lg);
   text-align: center;
   transition: all 0.3s ease;
