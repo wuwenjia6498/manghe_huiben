@@ -1,4 +1,7 @@
 // pages/profile/profile.js
+// 引入微信支付SDK（从utils目录）
+const paymentSDK = require('../../utils/paymentSDK.js');
+
 Page({
 
   /**
@@ -9,7 +12,8 @@ Page({
     userInfo: {
       name: '张先生',
       status: '微信用户 · 普通会员',
-      avatar: 'https://picsum.photos/200/200?random=user'
+      avatar: 'https://picsum.photos/200/200?random=user',
+      nickName: '张先生' // SDK需要的nickName字段
     },
     settingsClickCount: 0, // 设置按钮点击次数
     showAdminEntry: false // 是否显示管理端入口
@@ -168,6 +172,7 @@ Page({
             // 模拟登录成功
             const userInfo = {
               name: res.userInfo.nickName || '微信用户',
+              nickName: res.userInfo.nickName || '微信用户', // SDK需要的nickName字段
               status: '微信用户 · 普通会员',
               avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
             };
@@ -355,6 +360,104 @@ Page({
     wx.showToast({
       title: '请点击右上角分享',
       icon: 'none'
+    });
+  },
+
+  /**
+   * 支付测试点击
+   */
+  onPaymentTestTap() {
+    console.log('=== 点击支付测试按钮 ===');
+    
+    // 检查登录状态
+    if (!this.data.isLoggedIn) {
+      this.showLoginTip();
+      return;
+    }
+
+    // 显示加载提示
+    wx.showLoading({
+      title: '正在创建订单...',
+      mask: true
+    });
+
+    // 准备支付参数
+    const paymentOptions = {
+      amount: 5,  // 支付金额：5分（0.05元）
+      description: '绘本盲盒测试购买',
+      attach: JSON.stringify({
+        productType: 'test',
+        productName: '绘本盲盒',
+        testMode: true
+      })
+    };
+
+    console.log('支付参数:', paymentOptions);
+    console.log('用户信息:', this.data.userInfo);
+
+    // 调用支付SDK
+    paymentSDK.processPayment(this.data.userInfo, paymentOptions)
+      .then((result) => {
+        console.log('支付结果:', result);
+
+        // 隐藏加载提示
+        wx.hideLoading();
+
+        // 处理支付结果
+        if (result.success) {
+          // 支付成功
+          this.handlePaymentSuccess(result);
+        } else if (result.cancelled) {
+          // 用户取消支付
+          wx.showToast({
+            title: '支付已取消',
+            icon: 'none',
+            duration: 2000
+          });
+        } else {
+          // 支付失败
+          wx.showModal({
+            title: '支付失败',
+            content: result.message || '支付过程中出现错误，请重试',
+            showCancel: false,
+            confirmText: '我知道了'
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('支付异常:', error);
+        wx.hideLoading();
+        
+        wx.showModal({
+          title: '支付异常',
+          content: error.message || '支付过程中发生异常，请稍后重试',
+          showCancel: false,
+          confirmText: '我知道了'
+        });
+      });
+  },
+
+  /**
+   * 处理支付成功后的业务逻辑
+   */
+  handlePaymentSuccess(paymentResult) {
+    console.log('✅ 支付成功处理开始');
+    console.log('支付结果详情:', paymentResult);
+    
+    const { orderNo, transactionId } = paymentResult;
+    
+    // 显示支付成功提示
+    wx.showModal({
+      title: '支付成功！',
+      content: `订单号：${orderNo}\n交易号：${transactionId}\n支付金额：0.05元\n\n订单已记录到云数据库orders表中`,
+      showCancel: false,
+      confirmText: '确定',
+      success: () => {
+        console.log('✅ 支付成功处理完成');
+        
+        // 可以在这里添加其他业务逻辑
+        // 例如：刷新用户信息、跳转到订单页面等
+      }
     });
   }
 })

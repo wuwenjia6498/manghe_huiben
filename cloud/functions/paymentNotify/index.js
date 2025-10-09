@@ -284,10 +284,18 @@ async function processPaymentSuccess(paymentData) {
       trade_state_desc, // 交易状态描述
       success_time, // 支付完成时间
       amount, // 订单金额
-      payer // 支付者信息
+      payer, // 支付者信息
+      attach // 业务数据
     } = paymentData;
     
-    console.log(`处理订单 ${out_trade_no} 的支付成功回调`);
+    console.log(`✅ 处理订单 ${out_trade_no} 的支付成功回调`);
+    console.log('支付详情:', {
+      订单号: out_trade_no,
+      微信交易号: transaction_id,
+      支付金额: `${amount.total}分 (${(amount.total / 100).toFixed(2)}元)`,
+      支付时间: success_time,
+      用户OpenID: payer.openid
+    });
     
     // 1. 查询订单是否存在
     const orderQuery = await db.collection('orders')
@@ -295,45 +303,53 @@ async function processPaymentSuccess(paymentData) {
       .get();
     
     if (orderQuery.data.length === 0) {
-      console.log('订单不存在，创建支付记录:', out_trade_no);
+      console.log('⚠️ 订单不存在，创建新的支付记录:', out_trade_no);
       
-      // 如果订单不存在，直接记录支付信息
-      await db.collection('payment_logs').add({
+      // 🎯 业务逻辑：在orders表中创建新的支付记录
+      const newOrderResult = await db.collection('orders').add({
         data: {
           out_trade_no,
+          orderNo: out_trade_no,
           transaction_id,
           trade_state,
+          trade_state_desc,
           amount: amount.total,
           payer_openid: payer.openid,
-          callback_time: new Date(),
-          raw_data: paymentData,
-          note: '订单不存在，仅记录支付信息'
+          attach: attach || '',
+          status: 'PAID',
+          success_time: new Date(success_time),
+          created_at: new Date(),
+          updated_at: new Date(),
+          note: '支付回调时创建的订单记录'
         }
       });
       
-      return { success: true, message: '支付信息已记录' };
+      console.log('✅ 新订单记录已创建，ID:', newOrderResult._id);
+      console.log('✅ 支付成功！订单号:', out_trade_no, '金额:', (amount.total / 100).toFixed(2), '元');
+      
+      return { success: true, message: '支付成功，订单已创建' };
     }
     
     const order = orderQuery.data[0];
     
-    // 2. 检查订单是否已经处理过
+    // 2. 检查订单是否已经处理过（幂等性处理）
     if (order.status === 'PAID') {
-      console.log('订单已处理过:', out_trade_no);
+      console.log('ℹ️ 订单已处理过（幂等性检查）:', out_trade_no);
       return { success: true, message: '订单已处理' };
     }
     
-    // 3. 验证金额是否一致（允许小额差异）
-    const orderAmount = order.amount || 1; // 默认1分
+    // 3. 验证金额是否一致
+    const orderAmount = order.amount || 5; // 默认5分
     const payAmount = amount.total;
     if (Math.abs(orderAmount - payAmount) > 0) {
-      console.warn('订单金额差异:', {
-        orderAmount,
-        payAmount,
-        difference: Math.abs(orderAmount - payAmount)
+      console.warn('⚠️ 订单金额差异:', {
+        预期金额: orderAmount,
+        实际支付: payAmount,
+        差额: Math.abs(orderAmount - payAmount)
       });
     }
     
-    // 4. 更新订单状态
+    // 4. 🎯 业务逻辑：更新订单状态为已支付
     const updateResult = await db.collection('orders')
       .doc(order._id)
       .update({
@@ -342,35 +358,57 @@ async function processPaymentSuccess(paymentData) {
           transaction_id,
           trade_state,
           trade_state_desc,
-          success_time,
+          success_time: new Date(success_time),
           paid_amount: amount.total,
           payer_openid: payer.openid,
           updated_at: new Date()
         }
       });
     
-    console.log('订单状态更新结果:', updateResult);
+    console.log('✅ 订单状态已更新为PAID:', updateResult);
+    console.log('✅ 支付成功！订单号:', out_trade_no, '金额:', (amount.total / 100).toFixed(2), '元');
     
-    // 5. 记录支付日志
-    await db.collection('payment_logs').add({
-      data: {
-        out_trade_no,
-        transaction_id,
-        trade_state,
-        amount: amount.total,
-        payer_openid: payer.openid,
-        callback_time: new Date(),
-        raw_data: paymentData,
-        order_id: order._id
-      }
-    });
+    // 5. 🎯 额外的业务逻辑处理（根据attach中的业务数据）
+    await handleBusinessLogic(order, paymentData);
     
-    console.log('支付成功处理完成:', out_trade_no);
+    console.log('🎉 支付成功处理完成:', out_trade_no);
     return { success: true };
     
   } catch (error) {
-    console.error('处理支付成功逻辑异常:', error);
+    console.error('❌ 处理支付成功逻辑异常:', error);
     return { success: false, message: error.message };
+  }
+}
+
+/**
+ * 🎯 处理实际业务逻辑
+ * 根据您的业务需求自定义此函数
+ */
+async function handleBusinessLogic(order, paymentData) {
+  try {
+    // 解析业务数据
+    let attachData = {};
+    try {
+      attachData = JSON.parse(order.attach || paymentData.attach || '{}');
+    } catch (e) {
+      console.log('业务数据解析失败，使用空对象');
+    }
+    
+    console.log('📦 处理业务逻辑，业务数据:', attachData);
+    
+    // 🎯 这里可以添加您的实际业务逻辑
+    // 例如：
+    // - 用户点数增加
+    // - 会员权益开通
+    // - 商品发放
+    // - 发送通知消息
+    
+    // 示例：记录业务处理日志
+    console.log('✅ 业务逻辑处理完成 - 用户:', paymentData.payer.openid);
+    
+  } catch (error) {
+    console.error('❌ 业务逻辑处理失败:', error);
+    // 业务逻辑失败不影响支付成功的记录
   }
 }
 

@@ -198,7 +198,7 @@ cp -r wxPaymentSDK/cloudfunctions/* your-project/cloudfunctions/
 
 #### ⭐ 配置1：createPayment云函数 - 获取实际支付信息
 
-**位置**：`wxPaymentSDK/cloudfunctions/createPayment/index.js` 中的 `generateOrderInfo` 函数
+**位置**：`cloud\functions\createPayment\index.js` 中的 `generateOrderInfo` 函数
 
 **问题**：SDK默认使用硬编码的测试金额（0.01元），必须修改为获取实际业务支付信息。
 
@@ -241,7 +241,7 @@ function generateOrderInfo(event, openid) {
 
 #### ⭐ 配置2：paymentNotify云函数 - 处理实际业务逻辑
 
-**位置**：`wxPaymentSDK/cloudfunctions/paymentNotify/index.js` 中的 `processPaymentSuccess` 函数
+**位置**：`cloud\functions\paymentNotify\index.js` 中的 `processPaymentSuccess` 函数
 
 **问题**：SDK默认只处理订单状态更新，必须添加实际的业务逻辑处理。
 

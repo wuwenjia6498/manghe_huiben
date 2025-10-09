@@ -143,6 +143,16 @@
           <view class="item-arrow">></view>
         </view>
         
+        <!-- 支付测试入口 -->
+        <view class="menu-item payment-test" bindtap="onPaymentTestTap">
+          <view class="item-icon payment">💳</view>
+          <view class="item-info">
+            <view class="item-title">支付测试</view>
+            <view class="item-desc">测试微信支付功能 (0.05元)</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
         <!-- 管理端入口 -->
         <view class="menu-item admin-entry" bindtap="enterAdminMode">
           <view class="item-icon admin">👨‍💼</view>

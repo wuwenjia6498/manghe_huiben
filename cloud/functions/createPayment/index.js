@@ -203,16 +203,24 @@ function generateOrderInfo(event, openid) {
   const expireTime = new Date(Date.now() + 30 * 60 * 1000);
   const timeExpire = expireTime.toISOString().replace(/\.\d{3}Z$/, '+08:00');
   
+  // 从前端传递的options中获取实际支付信息
+  const options = event.options || {};
+  const amount = parseInt(options.amount, 10) || 5; // 实际支付金额（分），默认5分（0.05元）
+  const description = options.description || '绘本盲盒测试购买'; // 实际商品描述
+  const attach = options.attach || JSON.stringify({ productType: 'test', userId: openid }); // 实际业务数据
+  
+  console.log('订单生成参数:', { amount, description, attach });
+  
   return {
     appid: PAYMENT_CONFIG.appId,
     mchid: PAYMENT_CONFIG.mchId,
-    description: '微信支付测试', // 商品描述
+    description: description, // ✅ 使用实际的商品描述
     out_trade_no: orderNo, // 商户订单号
     time_expire: timeExpire, // 支付过期时间
-    attach: 'lazyenglish', // 商户数据包
+    attach: attach, // ✅ 使用实际的业务数据
     notify_url: PAYMENT_CONFIG.notifyUrl, // 支付结果通知地址
     amount: {
-      total: 1, // 支付金额：1分（0.01元）
+      total: amount, // ✅ 使用实际的支付金额（分）
       currency: 'CNY'
     },
     payer: {
