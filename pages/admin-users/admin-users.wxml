@@ -32,12 +32,12 @@
           data-filter="all" bindtap="onFilterChange">
       <text class="status-text">全部用户</text>
     </view>
-    <view class="status-item {{currentFilter === 'active' ? 'active' : ''}}" 
-          data-filter="active" bindtap="onFilterChange">
+    <view class="status-item {{currentFilter === 'vip' ? 'active' : ''}}" 
+          data-filter="vip" bindtap="onFilterChange">
       <text class="status-text">VIP用户</text>
     </view>
-    <view class="status-item {{currentFilter === 'inactive' ? 'active' : ''}}" 
-          data-filter="inactive" bindtap="onFilterChange">
+    <view class="status-item {{currentFilter === 'normal' ? 'active' : ''}}" 
+          data-filter="normal" bindtap="onFilterChange">
       <text class="status-text">普通用户</text>
     </view>
     <view class="status-item {{currentFilter === 'blocked' ? 'active' : ''}}" 
@@ -54,8 +54,8 @@
         <view class="user-header">
           <view class="user-info">
             <view class="user-avatar">
-              <image src="{{item.avatar || '/images/default-avatar.png'}}" 
-                     class="avatar-img" />
+              <image wx:if="{{item.avatar}}" src="{{item.avatar}}" class="avatar-img" />
+              <text wx:else class="default-avatar-text">👤</text>
             </view>
             <view class="user-basic">
               <view class="user-name">{{item.nickname || '未设置昵称'}}</view>
@@ -77,8 +77,12 @@
             <text class="value">{{item.registerTime}}</text>
           </view>
           <view class="detail-row">
-            <text class="label">最后登录：</text>
-            <text class="value">{{item.lastLoginTime}}</text>
+            <text class="label">最后活跃：</text>
+            <text class="value {{item.activityClass}}">{{item.lastLoginTime}} {{item.activityIndicator}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">活跃度：</text>
+            <text class="value">{{item.activityText}}</text>
           </view>
           <view class="detail-row">
             <text class="label">订单数量：</text>
@@ -105,14 +109,6 @@
       <view class="loading-text">正在加载用户数据...</view>
     </view>
   </view>
-
-  <!-- 状态修改弹窗 -->
-  <action-sheet hidden="{{!showStatusSheet}}" bindchange="onStatusSheetClose">
-    <action-sheet-item bindtap="onChangeStatus" data-status="active">设为VIP</action-sheet-item>
-    <action-sheet-item bindtap="onChangeStatus" data-status="inactive">设为普通</action-sheet-item>
-    <action-sheet-item bindtap="onChangeStatus" data-status="blocked">封禁用户</action-sheet-item>
-    <action-sheet-cancel>取消</action-sheet-cancel>
-  </action-sheet>
 
   <!-- 管理端底部导航 -->
   <view class="admin-tabbar">

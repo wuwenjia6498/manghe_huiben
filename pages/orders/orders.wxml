@@ -23,28 +23,40 @@
       bindtap="onTabChange"
       data-tab="all"
     >
-      全部
+      <text>全部</text>
+      <text class="tab-count" wx:if="{{orderCounts.all > 0}}">({{orderCounts.all}})</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'pending' ? 'active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="pending"
+    >
+      <text>待支付</text>
+      <text class="tab-count" wx:if="{{orderCounts.pending > 0}}">({{orderCounts.pending}})</text>
     </view>
     <view 
       class="tab-item {{currentTab === 'paid' ? 'active' : ''}}"
       bindtap="onTabChange"
       data-tab="paid"
     >
-      待发货
+      <text>待发货</text>
+      <text class="tab-count" wx:if="{{orderCounts.paid > 0}}">({{orderCounts.paid}})</text>
     </view>
     <view 
       class="tab-item {{currentTab === 'shipped' ? 'active' : ''}}"
       bindtap="onTabChange"
       data-tab="shipped"
     >
-      待收货
+      <text>待收货</text>
+      <text class="tab-count" wx:if="{{orderCounts.shipped > 0}}">({{orderCounts.shipped}})</text>
     </view>
     <view 
       class="tab-item {{currentTab === 'completed' ? 'active' : ''}}"
       bindtap="onTabChange"
       data-tab="completed"
     >
-      已完成
+      <text>已完成</text>
+      <text class="tab-count" wx:if="{{orderCounts.completed > 0}}">({{orderCounts.completed}})</text>
     </view>
   </view>
 
@@ -111,7 +123,23 @@
             确认收货
           </view>
           <view 
-            wx:elif="{{item.status === 'paid' || item.status === 'pending'}}"
+            wx:elif="{{item.status === 'pending'}}"
+            class="action-btn primary" 
+            bindtap="onContinuePay" 
+            data-order="{{item}}"
+          >
+            继续支付
+          </view>
+          <view 
+            wx:elif="{{item.status === 'pending'}}"
+            class="action-btn secondary" 
+            bindtap="onCancelOrder" 
+            data-order="{{item}}"
+          >
+            取消订单
+          </view>
+          <view 
+            wx:elif="{{item.status === 'paid'}}"
             class="action-btn secondary" 
             bindtap="onCancelOrder" 
             data-order="{{item}}"

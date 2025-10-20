@@ -1,4 +1,6 @@
 // pages/product-detail/product-detail.js
+const util = require('../../utils/util.js');
+
 Page({
 
   /**
@@ -384,97 +386,30 @@ Page({
     if (!selectedAgeRange || !selectedCondition || !selectedQuantity) return null;
     
     const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
-    return productMap[selectedAgeRange]?.[selectedCondition]?.[quantityNum];
+    return productMap[selectedAgeRange] && 
+           productMap[selectedAgeRange][selectedCondition] && 
+           productMap[selectedAgeRange][selectedCondition][quantityNum];
   },
 
   /**
-   * 检查登录状态
+   * 检查登录状态（静默登录后，总是已登录）
    */
   checkLoginStatus() {
     const loginInfo = wx.getStorageSync('loginInfo');
-    return loginInfo && loginInfo.isLoggedIn;
-  },
-
-  /**
-   * 显示登录提示
-   */
-  showLoginTip() {
-    wx.showModal({
-      title: '需要登录',
-      content: '此功能需要登录后使用，是否立即登录？',
-      success: (res) => {
-        if (res.confirm) {
-          this.performLogin();
-        }
-      }
-    });
-  },
-
-  /**
-   * 执行登录操作
-   */
-  performLogin() {
-    wx.getUserProfile({
-      desc: '用于完善会员资料',
-      success: (res) => {
-        console.log('获取用户信息成功:', res);
-        
-        // 调用微信登录
-        wx.login({
-          success: (loginRes) => {
-            console.log('微信登录成功:', loginRes);
-            
-            // 模拟登录成功
-            const userInfo = {
-              name: res.userInfo.nickName || '微信用户',
-              status: '微信用户 · 普通会员',
-              avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
-            };
-            
-            // 保存登录信息
-            const loginInfo = {
-              isLoggedIn: true,
-              userInfo: userInfo,
-              loginTime: Date.now(),
-              openid: 'mock_openid_' + Date.now() // 模拟openid
-            };
-            
-            wx.setStorageSync('loginInfo', loginInfo);
-            
-            wx.showToast({
-              title: '登录成功',
-              icon: 'success'
-            });
-          },
-          fail: (error) => {
-            console.error('微信登录失败:', error);
-            wx.showToast({
-              title: '登录失败',
-              icon: 'error'
-            });
-          }
-        });
-      },
-      fail: (error) => {
-        console.error('获取用户信息失败:', error);
-        wx.showToast({
-          title: '取消授权',
-          icon: 'none'
-        });
-      }
-    });
+    return !!(loginInfo && loginInfo.openid);
   },
 
   /**
    * 加入购物车
    */
-  onAddToCart() {
-    // 检查登录状态
-    if (!this.checkLoginStatus()) {
-      this.showLoginTip();
+  async onAddToCart() {
+    // 检查用户状态
+    const userStatus = await util.checkUserStatus();
+    if (userStatus.isBlocked) {
+      util.showBlockedAlert();
       return;
     }
-    
+
     const { selectedAgeRange, selectedCondition, selectedQuantity, currentPrice } = this.data;
     
     if (!selectedAgeRange || !selectedCondition || !selectedQuantity) {
@@ -552,7 +487,14 @@ Page({
   /**
    * 立即购买
    */
-  onBuyNow() {
+  async onBuyNow() {
+    // 检查用户状态
+    const userStatus = await util.checkUserStatus();
+    if (userStatus.isBlocked) {
+      util.showBlockedAlert();
+      return;
+    }
+
     // 检查登录状态
     if (!this.checkLoginStatus()) {
       this.showLoginTip();
@@ -669,7 +611,9 @@ Page({
     
     if (selectedAgeRange && selectedCondition && selectedQuantity) {
       const quantityNum = parseInt(selectedQuantity.replace(/[^0-9]/g, ''));
-      const price = priceMap[selectedAgeRange]?.[selectedCondition]?.[quantityNum];
+      const price = priceMap[selectedAgeRange] && 
+                    priceMap[selectedAgeRange][selectedCondition] && 
+                    priceMap[selectedAgeRange][selectedCondition][quantityNum];
       
       if (price) {
         const currentPrice = Math.round(price); // 确保价格为整数

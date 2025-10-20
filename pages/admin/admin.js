@@ -8,26 +8,34 @@ Page({
     // 当前选中的标签页
     currentTab: 'home',
     
+    // 统计数据初始为空，避免显示假数据
     stats: {
-      todaySales: '1,345',
-      salesGrowth: '12.5',
-      todayOrders: 37,
-      ordersGrowth: '8.3',
-      newUsers: 12,
-      usersChange: '3.2',
-      pendingOrders: 8,
-      pendingShipment: 8,
-      lowInventory: 2
-    }
+      todaySales: '0',
+      monthSales: '0',
+      salesGrowth: '0',
+      todayOrders: 0,
+      ordersGrowth: '0',
+      newUsers: 0,
+      usersChange: '0',
+      pendingOrders: 0,
+      pendingShipment: 0,
+      lowInventory: 0,
+      totalProducts: 0,
+      totalUsers: 0,
+      totalOrders: 0
+    },
+    
+    // 数据加载状态
+    isLoading: true
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   async onLoad(options) {
-    // 获取系统信息，设置状态栏高度
-    const systemInfo = wx.getSystemInfoSync();
-    const statusBarHeight = systemInfo.statusBarHeight || 20;
+    // 获取系统信息，设置状态栏高度（使用新API）
+    const windowInfo = wx.getWindowInfo();
+    const statusBarHeight = windowInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     // 检查管理员权限
@@ -46,11 +54,6 @@ Page({
     wx.setNavigationBarTitle({
       title: '数据看板'
     });
-    
-    // 绘制图表
-    setTimeout(() => {
-      this.drawPieChart();
-    }, 500);
   },
 
   /**
@@ -155,6 +158,11 @@ Page({
    */
   async loadStats() {
     try {
+      // 设置加载状态
+      this.setData({
+        isLoading: true
+      });
+      
       // 显示加载提示
       wx.showLoading({
         title: '加载统计数据...'
@@ -192,16 +200,17 @@ Page({
           rawData: data
         };
         
+        // 处理分类数据
+        const categoryData = this.processCategoryData(stats.rawData);
+        
         this.setData({
-          stats
+          stats: Object.assign({}, stats, {
+            categoryData: categoryData
+          }),
+          isLoading: false
         });
 
         console.log('📊 管理后台统计数据加载成功:', stats);
-        
-        // 数据加载完成后重新绘制饼图
-        setTimeout(() => {
-          this.drawPieChart();
-        }, 100);
       } else {
         throw new Error(res.result.message || '获取统计数据失败');
       }
@@ -226,7 +235,8 @@ Page({
       };
       
       this.setData({
-        stats: defaultStats
+        stats: defaultStats,
+        isLoading: false
       });
 
       wx.showToast({
@@ -252,82 +262,160 @@ Page({
   },
 
   /**
-   * 绘制饼图
+   * 处理分类数据
    */
-  drawPieChart() {
+  processCategoryData(rawData) {
+    if (!rawData || !rawData.categoryStats || rawData.categoryStats.length === 0) {
+      return [];
+    }
+
+    // 定义颜色方案
+    const colorMap = {
+      '0-3岁': '#FFA6C1',  // 粉色
+      '3-6岁': '#A7D8FF',  // 蓝色
+      '6-12岁': '#FFD6A5', // 橙色
+    };
+
+    const total = rawData.categoryStats.reduce((sum, item) => sum + item.value, 0);
+
+    return rawData.categoryStats.map(item => {
+      const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
+      return {
+        name: item.name,
+        value: item.value,
+        percentage: percentage,
+        color: colorMap[item.name] || '#d1d5db'
+      };
+    });
+  },
+
+  /**
+   * 绘制饼图（已废弃，改用进度条展示）
+   */
+  drawPieChart_deprecated() {
     const ctx = wx.createCanvasContext('pieChart', this);
-    const radius = 120;
-    const centerX = 150;
-    const centerY = 150;
+    // 画布尺寸设置（注意：这里的单位是px，不是rpx）
+    const canvasWidth = 300;   // canvas实际宽度
+    const canvasHeight = 300;  // canvas实际高度
+    const centerX = canvasWidth / 2;   // 圆心X：150
+    const centerY = canvasHeight / 2;  // 圆心Y：150
+    const outerRadius = 110;  // 外圈半径
+    const innerRadius = 55;   // 内圈半径（环形效果）
     
     // 使用真实的统计数据
     const { stats } = this.data;
     const rawData = stats.rawData || {};
     
-    // 如果有真实数据，使用真实数据；否则使用默认数据
+    // 定义颜色方案 - 使用渐变色，更加美观
+    const colorMap = {
+      '0-3岁': { primary: '#FFA6C1', secondary: '#FF8CAD' },  // 粉色系
+      '3-6岁': { primary: '#A7D8FF', secondary: '#85C9FF' },  // 蓝色系
+      '6-12岁': { primary: '#FFD6A5', secondary: '#FFC078' }, // 橙色系
+    };
+    
+    // 如果有真实数据，使用真实数据
     let data = [];
-    if (rawData.categoryStats) {
+    let chartData = []; // 用于图例显示
+    
+    if (rawData.categoryStats && rawData.categoryStats.length > 0) {
       // 从真实数据构建饼图数据
-      data = Object.entries(rawData.categoryStats).map(([key, value], index) => {
-        const colors = ['#22d3ee', '#fb923c', '#ef4444', '#10b981', '#8b5cf6', '#d1d5db'];
+      const total = rawData.categoryStats.reduce((sum, item) => sum + item.value, 0);
+      
+      data = rawData.categoryStats.map((item, index) => {
+        const colors = colorMap[item.name] || { 
+          primary: ['#EF5BA6', '#22d3ee', '#fb923c'][index % 3],
+          secondary: ['#FF8FAB', '#0ea5e9', '#f97316'][index % 3]
+        };
+        
+        const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
+        
         return {
-          value: value,
-          color: colors[index % colors.length],
-          label: key
+          value: item.value,
+          color: colors.primary,
+          label: item.name,
+          percentage: percentage
         };
       });
-    } else {
-      // 使用默认示例数据
-      data = [
-        { value: 35, color: '#22d3ee', label: '3-6岁九成新' },
-        { value: 25, color: '#fb923c', label: '0-3岁全新' },
-        { value: 30, color: '#ef4444', label: '6岁以上七成新' },
-        { value: 10, color: '#d1d5db', label: '其他' }
-      ];
+      
+      chartData = data;
     }
     
     // 如果没有数据，显示空状态
     if (data.length === 0 || data.every(item => item.value === 0)) {
       // 绘制空状态圆圈
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
       ctx.setFillStyle('#f3f4f6');
       ctx.fill();
       
       // 绘制中心圆
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
+      ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
       ctx.setFillStyle('#ffffff');
       ctx.fill();
       
+      // 显示"暂无数据"文字
+      ctx.setFontSize(12);
+      ctx.setFillStyle('#999999');
+      ctx.setTextAlign('center');
+      ctx.setTextBaseline('middle');
+      ctx.fillText('暂无数据', centerX, centerY);
+      
       ctx.draw();
+      
+      // 设置空图例数据
+      this.setData({
+        'stats.chartData': []
+      });
       return;
     }
     
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let currentAngle = -Math.PI / 2; // 从12点钟位置开始
     
-    // 绘制饼图
-    data.forEach(item => {
+    // 绘制环形饼图
+    data.forEach((item, index) => {
       const sliceAngle = (item.value / total) * 2 * Math.PI;
       
+      // 绘制扇形
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+      ctx.arc(centerX, centerY, outerRadius, currentAngle, currentAngle + sliceAngle);
       ctx.closePath();
       ctx.setFillStyle(item.color);
       ctx.fill();
       
+      // 绘制白色分隔线
+      ctx.setStrokeStyle('#ffffff');
+      ctx.setLineWidth(2);
+      ctx.stroke();
+      
       currentAngle += sliceAngle;
     });
     
-    // 绘制中心圆
+    // 绘制中心白色圆 - 创建环形效果
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
+    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
     ctx.setFillStyle('#ffffff');
     ctx.fill();
     
+    // 在中心显示总数
+    ctx.setFontSize(24);
+    ctx.setFillStyle('#333333');
+    ctx.setTextAlign('center');
+    ctx.setTextBaseline('middle');
+    ctx.fillText(total.toString(), centerX, centerY - 8);
+    
+    ctx.setFontSize(11);
+    ctx.setFillStyle('#999999');
+    ctx.fillText('总数', centerX, centerY + 12);
+    
     ctx.draw();
+    
+    // 保存图表数据用于图例显示
+    this.setData({
+      'stats.chartData': chartData
+    });
   },
 
   /**
@@ -371,22 +459,40 @@ Page({
   },
 
   /**
-   * 待发货订单点击
+   * 待发货订单点击 - 跳转到订单管理页并筛选待发货
    */
   onPendingOrdersTap() {
-    wx.showToast({
-      title: '订单管理功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/admin-orders/admin-orders?filter=paid',
+      success: () => {
+        console.log('跳转到待发货订单列表');
+      },
+      fail: (err) => {
+        console.error('跳转失败:', err);
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'none'
+        });
+      }
     });
   },
 
   /**
-   * 库存预警点击
+   * 库存预警点击 - 跳转到商品管理页并筛选低库存商品
    */
   onInventoryWarningTap() {
-    wx.showToast({
-      title: '库存管理功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/admin-products/admin-products?filter=lowStock',
+      success: () => {
+        console.log('跳转到库存预警列表');
+      },
+      fail: (err) => {
+        console.error('跳转失败:', err);
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'none'
+        });
+      }
     });
   },
 

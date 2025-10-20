@@ -6,44 +6,38 @@
     <view class="custom-navbar">
       <view class="navbar-left"></view>
       <view class="navbar-center"></view>
-      <view class="navbar-right" bindtap="onSettingsTap">
+      <view class="navbar-right" catchtap="onSettingsTap">
         <view class="settings-icon">⚙</view>
       </view>
     </view>
 
-    <!-- 已登录状态 -->
-    <view wx:if="{{isLoggedIn}}" class="user-info">
+    <!-- 用户信息区域（统一样式） -->
+    <view class="user-info">
       <view class="user-content">
-        <view class="user-avatar">
-          <image src="{{userInfo.avatar}}" class="avatar-image" />
-          <view class="avatar-badge"></view>
+        <!-- 头像区域 - 可点击编辑 -->
+        <view class="user-avatar-wrapper" bindtap="onEditAvatar">
+          <button 
+            class="avatar-edit-btn" 
+            open-type="chooseAvatar" 
+            bindchooseavatar="onChooseAvatar">
+            <image 
+              wx:if="{{userInfo && userInfo.avatar}}" 
+              src="{{userInfo.avatar}}" 
+              class="avatar-image" />
+            <view wx:else class="default-avatar">👤</view>
+            <view class="avatar-edit-mask">
+              <text class="edit-icon">📷</text>
+            </view>
+          </button>
+          <view class="avatar-tip">{{userInfo && userInfo.avatar ? '点击更换头像' : '点击设置头像'}}</view>
         </view>
+        
+        <!-- 昵称区域 - 可点击编辑 -->
         <view class="user-details">
-          <view class="user-name">{{userInfo.name}}</view>
-          <view class="user-status">{{userInfo.status}}</view>
-        </view>
-      </view>
-      <view class="user-actions">
-        <view class="logout-btn" bindtap="onLogoutTap">
-          <text class="logout-text">退出登录</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 未登录状态 -->
-    <view wx:else class="login-info">
-      <view class="login-content">
-        <view class="login-avatar">
-          <view class="default-avatar">👤</view>
-        </view>
-        <view class="login-details">
-          <view class="login-title">欢迎来到绘本童书</view>
-          <view class="login-subtitle">登录后享受更多服务</view>
-        </view>
-      </view>
-      <view class="login-actions">
-        <view class="primary-login-btn" bindtap="onLoginTap">
-          <text class="login-btn-text">登录/注册</text>
+          <view class="user-name-edit" bindtap="onEditNickname">
+            <text class="name-text">{{displayName}}</text>
+            <text class="edit-hint">✏️</text>
+          </view>
         </view>
       </view>
     </view>
@@ -62,19 +56,37 @@
       
       <view class="menu-list">
         <view class="menu-item" bindtap="onOrdersTap" data-type="pending">
-          <view class="item-icon pending">📦</view>
+          <view class="item-icon unpaid">💳</view>
           <view class="item-info">
-            <view class="item-title">待发货</view>
-            <view class="item-desc">{{isLoggedIn ? '查看待发货订单' : '登录后查看订单'}}</view>
+            <view class="item-title">
+              <text>待支付</text>
+              <text class="order-count" wx:if="{{orderCounts.pending > 0}}">({{orderCounts.pending}})</text>
+            </view>
+            <view class="item-desc">查看待支付订单</view>
           </view>
           <view class="item-arrow">></view>
         </view>
         
-        <view class="menu-item" bindtap="onOrdersTap" data-type="shipping">
+        <view class="menu-item" bindtap="onOrdersTap" data-type="paid">
+          <view class="item-icon pending">📦</view>
+          <view class="item-info">
+            <view class="item-title">
+              <text>待发货</text>
+              <text class="order-count" wx:if="{{orderCounts.paid > 0}}">({{orderCounts.paid}})</text>
+            </view>
+            <view class="item-desc">查看待发货订单</view>
+          </view>
+          <view class="item-arrow">></view>
+        </view>
+        
+        <view class="menu-item" bindtap="onOrdersTap" data-type="shipped">
           <view class="item-icon shipping">🚚</view>
           <view class="item-info">
-            <view class="item-title">待收货</view>
-            <view class="item-desc">{{isLoggedIn ? '查看运输中订单' : '登录后查看订单'}}</view>
+            <view class="item-title">
+              <text>待收货</text>
+              <text class="order-count" wx:if="{{orderCounts.shipped > 0}}">({{orderCounts.shipped}})</text>
+            </view>
+            <view class="item-desc">查看运输中订单</view>
           </view>
           <view class="item-arrow">></view>
         </view>
@@ -82,8 +94,11 @@
         <view class="menu-item" bindtap="onOrdersTap" data-type="all">
           <view class="item-icon all">📋</view>
           <view class="item-info">
-            <view class="item-title">全部订单</view>
-            <view class="item-desc">{{isLoggedIn ? '查看所有订单' : '登录后查看订单'}}</view>
+            <view class="item-title">
+              <text>全部订单</text>
+              <text class="order-count" wx:if="{{orderCounts.all > 0}}">({{orderCounts.all}})</text>
+            </view>
+            <view class="item-desc">查看所有订单</view>
           </view>
           <view class="item-arrow">></view>
         </view>
@@ -102,7 +117,7 @@
           <view class="item-icon address">📍</view>
           <view class="item-info">
             <view class="item-title">收货地址</view>
-            <view class="item-desc">{{isLoggedIn ? '管理收货地址信息' : '登录后管理地址'}}</view>
+            <view class="item-desc">管理收货地址信息</view>
           </view>
           <view class="item-arrow">></view>
         </view>
@@ -138,45 +153,73 @@
           <view class="item-icon about">ℹ</view>
           <view class="item-info">
             <view class="item-title">关于我们</view>
-            <view class="item-desc">了解本童书</view>
-          </view>
-          <view class="item-arrow">></view>
-        </view>
-        
-        <!-- 支付测试入口 -->
-        <view class="menu-item payment-test" bindtap="onPaymentTestTap">
-          <view class="item-icon payment">💳</view>
-          <view class="item-info">
-            <view class="item-title">支付测试</view>
-            <view class="item-desc">测试微信支付功能 (0.05元)</view>
-          </view>
-          <view class="item-arrow">></view>
-        </view>
-        
-        <!-- 管理端入口 -->
-        <view class="menu-item admin-entry" bindtap="enterAdminMode">
-          <view class="item-icon admin">👨‍💼</view>
-          <view class="item-info">
-            <view class="item-title">管理后台</view>
-            <view class="item-desc">进入管理端系统</view>
+            <view class="item-desc">了解盲盒</view>
           </view>
           <view class="item-arrow">></view>
         </view>
       </view>
-    </view>
-
-    <!-- 推荐给朋友 -->
-    <view class="recommend-section">
-      <view class="recommend-btn" bindtap="onRecommendTap">
-        <view class="recommend-icon">💗</view>
-        <view class="recommend-text">推荐给朋友</view>
+      
+      <!-- 管理端入口 -->
+      <view class="admin-entry" bindtap="enterAdminMode">
+        <view class="item-icon admin">👨‍💼</view>
+        <view class="item-info">
+          <view class="item-title">管理后台</view>
+          <view class="item-desc">进入管理端系统</view>
+        </view>
+        <view class="item-arrow">></view>
       </view>
     </view>
 
     <!-- 版权信息 -->
     <view class="footer">
-      <view class="app-version">绘本童书小程序 v1.0.0</view>
-      <view class="copyright">© 2025 绘本童. All rights reserved.</view>
+      <view class="app-version">绘本盲盒小程序 v1.0.0</view>
+      <view class="copyright">© 2025. All rights reserved.</view>
+    </view>
+  </view>
+
+  <!-- 关于我们自定义弹窗 -->
+  <view class="about-modal" wx:if="{{showAboutModal}}" bindtap="onCloseAboutModal">
+    <view class="about-modal-content" catchtap="onModalContentTap">
+      <!-- 顶部图标 -->
+      <view class="about-header">
+        <!-- 右上角关闭按钮 -->
+        <view class="about-close-icon" bindtap="onCloseAboutModal">✕</view>
+        <view class="about-icon">📚</view>
+        <view class="about-title">关于我们</view>
+      </view>
+      
+      <!-- 内容区域 -->
+      <view class="about-body">
+        <view class="about-paragraph">
+          <text class="about-text">绘本盲盒在帮助本馆优化库存管理的同时，也为家长提供了高性价比的优质绘本选择。</text>
+        </view>
+        
+        <view class="about-paragraph">
+          <text class="about-text">我们根据孩子的年龄段（0-3岁 / 3-6岁 / 6岁以上）进行精准推荐，并支持多种品相选择（从全新到五成新）。</text>
+        </view>
+        
+        <view class="about-paragraph">
+          <text class="about-text">通过盲盒这一形式，不仅让购书过程充满趣味，也让孩子的阅读成长之路时刻满载惊喜与期待。</text>
+        </view>
+        
+        <!-- 特色标签 -->
+        <view class="about-features">
+          <view class="feature-tag">📖 适龄推荐</view>
+          <view class="feature-tag">✨ 品质保证</view>
+          <view class="feature-tag">🎁 惊喜盲盒</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 客服二维码弹窗 -->
+  <view class="qrcode-modal" wx:if="{{showQrcodeModal}}" catchtap="onCloseQrcode">
+    <view class="qrcode-content" catchtap="{{''}}">
+      <view class="qrcode-title">添加客服微信</view>
+      <image class="qrcode-image" src="/images/wechat-qrcode.png" mode="aspectFit"></image>
+      <view class="qrcode-tips">扫描二维码添加客服微信</view>
+      <view class="qrcode-info">工作时间：09:00 - 21:00</view>
+      <view class="qrcode-close" bindtap="onCloseQrcode">关闭</view>
     </view>
   </view>
 </view>

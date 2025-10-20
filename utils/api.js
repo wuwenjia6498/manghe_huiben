@@ -20,7 +20,7 @@ class API {
         console.error(`云函数 ${functionName} 调用失败:`, result.result);
         return {
           success: false,
-          message: result.result?.message || '调用失败',
+          message: (result.result && result.result.message) || '调用失败',
           error: result.result
         };
       }

@@ -19,7 +19,7 @@
   <!-- 地址列表 -->
   <view class="address-content">
     <view wx:if="{{addressList.length > 0}}" class="address-list">
-      <view class="address-item" wx:for="{{addressList}}" wx:key="id">
+      <view class="address-item" wx:for="{{addressList}}" wx:key="_id">
         <!-- 地址信息 -->
         <view wx:if="{{fromOrder}}" class="address-info" bindtap="onSelectAddress" data-address="{{item}}">
           <view class="address-top">
@@ -51,7 +51,7 @@
               <view 
                 class="default-btn {{item.isDefault ? 'active' : ''}}" 
                 bindtap="onSetDefault" 
-                data-id="{{item.id}}"
+                data-id="{{item._id}}"
               >
                 <view class="radio-btn">
                   <view class="radio-inner {{item.isDefault ? 'checked' : ''}}"></view>
@@ -64,7 +64,7 @@
               <view class="edit-btn" bindtap="onEditAddress" data-address="{{item}}">
                 编辑
               </view>
-              <view class="delete-btn" bindtap="onDeleteAddress" data-id="{{item.id}}">
+              <view class="delete-btn" bindtap="onDeleteAddress" data-id="{{item._id}}">
                 删除
               </view>
             </view>

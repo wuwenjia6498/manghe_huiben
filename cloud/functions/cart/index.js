@@ -109,17 +109,17 @@ async function getCartItems(event, wxContext) {
     const cartItems = [];
     let totalAmount = 0;
     
-    for (const item of result.data) {
+    for (let i = 0; i < result.data.length; i++) {
+      const item = result.data[i];
       const productResult = await db.collection('products').doc(item.productId).get();
       
       if (productResult.data && productResult.data.status === 'active') {
         const product = productResult.data;
-        const cartItem = {
-          ...item,
+        const cartItem = Object.assign({}, item, {
           productName: product.name,
           productPrice: product.price,
           totalPrice: item.quantity * product.price
-        };
+        });
         
         cartItems.push(cartItem);
         
@@ -145,8 +145,7 @@ async function getCartItems(event, wxContext) {
     return {
       success: true,
       data: {
-        cartItems: cartItems.map(item => ({
-          ...item,
+        cartItems: cartItems.map(item => Object.assign({}, item, {
           productName: item.productName,
           productPrice: item.productPrice,
           totalPrice: item.totalPrice

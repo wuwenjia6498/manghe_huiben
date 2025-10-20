@@ -1,4 +1,6 @@
 // pages/cart/cart.js
+const util = require('../../utils/util.js');
+
 Page({
 
   /**
@@ -16,9 +18,9 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // 获取系统信息，设置状态栏高度
-    const systemInfo = wx.getSystemInfoSync();
-    const statusBarHeight = systemInfo.statusBarHeight || 20;
+    // 获取系统信息，设置状态栏高度（使用新API）
+    const windowInfo = wx.getWindowInfo();
+    const statusBarHeight = windowInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     this.loadCartData();
@@ -80,106 +82,19 @@ Page({
   },
 
   /**
-   * 检查登录状态
+   * 检查登录状态（静默登录后，总是已登录）
    */
   checkLoginStatus() {
     const loginInfo = wx.getStorageSync('loginInfo');
-    const isLoggedIn = loginInfo && loginInfo.isLoggedIn;
+    const isLoggedIn = !!(loginInfo && loginInfo.openid);
     
     this.setData({
       isLoggedIn: isLoggedIn
     });
     
-    if (!isLoggedIn) {
-      // 未登录，清空购物车数据
-      this.setData({
-        cartList: []
-      });
-      this.calculateTotal();
-      return false;
-    }
-    
-    // 已登录，加载购物车数据
+    // 静默登录后，直接加载购物车数据
     this.loadCartData();
     return true;
-  },
-
-  /**
-   * 显示登录提示
-   */
-  showLoginTip() {
-    wx.showModal({
-      title: '需要登录',
-      content: '购物车功能需要登录后使用，是否立即登录？',
-      success: (res) => {
-        if (res.confirm) {
-          this.performLogin();
-        }
-      }
-    });
-  },
-
-  /**
-   * 执行登录操作
-   */
-  performLogin() {
-    wx.getUserProfile({
-      desc: '用于完善会员资料',
-      success: (res) => {
-        console.log('获取用户信息成功:', res);
-        
-        // 调用微信登录
-        wx.login({
-          success: (loginRes) => {
-            console.log('微信登录成功:', loginRes);
-            
-            // 模拟登录成功
-            const userInfo = {
-              name: res.userInfo.nickName || '微信用户',
-              status: '微信用户 · 普通会员',
-              avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
-            };
-            
-            // 保存登录信息
-            const loginInfo = {
-              isLoggedIn: true,
-              userInfo: userInfo,
-              loginTime: Date.now(),
-              openid: 'mock_openid_' + Date.now() // 模拟openid
-            };
-            
-            wx.setStorageSync('loginInfo', loginInfo);
-            
-            // 更新当前页面状态
-            this.setData({
-              isLoggedIn: true
-            });
-            
-            // 重新加载购物车数据
-            this.loadCartData();
-            
-            wx.showToast({
-              title: '登录成功',
-              icon: 'success'
-            });
-          },
-          fail: (error) => {
-            console.error('微信登录失败:', error);
-            wx.showToast({
-              title: '登录失败',
-              icon: 'error'
-            });
-          }
-        });
-      },
-      fail: (error) => {
-        console.error('获取用户信息失败:', error);
-        wx.showToast({
-          title: '取消授权',
-          icon: 'none'
-        });
-      }
-    });
   },
 
   /**
@@ -486,7 +401,14 @@ Page({
   /**
    * 去结算
    */
-  onCheckout() {
+  async onCheckout() {
+    // 检查用户状态
+    const userStatus = await util.checkUserStatus();
+    if (userStatus.isBlocked) {
+      util.showBlockedAlert();
+      return;
+    }
+
     if (!this.checkLoginStatus()) {
       this.showLoginTip();
       return;

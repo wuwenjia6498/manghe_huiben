@@ -1,6 +1,4 @@
 // pages/profile/profile.js
-// 引入微信支付SDK（从utils目录）
-const paymentSDK = require('../../utils/paymentSDK.js');
 
 Page({
 
@@ -8,24 +6,31 @@ Page({
    * 页面的初始数据
    */
   data: {
-    isLoggedIn: false, // 登录状态
-    userInfo: {
-      name: '张先生',
-      status: '微信用户 · 普通会员',
-      avatar: 'https://picsum.photos/200/200?random=user',
-      nickName: '张先生' // SDK需要的nickName字段
-    },
+    isLoggedIn: false, // 是否已静默登录（有openid）
+    hasUserInfo: false, // 是否已完善用户信息
+    userInfo: null, // 用户信息，未登录或未设置时为 null
+    displayName: '用户昵称', // 显示的昵称（用于界面展示）
+    tempAvatar: '', // 临时头像
+    tempNickname: '', // 临时昵称
     settingsClickCount: 0, // 设置按钮点击次数
-    showAdminEntry: false // 是否显示管理端入口
+    showAdminEntry: false, // 是否显示管理端入口
+    showAboutModal: false, // 是否显示关于我们弹窗
+    orderCounts: {
+      all: 0,
+      pending: 0,  // 待支付
+      paid: 0,     // 待发货
+      shipped: 0   // 待收货
+    },
+    showQrcodeModal: false  // 控制二维码弹窗显示
   },
-
+  
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // 获取系统信息，设置状态栏高度
-    const systemInfo = wx.getSystemInfoSync();
-    const statusBarHeight = systemInfo.statusBarHeight || 20;
+    // 获取系统信息，设置状态栏高度（使用新API）
+    const windowInfo = wx.getWindowInfo();
+    const statusBarHeight = windowInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     this.checkLoginStatus();
@@ -43,6 +48,7 @@ Page({
    */
   onShow() {
     this.checkLoginStatus();
+    this.loadOrderCounts();
   },
 
   /**
@@ -86,43 +92,62 @@ Page({
 
   /**
    * 检查登录状态
+   * 优先使用本地缓存，仅在需要时刷新
    */
-  checkLoginStatus() {
+  async checkLoginStatus() {
+    console.log('🔄 检查登录状态...');
     const loginInfo = wx.getStorageSync('loginInfo');
+    console.log('本地缓存的 loginInfo:', loginInfo);
     
-    if (loginInfo && loginInfo.isLoggedIn) {
+    if (loginInfo && loginInfo.openid) {
+      // 优先显示本地缓存的用户信息
+      const userInfo = loginInfo.userInfo || null;
+      console.log('用户信息:', userInfo);
+      
+      // 修复：只要有 userInfo 对象就认为已登录，不要求必须有头像和昵称
+      const hasUserInfo = !!userInfo;
+      const displayName = this.getDisplayName(userInfo);
+      
+      console.log('hasUserInfo:', hasUserInfo, 'displayName:', displayName);
+      
       this.setData({
         isLoggedIn: true,
-        userInfo: loginInfo.userInfo
+        hasUserInfo: hasUserInfo,
+        userInfo: userInfo,
+        displayName: displayName
       });
+      
+      console.log('✅ 登录状态已更新');
     } else {
+      // 没有登录信息
+      console.log('❌ 无登录信息');
       this.setData({
-        isLoggedIn: false
+        isLoggedIn: false,
+        hasUserInfo: false,
+        userInfo: null,
+        displayName: '用户昵称'
       });
     }
   },
 
   /**
-   * 加载用户信息
+   * 获取显示的用户昵称
+   * 如果用户设置了昵称就显示昵称，否则显示默认值"用户昵称"
    */
-  loadUserInfo() {
-    // 模拟从服务器获取用户信息
-    // 实际项目中可以调用wx.getUserProfile()获取用户信息
-    const userInfo = {
-      name: '张先生',
-      status: '微信用户 · 普通会员',
-      avatar: 'https://picsum.photos/200/200?random=user'
-    };
-    
-    this.setData({
-      userInfo
-    });
+  getDisplayName(userInfo) {
+    if (!userInfo) return '用户昵称';
+    return userInfo.nickName || userInfo.name || '用户昵称';
   },
 
   /**
    * 设置按钮点击
    */
-  onSettingsTap() {
+  onSettingsTap(e) {
+    // 阻止事件冒泡
+    if (e) {
+      e.stopPropagation && e.stopPropagation();
+    }
+    
     wx.showToast({
       title: '设置功能开发中',
       icon: 'none'
@@ -156,115 +181,182 @@ Page({
   },
 
   /**
-   * 微信登录
+   * 点击编辑头像（触发button的选择）
    */
-  onLoginTap() {
-    wx.getUserProfile({
-      desc: '用于完善会员资料',
-      success: (res) => {
-        console.log('获取用户信息成功:', res);
-        
-        // 调用微信登录
-        wx.login({
-          success: (loginRes) => {
-            console.log('微信登录成功:', loginRes);
-            
-            // 模拟登录成功
-            const userInfo = {
-              name: res.userInfo.nickName || '微信用户',
-              nickName: res.userInfo.nickName || '微信用户', // SDK需要的nickName字段
-              status: '微信用户 · 普通会员',
-              avatar: res.userInfo.avatarUrl || 'https://picsum.photos/200/200?random=user'
-            };
-            
-            // 保存登录信息
-            const loginInfo = {
-              isLoggedIn: true,
-              userInfo: userInfo,
-              loginTime: Date.now(),
-              openid: 'mock_openid_' + Date.now() // 模拟openid
-            };
-            
-            wx.setStorageSync('loginInfo', loginInfo);
-            
-            // 更新页面状态
-            this.setData({
-              isLoggedIn: true,
-              userInfo: userInfo
-            });
-            
-            wx.showToast({
-              title: '登录成功',
-              icon: 'success'
-            });
-          },
-          fail: (error) => {
-            console.error('微信登录失败:', error);
-            wx.showToast({
-              title: '登录失败',
-              icon: 'error'
-            });
-          }
-        });
-      },
-      fail: (error) => {
-        console.error('获取用户信息失败:', error);
-        wx.showToast({
-          title: '取消授权',
-          icon: 'none'
-        });
-      }
-    });
+  onEditAvatar() {
+    // 由button的open-type="chooseAvatar"自动处理
+    console.log('点击编辑头像');
   },
 
   /**
-   * 退出登录
+   * 选择头像后的回调
    */
-  onLogoutTap() {
+  async onChooseAvatar(e) {
+    const { avatarUrl } = e.detail;
+    console.log('选择的头像临时路径:', avatarUrl);
+    
+    if (!avatarUrl) return;
+    
+    wx.showLoading({ title: '上传中...' });
+    
+    try {
+      const loginInfo = wx.getStorageSync('loginInfo');
+      if (!loginInfo || !loginInfo.openid) {
+        wx.hideLoading();
+        wx.showToast({ title: '请先登录', icon: 'none' });
+        return;
+      }
+
+      // 第一步：上传到云存储
+      console.log('开始上传头像到云存储...');
+      const timestamp = Date.now();
+      const cloudPath = `avatars/${loginInfo.openid}_${timestamp}.jpg`;
+      
+      const uploadResult = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl
+      });
+      
+      console.log('云存储上传成功:', uploadResult);
+      const cloudAvatarUrl = uploadResult.fileID;
+      console.log('云存储URL:', cloudAvatarUrl);
+
+      // 第二步：保存云存储URL到数据库
+      const cloudRes = await wx.cloud.callFunction({
+        name: 'auth',
+        data: {
+          action: 'updateUserInfo',
+          userInfo: {
+            avatar: cloudAvatarUrl  // 保存云存储URL
+          }
+        }
+      });
+
+      wx.hideLoading();
+
+      if (cloudRes.result && cloudRes.result.success) {
+        const { user } = cloudRes.result.data;
+        
+        // 更新本地数据
+        const updatedUserInfo = {
+          nickName: user.nickname,
+          avatar: user.avatar
+        };
+        
+        const updatedLoginInfo = Object.assign({}, loginInfo, {
+          userInfo: updatedUserInfo
+        });
+
+        wx.setStorageSync('loginInfo', updatedLoginInfo);
+
+        // 更新页面显示
+        this.setData({
+          hasUserInfo: true,
+          userInfo: updatedUserInfo,
+          displayName: this.getDisplayName(updatedUserInfo)
+        });
+
+        wx.showToast({
+          title: '头像已更新',
+          icon: 'success'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('更新头像失败:', error);
+      wx.showToast({
+        title: '更新失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 点击编辑昵称
+   */
+  onEditNickname() {
+    const currentName = this.data.displayName;
+    
     wx.showModal({
-      title: '确认退出',
-      content: '确定要退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          // 清除登录信息
-          wx.removeStorageSync('loginInfo');
+      title: '设置昵称',
+      editable: true,
+      placeholderText: '请输入昵称',
+      content: currentName === '用户昵称' ? '' : currentName,
+      confirmText: '保存',
+      success: async (res) => {
+        if (res.confirm && res.content) {
+          const newNickname = res.content.trim();
           
-          // 清除购物车数据
-          wx.removeStorageSync('cart');
-          wx.removeStorageSync('cartCount');
-          
-          // 清除订单数据
-          wx.removeStorageSync('orderData');
-          
-          // 清除tabBar徽章
-          wx.removeTabBarBadge({
-            index: 2
-          });
-          
-          // 更新页面状态
-          this.setData({
-            isLoggedIn: false
-          });
-          
-          wx.showToast({
-            title: '已退出登录',
-            icon: 'success'
-          });
+          if (!newNickname) {
+            wx.showToast({ title: '昵称不能为空', icon: 'none' });
+            return;
+          }
+
+          wx.showLoading({ title: '保存中...' });
+
+          try {
+            const loginInfo = wx.getStorageSync('loginInfo');
+            
+            const cloudRes = await wx.cloud.callFunction({
+              name: 'auth',
+              data: {
+                action: 'updateUserInfo',
+                userInfo: { nickname: newNickname }
+              }
+            });
+
+            wx.hideLoading();
+
+            if (cloudRes.result && cloudRes.result.success) {
+              const { user } = cloudRes.result.data;
+              
+              // 更新本地数据
+              const updatedUserInfo = {
+                nickName: user.nickname,
+                avatar: user.avatar
+              };
+              
+              const updatedLoginInfo = Object.assign({}, loginInfo, {
+                userInfo: updatedUserInfo
+              });
+
+              wx.setStorageSync('loginInfo', updatedLoginInfo);
+
+              // 更新页面显示
+              this.setData({
+                hasUserInfo: true,
+                userInfo: updatedUserInfo,
+                displayName: this.getDisplayName(updatedUserInfo)
+              });
+
+              wx.showToast({
+                title: '昵称已更新',
+                icon: 'success'
+              });
+            } else {
+              wx.showToast({
+                title: '更新失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('更新昵称失败:', error);
+            wx.showToast({
+              title: '更新失败',
+              icon: 'none'
+            });
+          }
         }
       }
     });
   },
 
+
   /**
    * 订单相关点击
    */
   onOrdersTap(e) {
-    // 检查登录状态
-    if (!this.data.isLoggedIn) {
-      this.showLoginTip();
-      return;
-    }
-    
     const type = e.currentTarget.dataset.type || 'all';
     
     wx.navigateTo({
@@ -276,12 +368,6 @@ Page({
    * 收货地址点击
    */
   onAddressTap() {
-    // 检查登录状态
-    if (!this.data.isLoggedIn) {
-      this.showLoginTip();
-      return;
-    }
-    
     wx.navigateTo({
       url: '/pages/address/address'
     });
@@ -293,26 +379,34 @@ Page({
   showLoginTip() {
     wx.showModal({
       title: '需要登录',
-      content: '此功能需要登录后使用，是否立即登录？',
-      confirmText: '立即登录',
+      content: '此功能需要登录后使用，请前往个人中心登录',
+      confirmText: '前往登录',
       cancelText: '稍后再说',
       success: (res) => {
         if (res.confirm) {
-          this.onLoginTap();
+          wx.switchTab({
+            url: '/pages/profile/profile'
+          });
         }
       }
     });
   },
 
   /**
-   * 联系客服点击
+   * 联系客服点击 - 显示二维码弹窗
    */
   onCustomerServiceTap() {
-    wx.showModal({
-      title: '联系客服',
-      content: '客服电话：400-123-4567\n工作时间：09:00-18:00',
-      showCancel: false,
-      confirmText: '我知道了'
+    this.setData({
+      showQrcodeModal: true
+    });
+  },
+
+  /**
+   * 关闭二维码弹窗
+   */
+  onCloseQrcode() {
+    this.setData({
+      showQrcodeModal: false
     });
   },
 
@@ -320,9 +414,8 @@ Page({
    * 用户协议点击
    */
   onAgreementTap() {
-    wx.showToast({
-      title: '用户协议页面开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/agreement/agreement'
     });
   },
 
@@ -330,9 +423,8 @@ Page({
    * 隐私政策点击
    */
   onPrivacyTap() {
-    wx.showToast({
-      title: '隐私政策页面开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/privacy/privacy'
     });
   },
 
@@ -340,124 +432,52 @@ Page({
    * 关于我们点击
    */
   onAboutTap() {
-    wx.showModal({
-      title: '关于我们',
-      content: '绘本童书小程序\n专注于为孩子提供优质绘本\n版本：v1.0.0',
-      showCancel: false,
-      confirmText: '我知道了'
+    this.setData({
+      showAboutModal: true
     });
   },
 
   /**
-   * 推荐给朋友点击
+   * 关闭关于我们弹窗
    */
-  onRecommendTap() {
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    });
-    
-    wx.showToast({
-      title: '请点击右上角分享',
-      icon: 'none'
+  onCloseAboutModal() {
+    this.setData({
+      showAboutModal: false
     });
   },
 
   /**
-   * 支付测试点击
+   * 阻止弹窗内容点击事件冒泡
    */
-  onPaymentTestTap() {
-    console.log('=== 点击支付测试按钮 ===');
-    
-    // 检查登录状态
+  onModalContentTap() {
+    // 阻止事件冒泡，避免点击内容时关闭弹窗
+  },
+
+  /**
+   * 加载订单数量统计
+   */
+  async loadOrderCounts() {
     if (!this.data.isLoggedIn) {
-      this.showLoginTip();
       return;
     }
 
-    // 显示加载提示
-    wx.showLoading({
-      title: '正在创建订单...',
-      mask: true
-    });
-
-    // 准备支付参数
-    const paymentOptions = {
-      amount: 5,  // 支付金额：5分（0.05元）
-      description: '绘本盲盒测试购买',
-      attach: JSON.stringify({
-        productType: 'test',
-        productName: '绘本盲盒',
-        testMode: true
-      })
-    };
-
-    console.log('支付参数:', paymentOptions);
-    console.log('用户信息:', this.data.userInfo);
-
-    // 调用支付SDK
-    paymentSDK.processPayment(this.data.userInfo, paymentOptions)
-      .then((result) => {
-        console.log('支付结果:', result);
-
-        // 隐藏加载提示
-        wx.hideLoading();
-
-        // 处理支付结果
-        if (result.success) {
-          // 支付成功
-          this.handlePaymentSuccess(result);
-        } else if (result.cancelled) {
-          // 用户取消支付
-          wx.showToast({
-            title: '支付已取消',
-            icon: 'none',
-            duration: 2000
-          });
-        } else {
-          // 支付失败
-          wx.showModal({
-            title: '支付失败',
-            content: result.message || '支付过程中出现错误，请重试',
-            showCancel: false,
-            confirmText: '我知道了'
-          });
+    try {
+      // 调用云函数获取订单统计
+      const res = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'getOrderStats'
         }
-      })
-      .catch((error) => {
-        console.error('支付异常:', error);
-        wx.hideLoading();
-        
-        wx.showModal({
-          title: '支付异常',
-          content: error.message || '支付过程中发生异常，请稍后重试',
-          showCancel: false,
-          confirmText: '我知道了'
-        });
       });
-  },
 
-  /**
-   * 处理支付成功后的业务逻辑
-   */
-  handlePaymentSuccess(paymentResult) {
-    console.log('✅ 支付成功处理开始');
-    console.log('支付结果详情:', paymentResult);
-    
-    const { orderNo, transactionId } = paymentResult;
-    
-    // 显示支付成功提示
-    wx.showModal({
-      title: '支付成功！',
-      content: `订单号：${orderNo}\n交易号：${transactionId}\n支付金额：0.05元\n\n订单已记录到云数据库orders表中`,
-      showCancel: false,
-      confirmText: '确定',
-      success: () => {
-        console.log('✅ 支付成功处理完成');
-        
-        // 可以在这里添加其他业务逻辑
-        // 例如：刷新用户信息、跳转到订单页面等
+      if (res.result && res.result.success) {
+        this.setData({ 
+          orderCounts: res.result.data 
+        });
       }
-    });
+    } catch (error) {
+      console.error('加载订单统计失败:', error);
+    }
   }
+
 })

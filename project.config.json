@@ -1,15 +1,14 @@
 {
-  "miniprogramRoot": "./",
+  "miniprogramRoot": "",
   "cloudfunctionRoot": "cloud/functions/",
-  "cloudbaseRoot": "cloud/",
   "setting": {
-    "es6": false,
+    "es6": true,
     "postcss": false,
     "compileWorklet": false,
     "minified": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
-    "enhance": false,
+    "enhance": true,
     "packNpmManually": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
@@ -29,9 +28,41 @@
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "value": "cloud",
+        "type": "folder"
+      },
+      {
+        "value": "node_modules",
+        "type": "folder"
+      },
+      {
+        "value": "user-ui",
+        "type": "folder"
+      },
+      {
+        "value": ".vscode",
+        "type": "folder"
+      },
+      {
+        "value": ".cursor",
+        "type": "folder"
+      },
+      {
+        "value": ".gitignore",
+        "type": "file"
+      },
+      {
+        "value": ".md",
+        "type": "suffix"
+      }
+    ],
     "include": []
   },
   "appid": "wx65d3962f36b37852",
-  "editorSetting": {}
+  "editorSetting": {
+    "tabIndent": "auto",
+    "tabSize": 2
+  }
 }

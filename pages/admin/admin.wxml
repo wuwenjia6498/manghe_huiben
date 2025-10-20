@@ -20,8 +20,14 @@
       <view class="dashboard-subtitle">全时监控业务关键指标</view>
     </view>
 
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-icon">⏳</view>
+      <view class="loading-text">正在加载数据...</view>
+    </view>
+
     <!-- 数据卡片区域（包含待处理事项） -->
-    <view class="data-cards-section">
+    <view class="data-cards-section" wx:else>
       <!-- 今日收入 -->
       <view class="data-card">
         <view class="card-header">
@@ -55,15 +61,6 @@
         </view>
       </view>
 
-      <!-- 待处理订单 -->
-      <view class="data-card">
-        <view class="card-header">
-          <view class="card-title">待处理订单</view>
-        </view>
-        <view class="card-value">{{stats.pendingOrders}}</view>
-        <view class="card-warning">需要关注</view>
-      </view>
-
       <!-- 待发货订单 -->
       <view class="data-card clickable" bindtap="onPendingOrdersTap">
         <view class="card-header">
@@ -83,32 +80,43 @@
       </view>
     </view>
 
-    <!-- 热门商品排行 -->
-    <view class="chart-section">
+    <!-- 商品类别分布 - 改用进度条卡片 -->
+    <view class="chart-section" wx:if="{{!isLoading}}">
       <view class="chart-card">
         <view class="chart-header">
-          <view class="chart-title">商品类别分布</view>
+          <view class="chart-title">📊 商品类别分布</view>
+          <view class="chart-subtitle">按年龄段统计 · 共{{stats.totalProducts}}个商品</view>
         </view>
-        <view class="pie-chart-container">
-          <canvas canvas-id="pieChart" class="pie-chart"></canvas>
-          <view class="chart-legend" wx:if="{{stats.rawData && stats.rawData.categoryStats && stats.rawData.categoryStats.length > 0}}">
-            <view class="legend-item" wx:for="{{stats.rawData.categoryStats}}" wx:key="name">
-              <view class="legend-color color-{{index + 1}}"></view>
-              <text>{{item.name}} ({{item.value}})</text>
+        
+        <!-- 数据卡片列表 -->
+        <view class="category-list" wx:if="{{stats.categoryData && stats.categoryData.length > 0}}">
+          <view class="category-item" wx:for="{{stats.categoryData}}" wx:key="name">
+            <view class="category-header">
+              <view class="category-label">
+                <view class="category-icon" style="background: {{item.color}}"></view>
+                <text class="category-name">{{item.name}}</text>
+              </view>
+              <view class="category-stats">
+                <text class="category-count">{{item.value}}</text>
+                <text class="category-percent">{{item.percentage}}%</text>
+              </view>
+            </view>
+            <view class="category-bar-container">
+              <view class="category-bar" style="width: {{item.percentage}}%; background: {{item.color}}"></view>
             </view>
           </view>
-          <view class="chart-legend" wx:else>
-            <view class="legend-item">
-              <view class="legend-color color-1"></view>
-              <text>暂无数据</text>
-            </view>
-          </view>
+        </view>
+        
+        <!-- 空状态 -->
+        <view class="empty-state" wx:else>
+          <text class="empty-icon">📦</text>
+          <text class="empty-text">暂无商品数据</text>
         </view>
       </view>
     </view>
 
     <!-- 快速统计卡片 -->
-    <view class="quick-stats-section">
+    <view class="quick-stats-section" wx:if="{{!isLoading}}">
       <view class="section-title">业务概览</view>
       <view class="quick-stats-grid">
         <view class="quick-stat-item">

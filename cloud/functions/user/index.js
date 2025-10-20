@@ -13,6 +13,8 @@ exports.main = async (event, context) => {
         return await getUserProfile(wxContext);
       case 'updateProfile':
         return await updateUserProfile(wxContext, event);
+      case 'checkUserStatus':
+        return await checkUserStatus(wxContext);
       case 'getAddresses':
         return await getUserAddresses(wxContext);
       case 'addAddress':
@@ -54,19 +56,56 @@ async function getUserProfile(wxContext) {
   }
 }
 
+// 检查用户状态
+async function checkUserStatus(wxContext) {
+  const openid = wxContext.OPENID;
+  
+  try {
+    const result = await db.collection('users').where({
+      openid: openid
+    }).get();
+    
+    if (result.data.length === 0) {
+      return { 
+        success: true, 
+        data: { 
+          status: 'active', // 新用户默认为正常状态
+          isBlocked: false 
+        } 
+      };
+    }
+    
+    const user = result.data[0];
+    const status = user.status || 'active';
+    const isBlocked = status === 'blocked';
+    
+    return {
+      success: true,
+      data: {
+        status: status,
+        isBlocked: isBlocked,
+        message: isBlocked ? '您的账号已被封禁，无法进行此操作' : ''
+      }
+    };
+  } catch (error) {
+    throw new Error(`检查用户状态失败: ${error.message}`);
+  }
+}
+
 // 更新用户资料
 async function updateUserProfile(wxContext, event) {
   const { profileData } = event;
   const openid = wxContext.OPENID;
   
   try {
+    const updateData = Object.assign({}, profileData, {
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('users').where({
       openid: openid
     }).update({
-      data: {
-        ...profileData,
-        updateTime: new Date()
-      }
+      data: updateData
     });
     
     return {
@@ -83,9 +122,9 @@ async function getUserAddresses(wxContext) {
   const openid = wxContext.OPENID;
   
   try {
+    // 使用硬删除后，不需要过滤 deleted 字段
     const result = await db.collection('addresses').where({
-      openid: openid,
-      deleted: false
+      openid: openid
     }).orderBy('isDefault', 'desc').orderBy('createTime', 'desc').get();
     
     return {
@@ -106,8 +145,7 @@ async function addUserAddress(wxContext, event) {
     // 如果是默认地址，先将其他地址设为非默认
     if (addressData.isDefault) {
       await db.collection('addresses').where({
-        openid: openid,
-        deleted: false
+        openid: openid
       }).update({
         data: {
           isDefault: false
@@ -115,14 +153,14 @@ async function addUserAddress(wxContext, event) {
       });
     }
     
+    const data = Object.assign({}, addressData, {
+      openid: openid,
+      createTime: new Date(),
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('addresses').add({
-      data: {
-        ...addressData,
-        openid: openid,
-        deleted: false,
-        createTime: new Date(),
-        updateTime: new Date()
-      }
+      data: data
     });
     
     return {
@@ -143,8 +181,7 @@ async function updateUserAddress(wxContext, event) {
     // 如果是默认地址，先将其他地址设为非默认
     if (addressData.isDefault) {
       await db.collection('addresses').where({
-        openid: openid,
-        deleted: false
+        openid: openid
       }).update({
         data: {
           isDefault: false
@@ -152,11 +189,12 @@ async function updateUserAddress(wxContext, event) {
       });
     }
     
+    const updateData = Object.assign({}, addressData, {
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('addresses').doc(addressId).update({
-      data: {
-        ...addressData,
-        updateTime: new Date()
-      }
+      data: updateData
     });
     
     return {
@@ -168,17 +206,13 @@ async function updateUserAddress(wxContext, event) {
   }
 }
 
-// 删除用户地址
+// 删除用户地址（硬删除）
 async function deleteUserAddress(wxContext, event) {
   const { addressId } = event;
   
   try {
-    const result = await db.collection('addresses').doc(addressId).update({
-      data: {
-        deleted: true,
-        updateTime: new Date()
-      }
-    });
+    // 硬删除：彻底从数据库中删除记录
+    const result = await db.collection('addresses').doc(addressId).remove();
     
     return {
       success: true,
@@ -197,8 +231,7 @@ async function setDefaultAddress(wxContext, event) {
   try {
     // 先将所有地址设为非默认
     await db.collection('addresses').where({
-      openid: openid,
-      deleted: false
+      openid: openid
     }).update({
       data: {
         isDefault: false

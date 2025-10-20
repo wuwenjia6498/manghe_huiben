@@ -1,4 +1,8 @@
 // pages/order/order.js
+// 引入支付SDK
+const paymentSDK = require('../../utils/paymentSDK.js');
+const util = require('../../utils/util.js');
+
 Page({
 
   /**
@@ -6,11 +10,8 @@ Page({
    */
   data: {
     orderItems: [],
-    addressInfo: {
-      name: '张先生',
-      phone: '138****8888',
-      detail: '宁波江北外滩大厦506'
-    },
+    addressInfo: null, // 初始为空，从云端加载
+    hasAddress: false, // 是否有地址
     deliveryType: 'express', // express: 快递配送, pickup: 门店自取
     orderNote: '',
     orderAmount: 54.00, // 商品金额
@@ -33,9 +34,9 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // 获取系统信息，设置状态栏高度
-    const systemInfo = wx.getSystemInfoSync();
-    const statusBarHeight = systemInfo.statusBarHeight || 20;
+    // 获取系统信息，设置状态栏高度（使用新API）
+    const windowInfo = wx.getWindowInfo();
+    const statusBarHeight = windowInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     // 加载默认地址
@@ -59,27 +60,22 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    console.log('订单页面显示');
     // 检查是否有选中的地址
     const selectedAddress = wx.getStorageSync('selectedAddress');
-    console.log('检查选中的地址:', selectedAddress);
     
     if (selectedAddress) {
-      console.log('发现选中地址，更新页面数据');
-      // 确保地址数据结构匹配
       const addressInfo = {
         name: selectedAddress.name,
         phone: selectedAddress.phone,
         detail: selectedAddress.detail
       };
-      console.log('格式化后的地址信息:', addressInfo);
       
       this.setData({
-        addressInfo: addressInfo
+        addressInfo: addressInfo,
+        hasAddress: true
       });
-      // 清除临时存储的地址
+      
       wx.removeStorageSync('selectedAddress');
-      console.log('地址已更新，临时存储已清除');
       
       wx.showToast({
         title: '地址已更新',
@@ -449,6 +445,13 @@ Page({
    * 确认支付
    */
   async onConfirmPayment() {
+    // 检查用户状态
+    const userStatus = await util.checkUserStatus();
+    if (userStatus.isBlocked) {
+      util.showBlockedAlert();
+      return;
+    }
+
     const { addressInfo, orderItems, deliveryType, orderNote, finalAmount, deliveryFee, firstDiscount, fullDiscount } = this.data;
     
     if (!orderItems || orderItems.length === 0) {
@@ -459,9 +462,29 @@ Page({
       return;
     }
     
+    // 检查收货地址（静默登录后，验证必要信息）
+    if (!addressInfo || !addressInfo.name || !addressInfo.phone) {
+      wx.showModal({
+        title: '请填写收货地址',
+        content: '下单需要填写收货地址，请先添加地址',
+        confirmText: '去添加',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/address/address'
+            });
+          }
+        }
+      });
+      return;
+    }
+    
+    // 获取登录信息（静默登录后一定有 openid）
+    const loginInfo = wx.getStorageSync('loginInfo');
+    
     // 显示支付加载状态
     wx.showLoading({
-      title: '支付中...'
+      title: '创建订单中...'
     });
     
     try {
@@ -469,6 +492,7 @@ Page({
       const orderAmount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
       
       // 创建订单
+      console.log('=== 开始创建订单 ===');
       const orderResult = await wx.cloud.callFunction({
         name: 'order',
         data: {
@@ -493,41 +517,140 @@ Page({
         }
       });
 
-      wx.hideLoading();
+      console.log('订单创建结果:', orderResult);
 
       if (orderResult.result.success) {
         const { orderId, orderNo } = orderResult.result.data;
+        console.log('订单创建成功，订单号:', orderNo);
         
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success',
-          duration: 2000,
-          success: () => {
-            setTimeout(() => {
-              // 清空购物车中对应的商品
-              this.clearCartItems();
-              
-              // 跳转到订单详情页，而不是首页
-              wx.redirectTo({
-                url: `/pages/order-detail/order-detail?orderId=${orderId}&orderNo=${orderNo}`
-              });
-            }, 2000);
-          }
+        // 准备用户信息
+        const userInfo = Object.assign({}, loginInfo.userInfo, {
+          nickName: loginInfo.userInfo.nickName || loginInfo.userInfo.name || '微信用户',
+          name: loginInfo.userInfo.name || loginInfo.userInfo.nickName || '微信用户',
+          openid: loginInfo.userInfo.openid || loginInfo.openid || 'mock_openid'
         });
+        
+        // 准备支付参数（金额转为分）
+        const paymentAmount = Math.round(finalAmount * 100); // 转为分
+        const paymentOptions = {
+          amount: paymentAmount,
+          description: `绘本盲盒订单-${orderNo}`,
+          // attach字段限制128字节，只传订单号
+          attach: orderNo
+        };
+        
+        console.log('=== 开始发起支付 ===');
+        console.log('支付金额（分）:', paymentAmount);
+        console.log('支付金额（元）:', finalAmount);
+        console.log('用户信息:', userInfo);
+        
+        wx.hideLoading();
+        
+        // 调用支付SDK发起真实支付
+        paymentSDK.processPayment(userInfo, paymentOptions)
+          .then((paymentResult) => {
+            console.log('支付结果:', paymentResult);
+            
+            if (paymentResult.success) {
+              // 支付成功
+              this.handlePaymentSuccess(orderId, orderNo);
+            } else if (paymentResult.cancelled) {
+              // 用户取消支付
+              wx.showModal({
+                title: '支付已取消',
+                content: '您可以在"我的订单"中继续完成支付',
+                confirmText: '查看订单',
+                cancelText: '返回',
+                success: (res) => {
+                  if (res.confirm) {
+                    wx.redirectTo({
+                      url: `/pages/order-detail/order-detail?orderId=${orderId}&orderNo=${orderNo}`
+                    });
+                  }
+                }
+              });
+            } else {
+              // 支付失败
+              wx.showModal({
+                title: '支付失败',
+                content: paymentResult.message || '支付过程中出现错误，您可以在"我的订单"中继续完成支付',
+                confirmText: '查看订单',
+                cancelText: '返回',
+                success: (res) => {
+                  if (res.confirm) {
+                    wx.redirectTo({
+                      url: `/pages/order-detail/order-detail?orderId=${orderId}&orderNo=${orderNo}`
+                    });
+                  }
+                }
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('支付异常:', error);
+            wx.showModal({
+              title: '支付异常',
+              content: '支付过程中发生异常，您可以在"我的订单"中继续完成支付',
+              showCancel: false
+            });
+          });
+          
       } else {
+        wx.hideLoading();
         wx.showToast({
-          title: orderResult.result.message || '支付失败',
+          title: orderResult.result.message || '创建订单失败',
           icon: 'error'
         });
       }
     } catch (error) {
       wx.hideLoading();
-      console.error('支付失败:', error);
+      console.error('创建订单失败:', error);
       wx.showToast({
-        title: '支付失败，请重试',
+        title: '创建订单失败，请重试',
         icon: 'error'
       });
     }
+  },
+  
+  /**
+   * 处理支付成功
+   */
+  async handlePaymentSuccess(orderId, orderNo) {
+    console.log('支付成功，订单ID:', orderId, '订单号:', orderNo);
+    
+    try {
+      // 立即更新订单状态为已支付（待发货）
+      await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'updateOrderStatus',
+          orderId: orderId,
+          status: 'paid',
+          paymentStatus: 'paid'
+        }
+      });
+      console.log('订单状态已更新为待发货');
+    } catch (error) {
+      console.error('更新订单状态失败:', error);
+      // 即使更新失败也继续，因为支付回调会处理
+    }
+    
+    wx.showToast({
+      title: '支付成功',
+      icon: 'success',
+      duration: 2000,
+      success: () => {
+        setTimeout(() => {
+          // 清空购物车中对应的商品
+          this.clearCartItems();
+          
+          // 跳转到订单详情页
+          wx.redirectTo({
+            url: `/pages/order-detail/order-detail?orderId=${orderId}&orderNo=${orderNo}`
+          });
+        }, 2000);
+      }
+    });
   },
 
   /**
@@ -551,42 +674,49 @@ Page({
   },
 
   /**
-   * 加载默认地址
+   * 加载默认地址（从云端）
    */
-  loadDefaultAddress() {
-    console.log('开始加载默认地址');
-    const addressList = wx.getStorageSync('addressList') || [];
-    console.log('获取到地址列表:', addressList);
-    
-    const defaultAddress = addressList.find(addr => addr.isDefault);
-    console.log('默认地址:', defaultAddress);
-    
-    if (defaultAddress) {
-      // 确保地址数据结构匹配
-      const addressInfo = {
-        name: defaultAddress.name,
-        phone: defaultAddress.phone,
-        detail: defaultAddress.detail
-      };
-      console.log('设置默认地址信息:', addressInfo);
-      this.setData({
-        addressInfo: addressInfo
+  async loadDefaultAddress() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'getAddresses'
+        }
       });
-    } else if (addressList.length > 0) {
-      // 如果没有默认地址，使用第一个地址
-      const firstAddress = addressList[0];
-      const addressInfo = {
-        name: firstAddress.name,
-        phone: firstAddress.phone,
-        detail: firstAddress.detail
-      };
-      console.log('使用第一个地址:', addressInfo);
-      this.setData({
-        addressInfo: addressInfo
-      });
-    } else {
-      console.log('没有地址数据，保持原有示例地址');
+
+      if (res.result && res.result.success) {
+        const addressList = res.result.data || [];
+        const defaultAddress = addressList.find(addr => addr.isDefault);
+        
+        if (defaultAddress) {
+          this.setData({
+            addressInfo: {
+              name: defaultAddress.name,
+              phone: defaultAddress.phone,
+              detail: defaultAddress.detail
+            },
+            hasAddress: true
+          });
+        } else if (addressList.length > 0) {
+          const firstAddress = addressList[0];
+          this.setData({
+            addressInfo: {
+              name: firstAddress.name,
+              phone: firstAddress.phone,
+              detail: firstAddress.detail
+            },
+            hasAddress: true
+          });
+        } else {
+          this.setData({
+            addressInfo: null,
+            hasAddress: false
+          });
+        }
+      }
+    } catch (error) {
+      console.error('加载默认地址失败:', error);
     }
-    // 如果没有任何地址，保持原有的示例地址
   }
 })

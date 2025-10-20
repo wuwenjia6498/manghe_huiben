@@ -59,8 +59,8 @@
           bindchange="onRegionChange"
           bindcolumnchange="onRegionColumnChange">
           <view class="location-selector">
-            <text class="location-text {{formData.region.province ? '' : 'location-placeholder'}}">
-              {{formData.region.province ? (formData.region.province + ' ' + (formData.region.city || '') + ' ' + (formData.region.district || '')) : '请选择省市区'}}
+            <text class="location-text {{formData.region ? '' : 'location-placeholder'}}">
+              {{formData.region || '请选择省市区'}}
             </text>
             <text class="arrow">></text>
           </view>

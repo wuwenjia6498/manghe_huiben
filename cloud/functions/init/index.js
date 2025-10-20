@@ -65,7 +65,8 @@ async function initCategories() {
   try {
     // 清空现有数据 - 先查询所有记录，然后逐个删除
     const existingCategories = await db.collection('categories').get();
-    for (const category of existingCategories.data) {
+    for (let i = 0; i < existingCategories.data.length; i++) {
+      const category = existingCategories.data[i];
       await db.collection('categories').doc(category._id).remove();
     }
     
@@ -113,9 +114,12 @@ async function initProducts() {
   let productIndex = 1;
   
   // 生成所有组合的产品
-  for (const age of ageGroups) {
-    for (const condition of conditions) {
-      for (const quantity of quantities) {
+  for (let i = 0; i < ageGroups.length; i++) {
+    const age = ageGroups[i];
+    for (let j = 0; j < conditions.length; j++) {
+      const condition = conditions[j];
+      for (let k = 0; k < quantities.length; k++) {
+        const quantity = quantities[k];
         const price = Math.round(age.basePrice * condition.multiplier * quantity.multiplier); // 去掉小数点
         const originalPrice = Math.round(price * 1.4); // 原价为现价的1.4倍，去掉小数点
         
@@ -154,7 +158,8 @@ async function initProducts() {
   try {
     // 清空现有数据 - 先查询所有记录，然后逐个删除
     const existingProducts = await db.collection('products').get();
-    for (const product of existingProducts.data) {
+    for (let i = 0; i < existingProducts.data.length; i++) {
+      const product = existingProducts.data[i];
       await db.collection('products').doc(product._id).remove();
     }
     

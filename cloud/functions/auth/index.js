@@ -34,7 +34,6 @@ async function login(wxContext, event) {
   const openid = wxContext.OPENID;
   
   try {
-    // 查找用户是否已存在
     const userResult = await db.collection('users').where({
       openid: openid
     }).get();
@@ -45,8 +44,8 @@ async function login(wxContext, event) {
       const createResult = await db.collection('users').add({
         data: {
           openid: openid,
-          nickname: userInfo?.nickName || '用户',
-          avatar: userInfo?.avatarUrl || '',
+          nickname: (userInfo && userInfo.nickName) || '',
+          avatar: (userInfo && userInfo.avatarUrl) || '',
           phone: '',
           createTime: new Date(),
           updateTime: new Date(),
@@ -57,15 +56,15 @@ async function login(wxContext, event) {
       user = {
         _id: createResult._id,
         openid: openid,
-        nickname: userInfo?.nickName || '用户',
-        avatar: userInfo?.avatarUrl || '',
+        nickname: (userInfo && userInfo.nickName) || '',
+        avatar: (userInfo && userInfo.avatarUrl) || '',
         phone: '',
         createTime: new Date(),
         updateTime: new Date(),
         status: 'active'
       };
     } else {
-      // 已存在用户，更新信息
+      // 已存在用户
       user = userResult.data[0];
       if (userInfo) {
         await db.collection('users').doc(user._id).update({
@@ -88,6 +87,7 @@ async function login(wxContext, event) {
       }
     };
   } catch (error) {
+    console.error('登录失败:', error);
     throw new Error(`登录失败: ${error.message}`);
   }
 }
@@ -110,6 +110,7 @@ async function getUserInfo(wxContext) {
       data: result.data[0]
     };
   } catch (error) {
+    console.error('获取用户信息失败:', error);
     throw new Error(`获取用户信息失败: ${error.message}`);
   }
 }
@@ -120,21 +121,39 @@ async function updateUserInfo(wxContext, event) {
   const openid = wxContext.OPENID;
   
   try {
-    const result = await db.collection('users').where({
+    // 构建更新数据（避免使用对象展开语法）
+    const updateData = Object.assign({}, userInfo, {
+      updateTime: new Date()
+    });
+    
+    // 执行更新
+    await db.collection('users').where({
       openid: openid
     }).update({
-      data: {
-        ...userInfo,
-        updateTime: new Date()
-      }
+      data: updateData
     });
+    
+    // 获取更新后的用户信息
+    const userResult = await db.collection('users').where({
+      openid: openid
+    }).get();
+    
+    if (userResult.data.length === 0) {
+      throw new Error('用户不存在');
+    }
     
     return {
       success: true,
-      data: result
+      data: {
+        user: userResult.data[0]
+      }
     };
   } catch (error) {
-    throw new Error(`更新用户信息失败: ${error.message}`);
+    console.error('更新用户信息失败:', error);
+    return {
+      success: false,
+      message: `更新用户信息失败: ${error.message}`
+    };
   }
 }
 
@@ -166,14 +185,15 @@ async function createAdmin(wxContext, event) {
   const openid = wxContext.OPENID;
   
   try {
+    const data = Object.assign({}, adminInfo, {
+      openid: openid,
+      createTime: new Date(),
+      updateTime: new Date(),
+      status: 'active'
+    });
+    
     const result = await db.collection('admin_users').add({
-      data: {
-        openid: openid,
-        ...adminInfo,
-        createTime: new Date(),
-        updateTime: new Date(),
-        status: 'active'
-      }
+      data: data
     });
     
     return {

@@ -19,7 +19,7 @@ Page({
       });
     }
     
-    // 加载地址列表
+    // 首次加载地址列表
     this.loadAddressList();
   },
 
@@ -27,72 +27,62 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    // 每次显示页面时重新加载地址列表（可能从编辑页面返回）
+    // 每次显示页面时重新加载地址列表（避免显示缓存数据）
     this.loadAddressList();
   },
 
   /**
-   * 加载地址列表
+   * 加载地址列表（从云数据库）
    */
-  loadAddressList() {
-    let addressList = wx.getStorageSync('addressList') || [];
-    
-    // 如果没有地址数据，添加示例数据
-    if (addressList.length === 0) {
-      addressList = [
-        {
-          id: 1,
-          name: '张先生',
-          phone: '138****8888',
-          detail: '广东省深圳市南山区科技园南区深南大道9988号腾讯大厦',
-          isDefault: true
-        },
-        {
-          id: 2,
-          name: '李女士',
-          phone: '139****9999',
-          detail: '北京市朝阳区建国门外大街1号国贸大厦A座',
-          isDefault: false
-        }
-      ];
-      wx.setStorageSync('addressList', addressList);
-    }
-
-    this.setData({
-      addressList: addressList
+  async loadAddressList() {
+    wx.showLoading({
+      title: '加载中...'
     });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'getAddresses'
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        const addressList = res.result.data || [];
+        this.setData({
+          addressList: addressList
+        });
+      } else {
+        throw new Error(res.result.message || '加载地址失败');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('加载地址列表失败:', error);
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'none'
+      });
+    }
   },
 
   /**
    * 返回按钮点击
    */
   onBackTap() {
-    console.log('地址管理页面返回按钮被点击');
-    
-    // 获取当前页面栈
     const pages = getCurrentPages();
-    console.log('当前页面栈长度:', pages.length);
     
-    // 优先使用原生的返回功能
     if (pages.length > 1) {
-      console.log('执行页面返回操作');
       wx.navigateBack({
         delta: 1,
-        success: () => {
-          console.log('页面返回成功');
-        },
-        fail: (error) => {
-          console.log('页面返回失败:', error);
-          console.log('跳转到我的页面');
-          // 如果返回失败，跳转到我的页面
+        fail: () => {
           wx.switchTab({
             url: '/pages/profile/profile'
           });
         }
       });
     } else {
-      console.log('当前是第一个页面，跳转到我的页面');
-      // 如果是第一个页面，跳转到我的页面
       wx.switchTab({
         url: '/pages/profile/profile'
       });
@@ -100,30 +90,44 @@ Page({
   },
 
   /**
-   * 设置默认地址
+   * 设置默认地址（云端）
    */
-  onSetDefault(e) {
+  async onSetDefault(e) {
     const addressId = e.currentTarget.dataset.id;
-    const { addressList } = this.data;
     
-    // 更新地址列表
-    const updatedList = addressList.map(item => ({
-      ...item,
-      isDefault: item.id === addressId
-    }));
-    
-    // 保存到存储
-    wx.setStorageSync('addressList', updatedList);
-    
-    // 更新页面数据
-    this.setData({
-      addressList: updatedList
+    wx.showLoading({
+      title: '设置中...'
     });
-    
-    wx.showToast({
-      title: '设置成功',
-      icon: 'success'
-    });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'setDefaultAddress',
+          addressId: addressId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        wx.showToast({
+          title: '设置成功',
+          icon: 'success'
+        });
+        // 重新加载地址列表
+        this.loadAddressList();
+      } else {
+        throw new Error(res.result.message || '设置失败');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('设置默认地址失败:', error);
+      wx.showToast({
+        title: '设置失败，请重试',
+        icon: 'none'
+      });
+    }
   },
 
   /**
@@ -165,32 +169,42 @@ Page({
   },
 
   /**
-   * 执行删除地址
+   * 执行删除地址（云端）
    */
-  deleteAddress(addressId) {
-    const { addressList } = this.data;
-    const updatedList = addressList.filter(item => item.id !== addressId);
-    
-    // 如果删除的是默认地址，且还有其他地址，将第一个设为默认
-    if (updatedList.length > 0) {
-      const hasDefault = updatedList.some(item => item.isDefault);
-      if (!hasDefault) {
-        updatedList[0].isDefault = true;
+  async deleteAddress(addressId) {
+    wx.showLoading({
+      title: '删除中...'
+    });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'deleteAddress',
+          addressId: addressId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        wx.showToast({
+          title: '删除成功',
+          icon: 'success'
+        });
+        // 重新加载地址列表
+        await this.loadAddressList();
+      } else {
+        throw new Error(res.result.message || '删除失败');
       }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('删除地址失败:', error);
+      wx.showToast({
+        title: '删除失败，请重试',
+        icon: 'none'
+      });
     }
-    
-    // 保存到存储
-    wx.setStorageSync('addressList', updatedList);
-    
-    // 更新页面数据
-    this.setData({
-      addressList: updatedList
-    });
-    
-    wx.showToast({
-      title: '删除成功',
-      icon: 'success'
-    });
   },
 
   /**
@@ -243,19 +257,13 @@ Page({
    * 选择地址（从订单页面进入时使用）
    */
   onSelectAddress(e) {
-    console.log('地址选择事件触发');
-    console.log('fromOrder 状态:', this.data.fromOrder);
-    
     if (!this.data.fromOrder) {
-      console.log('不是从订单页面进入，忽略选择事件');
       return;
     }
     
     const address = e.currentTarget.dataset.address;
-    console.log('选中的地址:', address);
     
     if (!address) {
-      console.error('地址数据为空');
       wx.showToast({
         title: '地址数据错误',
         icon: 'error'
@@ -265,16 +273,8 @@ Page({
     
     // 将选中的地址保存到全局存储
     wx.setStorageSync('selectedAddress', address);
-    console.log('地址已保存到存储');
     
     // 返回订单页面
-    wx.navigateBack({
-      success: () => {
-        console.log('地址选择完成，返回订单页面');
-      },
-      fail: (error) => {
-        console.error('返回订单页面失败:', error);
-      }
-    });
+    wx.navigateBack();
   }
 }) 

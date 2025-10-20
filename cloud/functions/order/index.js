@@ -26,6 +26,8 @@ exports.main = async (event, context) => {
         return await getAllOrders(event, wxContext);
       case 'updateOrderStatusAdmin':
         return await updateOrderStatusAdmin(event, wxContext);
+      case 'getOrderStats':
+        return await getOrderStats(event, wxContext);
       default:
         return { success: false, message: '未知操作' };
     }
@@ -53,7 +55,8 @@ async function createOrder(event, wxContext) {
     const orderNo = generateOrderNo();
     
     // 验证商品信息和库存
-    for (const item of products) {
+    for (let i = 0; i < products.length; i++) {
+      const item = products[i];
       const productResult = await db.collection('products').doc(item.productId).get();
       if (!productResult.data) {
         return { success: false, message: `商品 ${item.name} 不存在` };
@@ -78,15 +81,16 @@ async function createOrder(event, wxContext) {
         fullDiscount: fullDiscount || 0, // 满减优惠
         remark: remark || '',
         deliveryType: event.deliveryType || 'express',
-        status: 'paid', // 创建订单时已完成支付，设置为已付款状态
-        paymentStatus: 'paid', // 已付款
+        status: 'pending', // 订单初始状态为待支付
+        paymentStatus: 'pending', // 待支付
         createTime: new Date(),
         updateTime: new Date()
       }
     });
     
     // 减少商品库存
-    for (const item of products) {
+    for (let i = 0; i < products.length; i++) {
+      const item = products[i];
       await db.collection('products').doc(item.productId).update({
         data: {
           stock: _.inc(-item.quantity),
@@ -114,11 +118,19 @@ async function getOrders(event, wxContext) {
   const openid = wxContext.OPENID;
   
   try {
-    let query = db.collection('orders').where({ openid });
+    // 构建查询条件（必须包含 openid）
+    let whereCondition = { openid };
     
+    // 根据状态筛选
     if (status) {
-      query = query.where({ status });
+      // 所有状态都使用精确匹配
+      whereCondition.status = status;
+    } else {
+      // "全部"订单：只查询有效的订单状态（排除已取消和异常状态）
+      whereCondition.status = _.in(['pending', 'paid', 'shipped', 'completed']);
     }
+    
+    let query = db.collection('orders').where(whereCondition);
     
     const countResult = await query.count();
     const total = countResult.total;
@@ -262,7 +274,8 @@ async function cancelOrder(event, wxContext) {
     });
     
     // 恢复商品库存
-    for (const item of order.products) {
+    for (let i = 0; i < order.products.length; i++) {
+      const item = order.products[i];
       await db.collection('products').doc(item.productId).update({
         data: {
           stock: _.inc(item.quantity),
@@ -396,5 +409,53 @@ async function checkAdminPermission(openid) {
     return { success: true };
   } catch (error) {
     return { success: false, message: '权限验证失败' };
+  }
+}
+
+// 获取订单统计数据
+async function getOrderStats(event, wxContext) {
+  const openid = wxContext.OPENID;
+  
+  try {
+    // 获取全部订单数量（排除已取消）
+    const allCount = await db.collection('orders')
+      .where({ 
+        openid,
+        status: _.neq('cancelled')
+      })
+      .count();
+    
+    // 获取待支付订单数量
+    const pendingCount = await db.collection('orders')
+      .where({ openid, status: 'pending' })
+      .count();
+    
+    // 获取待发货订单数量
+    const paidCount = await db.collection('orders')
+      .where({ openid, status: 'paid' })
+      .count();
+    
+    // 获取待收货订单数量
+    const shippedCount = await db.collection('orders')
+      .where({ openid, status: 'shipped' })
+      .count();
+    
+    // 获取已完成订单数量
+    const completedCount = await db.collection('orders')
+      .where({ openid, status: 'completed' })
+      .count();
+    
+    return {
+      success: true,
+      data: {
+        all: allCount.total,
+        pending: pendingCount.total,  // 待支付
+        paid: paidCount.total,        // 待发货
+        shipped: shippedCount.total,  // 待收货
+        completed: completedCount.total // 已完成
+      }
+    };
+  } catch (error) {
+    throw new Error(`获取订单统计失败: ${error.message}`);
   }
 } 

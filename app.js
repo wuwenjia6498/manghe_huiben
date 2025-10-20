@@ -1,5 +1,5 @@
 // app.js
-const { ENV_ID } = require('./cloud/env.js');
+const { ENV_ID } = require('./env.js');
 
 App({
   onLaunch() {
@@ -18,32 +18,109 @@ App({
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
 
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-        console.log('登录成功，code:', res.code);
-        this.getUserInfo();
-      }
-    })
+    // 静默登录
+    this.silentLogin();
   },
 
-  // 获取用户信息
-  getUserInfo() {
-    wx.getUserProfile({
-      desc: '用于完善用户资料',
-      success: (res) => {
-        this.globalData.userInfo = res.userInfo;
-        console.log('用户信息:', res.userInfo);
-      },
-      fail: (err) => {
-        console.log('获取用户信息失败:', err);
+  /**
+   * 静默登录 - 用户无感知自动登录
+   */
+  async silentLogin() {
+    try {
+      // 检查本地是否已有登录信息
+      const localLoginInfo = wx.getStorageSync('loginInfo');
+      if (localLoginInfo && localLoginInfo.openid) {
+        console.log('本地已有登录信息，从云端获取最新用户数据...');
+        
+        // 从数据库获取最新用户信息
+        try {
+          const cloudRes = await wx.cloud.callFunction({
+            name: 'auth',
+            data: { action: 'getUserInfo' }
+          });
+          
+          console.log('云端获取用户信息结果:', cloudRes);
+          
+          if (cloudRes.result && cloudRes.result.success) {
+            const user = cloudRes.result.data;
+            console.log('用户数据:', user);
+            
+            // 修复：即使 nickname 或 avatar 为空字符串，也应该创建 userInfo 对象
+            const userInfo = user ? {
+              nickName: user.nickname || '',
+              avatar: user.avatar || ''
+            } : null;
+            
+            console.log('格式化后的 userInfo:', userInfo);
+            
+            const loginInfo = {
+              isLoggedIn: true,
+              openid: localLoginInfo.openid,
+              userInfo: userInfo,
+              loginTime: Date.now()
+            };
+            
+            wx.setStorageSync('loginInfo', loginInfo);
+            this.globalData.userInfo = userInfo;
+            this.globalData.openid = localLoginInfo.openid;
+            
+            console.log('✅ 用户信息已更新到本地缓存');
+            return;
+          } else {
+            console.error('云端获取用户信息失败:', cloudRes.result);
+          }
+        } catch (error) {
+          console.error('获取用户信息异常:', error);
+          // 使用本地缓存
+          this.globalData.userInfo = localLoginInfo.userInfo || null;
+          this.globalData.openid = localLoginInfo.openid;
+          return;
+        }
       }
-    })
+
+      // 新用户登录
+      const loginRes = await new Promise((resolve, reject) => {
+        wx.login({ success: resolve, fail: reject });
+      });
+
+      const cloudRes = await wx.cloud.callFunction({
+        name: 'auth',
+        data: { action: 'login' }
+      });
+
+      if (cloudRes.result && cloudRes.result.success) {
+        const { openid, user } = cloudRes.result.data;
+        console.log('新用户登录，用户数据:', user);
+        
+        // 修复：即使 nickname 或 avatar 为空字符串，也应该创建 userInfo 对象
+        const userInfo = user ? {
+          nickName: user.nickname || '',
+          avatar: user.avatar || ''
+        } : null;
+        
+        console.log('格式化后的 userInfo:', userInfo);
+        
+        const loginInfo = {
+          isLoggedIn: true,
+          openid: openid,
+          userInfo: userInfo,
+          loginTime: Date.now()
+        };
+
+        wx.setStorageSync('loginInfo', loginInfo);
+        this.globalData.userInfo = userInfo;
+        this.globalData.openid = openid;
+        
+        console.log('✅ 新用户登录信息已保存');
+      }
+    } catch (error) {
+      console.error('静默登录失败:', error);
+    }
   },
 
   globalData: {
     userInfo: null,
+    openid: null, // 用户的 openid
     // 添加云开发相关的全局数据
     db: null,
     isAdmin: false,

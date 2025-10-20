@@ -38,6 +38,10 @@ exports.main = async (event, context) => {
         return await updateOrderStatus(event);
       case 'getUsers':
         return await getUsers(event);
+      case 'getUserOrderStats':
+        return await getUserOrderStats(event);
+      case 'updateUserStatus':
+        return await updateUserStatus(event);
       case 'getStats':
         return await getStats();
       case 'updateSettings':
@@ -119,13 +123,14 @@ async function addProduct(event) {
   const { productData } = event;
   
   try {
+    const data = Object.assign({}, productData, {
+      createTime: new Date(),
+      updateTime: new Date(),
+      status: 'active'
+    });
+    
     const result = await db.collection('products').add({
-      data: {
-        ...productData,
-        createTime: new Date(),
-        updateTime: new Date(),
-        status: 'active'
-      }
+      data: data
     });
     
     return {
@@ -162,10 +167,9 @@ async function updateProduct(event) {
     console.log('更新前的商品数据:', existingProduct.data);
     
     // 构建更新数据
-    const updateData = {
-      ...productData,
+    const updateData = Object.assign({}, productData, {
       updateTime: new Date()
-    };
+    });
     
     console.log('准备更新的数据:', updateData);
     
@@ -296,11 +300,13 @@ async function updateOrderStatus(event) {
   }
 }
 
-// 获取用户列表
+// 获取用户列表（简化版，不包含订单统计）
 async function getUsers(event) {
   const { page = 1, pageSize = 20 } = event;
   
   try {
+    console.log('📋 开始获取用户列表...');
+    
     const result = await db.collection('users')
       .orderBy('createTime', 'desc')
       .skip((page - 1) * pageSize)
@@ -309,6 +315,24 @@ async function getUsers(event) {
     
     // 获取总数
     const countResult = await db.collection('users').count();
+    
+    console.log(`✅ 获取到 ${result.data.length} 个用户，总计 ${countResult.total} 个`);
+    
+    // 输出前3个用户的详细信息用于调试
+    if (result.data.length > 0) {
+      console.log('==== 用户数据示例（前3个）====');
+      result.data.slice(0, 3).forEach((user, index) => {
+        console.log(`用户${index + 1}:`, {
+          _id: user._id,
+          openid: user.openid,
+          nickname: user.nickname,
+          avatar: user.avatar,
+          phone: user.phone,
+          createTime: user.createTime
+        });
+      });
+      console.log('========================');
+    }
     
     return {
       success: true,
@@ -320,7 +344,94 @@ async function getUsers(event) {
       }
     };
   } catch (error) {
+    console.error('❌ 获取用户列表失败:', error);
     throw new Error(`获取用户列表失败: ${error.message}`);
+  }
+}
+
+// 获取单个用户的订单统计
+async function getUserOrderStats(event) {
+  const { openid } = event;
+  
+  try {
+    console.log(`📊 开始统计用户 ${openid} 的订单数据...`);
+    
+    // 获取用户的所有订单
+    const ordersResult = await db.collection('orders')
+      .where({
+        openid: openid
+      })
+      .get();
+    
+    console.log(`找到 ${ordersResult.data.length} 个订单`);
+    
+    if (ordersResult.data.length > 0) {
+      console.log('订单数据示例:', ordersResult.data[0]);
+    }
+    
+    // 统计订单数量和总金额
+    let orderCount = 0;
+    let totalAmount = 0;
+    
+    ordersResult.data.forEach(order => {
+      // 只统计有效订单（排除已取消的）
+      if (order.status !== 'cancelled' && order.status !== 'CANCELLED') {
+        orderCount++;
+        // 获取订单金额
+        const amount = order.totalAmount || order.amount || 0;
+        totalAmount += amount;
+      }
+    });
+    
+    console.log(`✅ 统计完成：订单数 ${orderCount}，总金额 ${totalAmount}`);
+    
+    return {
+      success: true,
+      data: {
+        orderCount,
+        totalAmount
+      }
+    };
+  } catch (error) {
+    console.error(`❌ 统计用户订单失败:`, error);
+    return {
+      success: false,
+      data: {
+        orderCount: 0,
+        totalAmount: 0
+      }
+    };
+  }
+}
+
+// 更新用户状态
+async function updateUserStatus(event) {
+  const { userId, status } = event;
+  
+  try {
+    if (!userId) {
+      throw new Error('用户ID不能为空');
+    }
+    
+    if (!['active', 'inactive', 'blocked'].includes(status)) {
+      throw new Error('无效的用户状态');
+    }
+    
+    const result = await db.collection('users').doc(userId).update({
+      data: {
+        status: status,
+        updateTime: new Date()
+      }
+    });
+    
+    return {
+      success: true,
+      data: result,
+      message: '用户状态更新成功'
+    };
+  } catch (error) {
+    console.error('更新用户状态失败:', error);
+    throw new Error(`更新用户状态失败: ${error.message}`);
   }
 }
 
@@ -367,7 +478,7 @@ async function getStats() {
       status: db.command.in(['paid', 'shipped', 'delivered'])
     }).count();
     
-    // 待发货订单
+    // 待发货订单（只包括 paid 状态，pending 是待支付）
     const pendingShipmentCount = await db.collection('orders').where({
       status: 'paid'
     }).count();
@@ -447,22 +558,37 @@ async function getStats() {
     const ordersGrowth = calculateGrowthRate(todayOrderCount.total, yesterdayOrderCount.total);
     const usersChange = calculateGrowthRate(todayNewUsers.total, yesterdayNewUsers.total);
     
-    // 商品类别统计（用于饼图）
+    // 商品类别统计（用于饼图） - 按年龄段分类
     const products = await db.collection('products').where({
       status: 'active'
     }).get();
     
-    const categoryStats = {};
+    const ageGroupStats = {
+      '0-3岁': 0,
+      '3-6岁': 0,
+      '6-12岁': 0
+    };
+    
+    // 统计年龄段分布
     products.data.forEach(product => {
-      const category = product.category || '其他';
-      categoryStats[category] = (categoryStats[category] || 0) + 1;
+      // 年龄段统计
+      if (product.ageRange) {
+        const ageKey = product.ageRange === '0-3' ? '0-3岁' : 
+                       product.ageRange === '3-6' ? '3-6岁' : 
+                       product.ageRange === '6-12' ? '6-12岁' : null;
+        if (ageKey && ageGroupStats.hasOwnProperty(ageKey)) {
+          ageGroupStats[ageKey]++;
+        }
+      }
     });
     
-    // 转换为数组格式
-    const categoryData = Object.entries(categoryStats).map(([name, value]) => ({
-      name,
-      value
-    }));
+    // 转换为数组格式 - 只显示有数据的年龄段
+    const categoryData = Object.entries(ageGroupStats)
+      .filter(([name, value]) => value > 0)  // 只显示有数据的分类
+      .map(([name, value]) => ({
+        name,
+        value
+      }));
     
     const result = {
       success: true,
@@ -495,8 +621,8 @@ async function getStats() {
         pendingShipmentCount: pendingShipmentCount.total,
         lowInventoryCount: lowInventoryProducts.total,
         
-        // 计算字段
-        pendingOrderCount: orderCount.total - paidOrderCount.total,
+        // 待处理订单（等同于待发货订单）
+        pendingOrderCount: pendingShipmentCount.total,
         
         // 商品类别统计
         categoryStats: categoryData
@@ -587,7 +713,8 @@ async function updateSettings(event) {
     }
     
     // 过滤掉 _id 字段，避免更新时报错
-    const { _id, ...cleanSettings } = settings;
+    const cleanSettings = Object.assign({}, settings);
+    delete cleanSettings._id;
     console.log('过滤后的设置数据:', cleanSettings);
     
     // 先尝试获取现有设置
@@ -607,25 +734,27 @@ async function updateSettings(event) {
     
     if (existingSettings) {
       // 记录已存在，使用update方法
+      const updateData = Object.assign({}, cleanSettings, {
+        updateTime: new Date()
+      });
+      
       result = await db.collection('system_settings')
         .doc('global')
         .update({
-          data: {
-            ...cleanSettings,
-            updateTime: new Date()
-          }
+          data: updateData
         });
       console.log('设置更新结果:', result);
     } else {
       // 记录不存在，使用add方法创建
+      const addData = Object.assign({}, cleanSettings, {
+        _id: 'global',
+        createTime: new Date(),
+        updateTime: new Date()
+      });
+      
       result = await db.collection('system_settings')
         .add({
-          data: {
-            _id: 'global',
-            ...cleanSettings,
-            createTime: new Date(),
-            updateTime: new Date()
-          }
+          data: addData
         });
       console.log('设置创建结果:', result);
     }

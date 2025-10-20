@@ -1,0 +1,108 @@
+<!--pages/agreement/agreement.wxml-->
+<view class="agreement-container">
+  <view class="agreement-content">
+    <!-- 引言 -->
+    <view class="section">
+      <view class="section-text">
+        欢迎使用绘本盲盒！请仔细阅读本协议。使用本服务即表示您同意以下条款。
+      </view>
+    </view>
+
+    <!-- 第一条 -->
+    <view class="section">
+      <view class="section-title">一、服务内容</view>
+      <view class="section-text">
+        我们提供儿童绘本盲盒销售服务，包括商品展示、在线购买、订单管理和客服咨询。
+      </view>
+      <view class="section-text">
+        盲盒商品采用随机发货，具体书目以实际收到为准。
+      </view>
+    </view>
+
+    <!-- 第二条 -->
+    <view class="section">
+      <view class="section-title">二、账号使用</view>
+      <view class="section-text">
+        用户需通过微信授权登录，并提供真实的收货信息。请妥善保管账号，不得转让或出租。
+      </view>
+    </view>
+
+    <!-- 第三条 -->
+    <view class="section">
+      <view class="section-title">三、商品说明</view>
+      <view class="section-text">
+        商品以实际收到为准，图片仅供参考。盲盒内容随机发货，不支持指定书目。页面显示价格为最终价格，运费另计。
+      </view>
+    </view>
+
+    <!-- 第四条 -->
+    <view class="section">
+      <view class="section-title">四、订单与支付</view>
+      <view class="section-text">
+        支付成功后订单生效，我们将在3个工作日内发货。支持微信支付。如需发票请在订单备注中说明。
+      </view>
+    </view>
+
+    <!-- 第五条 -->
+    <view class="section">
+      <view class="section-title">五、配送与签收</view>
+      <view class="section-text">
+        一般3-7个工作日送达。请当面验货，如包装破损请拒收。签收后视为商品完好。
+      </view>
+    </view>
+
+    <!-- 第六条 -->
+    <view class="section">
+      <view class="section-title">六、退换货政策</view>
+      <view class="section-text">
+        盲盒商品原则上不支持退换货。仅在发错商品或存在安全隐患时，可在收货后7天内联系客服申请退换货。
+      </view>
+    </view>
+
+    <!-- 第七条 -->
+    <view class="section">
+      <view class="section-title">七、用户行为</view>
+      <view class="section-text">
+        禁止恶意下单、发布虚假信息、破坏平台运营等行为。违规用户将被限制使用或封禁账号。
+      </view>
+    </view>
+
+    <!-- 第八条 -->
+    <view class="section">
+      <view class="section-title">八、知识产权</view>
+      <view class="section-text">
+        平台内容受知识产权保护，未经许可不得使用。用户上传的内容视为授予平台使用权。
+      </view>
+    </view>
+
+    <!-- 第九条 -->
+    <view class="section">
+      <view class="section-title">九、免责声明</view>
+      <view class="section-text">
+        因不可抗力、网络故障、第三方服务等原因造成的服务中断，平台不承担责任。
+      </view>
+    </view>
+
+    <!-- 第十条 -->
+    <view class="section">
+      <view class="section-title">十、其他</view>
+      <view class="section-text">
+        本协议适用中华人民共和国法律。如有争议，双方应友好协商解决。
+      </view>
+      <view class="section-text">
+        我们有权修改本协议，修改后将在平台公布。继续使用服务视为接受新协议。
+      </view>
+      <view class="section-text">
+        如有疑问，请通过小程序内客服微信联系我们（工作时间：09:00 - 21:00）。
+      </view>
+    </view>
+
+    <!-- 底部声明 -->
+    <view class="section footer-section">
+      <view class="footer-text">
+        本协议自用户注册之日起生效。感谢您选择绘本盲盒，祝您使用愉快！
+      </view>
+    </view>
+  </view>
+</view>
+

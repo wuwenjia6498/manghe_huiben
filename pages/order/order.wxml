@@ -25,7 +25,8 @@
         <view class="section-title">收货地址</view>
       </view>
       
-      <view class="address-card" bindtap="onSelectAddress">
+      <!-- 有地址时显示 -->
+      <view wx:if="{{hasAddress}}" class="address-card" bindtap="onSelectAddress">
         <view class="address-info">
           <view class="address-name">{{addressInfo.name}} {{addressInfo.phone}}</view>
           <view class="address-detail">{{addressInfo.detail}}</view>
@@ -33,8 +34,15 @@
         <view class="address-arrow">></view>
       </view>
       
-      <!-- 添加新地址 -->
-      <view class="add-address" bindtap="onAddAddress">
+      <!-- 无地址时显示提示 -->
+      <view wx:else class="empty-address-card" bindtap="onAddAddress">
+        <view class="empty-address-icon">📍</view>
+        <view class="empty-address-text">暂无收货地址，请添加</view>
+        <view class="address-arrow">></view>
+      </view>
+      
+      <!-- 添加新地址按钮 -->
+      <view wx:if="{{hasAddress}}" class="add-address" bindtap="onAddAddress">
         <view class="add-icon">+</view>
         <view class="add-text">添加新地址</view>
       </view>

@@ -1362,7 +1362,7 @@ Page({
         
         this.setData({
           formData: {
-            id: address.id,
+            id: address._id || address.id, // 兼容云端的_id和本地的id
             name: address.name,
             phone: address.phone,
             region: regionInfo,
@@ -1438,10 +1438,10 @@ Page({
   onRegionColumnChange(e) {
     const { column, value } = e.detail;
     const { regionFullData, regionIndex } = this.data;
-    let newRegionIndex = [...regionIndex];
+    let newRegionIndex = regionIndex.slice();
     newRegionIndex[column] = value;
     
-    let newRegionData = [...this.data.regionData];
+    let newRegionData = this.data.regionData.slice();
     
     if (column === 0) {
       // 省份变化，更新城市和区县
@@ -1557,13 +1557,8 @@ Page({
    * 返回按钮点击
    */
   onBackTap() {
-    console.log('地址编辑页面返回按钮被点击');
     wx.navigateBack({
-      success: () => {
-        console.log('页面返回成功');
-      },
-      fail: (error) => {
-        console.log('页面返回失败:', error);
+      fail: () => {
         wx.navigateTo({
           url: '/pages/address/address'
         });
@@ -1617,9 +1612,9 @@ Page({
   },
 
   /**
-   * 保存地址
+   * 保存地址（云端）
    */
-  onSaveAddress() {
+  async onSaveAddress() {
     const { formData, mode } = this.data;
     
     // 表单验证
@@ -1627,64 +1622,63 @@ Page({
       return;
     }
 
-    // 获取现有地址列表
-    let addressList = wx.getStorageSync('addressList') || [];
-    
-    if (mode === 'add') {
-      // 添加新地址
-      const newAddress = {
-        id: Date.now(),
+    wx.showLoading({
+      title: mode === 'add' ? '添加中...' : '保存中...'
+    });
+
+    try {
+      // 准备地址数据
+      const addressData = {
         name: formData.name,
         phone: formData.phone,
         detail: `${formData.region}${formData.detailAddress}`,
         isDefault: formData.isDefault
       };
 
-      // 如果设为默认，将其他地址的默认状态取消
-      if (formData.isDefault) {
-        addressList = addressList.map(item => ({
-          ...item,
-          isDefault: false
-        }));
+      let res;
+      if (mode === 'add') {
+        // 添加新地址
+        res = await wx.cloud.callFunction({
+          name: 'user',
+          data: {
+            action: 'addAddress',
+            addressData: addressData
+          }
+        });
+      } else {
+        // 编辑现有地址
+        res = await wx.cloud.callFunction({
+          name: 'user',
+          data: {
+            action: 'updateAddress',
+            addressId: formData.id,
+            addressData: addressData
+          }
+        });
       }
 
-      addressList.push(newAddress);
-      
-    } else {
-      // 编辑现有地址
-      addressList = addressList.map(item => {
-        if (item.id === formData.id) {
-          return {
-            ...item,
-            name: formData.name,
-            phone: formData.phone,
-            detail: `${formData.region}${formData.detailAddress}`,
-            isDefault: formData.isDefault
-          };
-        }
-        // 如果当前地址设为默认，将其他地址的默认状态取消
-        if (formData.isDefault) {
-          return {
-            ...item,
-            isDefault: false
-          };
-        }
-        return item;
-      });
-    }
+      wx.hideLoading();
 
-    // 保存到存储
-    wx.setStorageSync('addressList', addressList);
-
-    wx.showToast({
-      title: mode === 'add' ? '添加成功' : '保存成功',
-      icon: 'success',
-      success: () => {
+      if (res.result && res.result.success) {
+        wx.showToast({
+          title: mode === 'add' ? '添加成功' : '保存成功',
+          icon: 'success'
+        });
+        
         setTimeout(() => {
           wx.navigateBack();
         }, 1500);
+      } else {
+        throw new Error(res.result.message || '保存失败');
       }
-    });
+    } catch (error) {
+      wx.hideLoading();
+      console.error('保存地址失败:', error);
+      wx.showToast({
+        title: '保存失败，请重试',
+        icon: 'none'
+      });
+    }
   },
 
   /**

@@ -247,6 +247,11 @@
   object-fit: cover;
 }
 
+.default-avatar-text {
+  font-size: 36rpx;
+  color: #8E8E93;
+}
+
 .user-basic {
   flex: 1;
   min-width: 0;
@@ -318,15 +323,17 @@
 /* 用户详细信息 */
 .user-details {
   margin-bottom: 16rpx;
+  background: #f8f9fa;
+  padding: 16rpx;
+  border-radius: 8rpx;
 }
 
 .detail-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8rpx;
-  font-size: 26rpx;
-  min-height: 32rpx;
+  margin-bottom: 12rpx;
+  min-height: 40rpx;
 }
 
 .detail-row:last-child {
@@ -335,24 +342,48 @@
 
 .label {
   color: #8E8E93;
-  width: 120rpx;
+  width: 140rpx;
   flex-shrink: 0;
-  font-size: 24rpx;
+  font-size: 26rpx;
+  line-height: 1.5;
 }
 
 .value {
   color: #3C3C43;
   flex: 1;
   text-align: right;
-  font-size: 24rpx;
+  font-size: 26rpx;
+  line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .value.highlight {
   color: #EF5BA6;
   font-weight: 600;
+  font-size: 28rpx;
+}
+
+/* 活跃度指示器样式 */
+.value.active-today,
+.value.active-recent {
+  color: #34C759;
+  font-weight: 600;
+}
+
+.value.active-week {
+  color: #FF9500;
+  font-weight: 500;
+}
+
+.value.active-month {
+  color: #FF9500;
+}
+
+.value.active-inactive {
+  color: #FF3B30;
 }
 
 /* 空状态 */

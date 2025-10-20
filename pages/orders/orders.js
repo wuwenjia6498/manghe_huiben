@@ -10,16 +10,23 @@ Page({
     loading: true, // 加载状态
     page: 1,
     pageSize: 10,
-    hasMore: true
+    hasMore: true,
+    orderCounts: {
+      all: 0,
+      pending: 0,  // 待支付
+      paid: 0,     // 待发货
+      shipped: 0,  // 待收货
+      completed: 0 // 已完成
+    }
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // 获取系统信息，设置状态栏高度
-    const systemInfo = wx.getSystemInfoSync();
-    const statusBarHeight = systemInfo.statusBarHeight || 20;
+    // 获取系统信息，设置状态栏高度（使用新API）
+    const windowInfo = wx.getWindowInfo();
+    const statusBarHeight = windowInfo.statusBarHeight || 20;
     wx.setStorageSync('statusBarHeight', statusBarHeight);
     
     // 获取传递的订单类型参数
@@ -128,10 +135,13 @@ Page({
           hasMore: orders.length >= this.data.pageSize,
           page: 1
         });
+
+        // 加载订单统计
+        this.loadOrderCounts();
       } else {
-        console.error('获取订单失败:', res.result?.message);
+        console.error('获取订单失败:', res.result && res.result.message);
         wx.showToast({
-          title: res.result?.message || '订单加载失败',
+          title: (res.result && res.result.message) || '订单加载失败',
           icon: 'none'
         });
         
@@ -182,7 +192,7 @@ Page({
         
         if (orders.length > 0) {
           const formattedOrders = orders.map(order => this.formatOrderForUI(order));
-          const newAllOrders = [...this.data.allOrders, ...formattedOrders];
+          const newAllOrders = this.data.allOrders.concat(formattedOrders);
           
           this.setData({
             allOrders: newAllOrders,
@@ -209,33 +219,38 @@ Page({
    * 格式化订单数据用于UI显示
    */
   formatOrderForUI(orderData) {
+    // 检查订单数据完整性
+    if (!orderData._id || !orderData.orderNo) {
+      console.warn('订单数据不完整:', orderData);
+    }
+
     // 状态映射
     const statusMap = {
-      'pending': { text: '待发货', color: 'pending' },
-      'paid': { text: '待发货', color: 'pending' },
-      'shipped': { text: '待收货', color: 'shipping' },
-      'completed': { text: '已完成', color: 'completed' },
-      'cancelled': { text: '已取消', color: 'cancelled' }
+      'pending': { text: '待支付', color: 'unpaid' },    // 待支付状态
+      'paid': { text: '待发货', color: 'pending' },      // 待发货状态
+      'shipped': { text: '待收货', color: 'shipping' },  // 待收货状态
+      'completed': { text: '已完成', color: 'completed' }, // 已完成状态
+      'cancelled': { text: '已取消', color: 'cancelled' }  // 已取消状态
     };
 
     const statusInfo = statusMap[orderData.status] || { text: '未知状态', color: 'pending' };
 
     return {
-      id: orderData._id,
-      orderNo: orderData.orderNo,
-      status: orderData.status,
+      id: orderData._id || '',
+      orderNo: orderData.orderNo || '未知订单号',
+      status: orderData.status || 'unknown',
       statusText: statusInfo.text,
       createTime: this.formatTime(orderData.createTime),
-      totalAmount: Math.round(orderData.totalAmount),
-      goods: orderData.products.map(product => ({
-        id: product.productId,
-        name: `${product.ageRange}${product.condition}${product.count}本装绘本盲盒`,
-        age: product.ageRange,
-        condition: product.condition,
-        count: product.count,
-        price: Math.round(product.price),
-        quantity: product.quantity,
-        averagePrice: Math.round(product.price / parseInt(product.count))
+      totalAmount: orderData.totalAmount != null ? Math.round(orderData.totalAmount) : 0,
+      goods: (orderData.products || []).map(product => ({
+        id: product.productId || '',
+        name: `${product.ageRange || ''}${product.condition || ''}${product.count || ''}本装绘本盲盒`,
+        age: product.ageRange || '',
+        condition: product.condition || '',
+        count: product.count || '',
+        price: product.price != null ? Math.round(product.price) : 0,
+        quantity: product.quantity || 0,
+        averagePrice: product.price && product.count ? Math.round(product.price / parseInt(product.count)) : 0
       }))
     };
   },
@@ -244,7 +259,18 @@ Page({
    * 格式化时间
    */
   formatTime(dateStr) {
+    if (!dateStr) {
+      return '未知时间';
+    }
+
     const date = new Date(dateStr);
+    
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      console.warn('无效的日期格式:', dateStr);
+      return '日期格式错误';
+    }
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -322,7 +348,7 @@ Page({
               this.loadOrderData();
             } else {
               wx.showToast({
-                title: result.result?.message || '确认收货失败',
+                title: (result.result && result.result.message) || '确认收货失败',
                 icon: 'none'
               });
             }
@@ -333,6 +359,27 @@ Page({
               icon: 'none'
             });
           }
+        }
+      }
+    });
+  },
+
+  /**
+   * 继续支付
+   */
+  onContinuePay(e) {
+    const order = e.currentTarget.dataset.order;
+    wx.showModal({
+      title: '继续支付',
+      content: `订单金额：¥${order.totalAmount}\n是否继续完成支付？`,
+      confirmText: '去支付',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 跳转到订单详情页，在详情页可以继续支付
+          wx.navigateTo({
+            url: `/pages/order-detail/order-detail?orderId=${order.id}`
+          });
         }
       }
     });
@@ -365,7 +412,7 @@ Page({
               this.loadOrderData();
             } else {
               wx.showToast({
-                title: result.result?.message || '取消订单失败',
+                title: (result.result && result.result.message) || '取消订单失败',
                 icon: 'none'
               });
             }
@@ -388,5 +435,28 @@ Page({
     wx.switchTab({
       url: '/pages/home/home'
     });
+  },
+
+  /**
+   * 加载订单数量统计
+   */
+  async loadOrderCounts() {
+    try {
+      // 调用云函数获取订单统计
+      const res = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'getOrderStats'
+        }
+      });
+
+      if (res.result && res.result.success) {
+        this.setData({ 
+          orderCounts: res.result.data 
+        });
+      }
+    } catch (error) {
+      console.error('加载订单统计失败:', error);
+    }
   }
 }) 

@@ -145,8 +145,9 @@ exports.main = async (event, context) => {
     const payParams = generateMiniProgramPayParams(prepayResult.prepayId);
     console.log('生成的支付参数:', payParams);
     
-    // 保存订单到数据库
-    await saveOrderToDatabase(orderInfo, prepayResult.prepayId);
+    // ⚠️ 不再在这里保存订单到数据库
+    // 业务订单应该由 order 云函数的 createOrder 创建
+    // 这里只负责调用微信支付API
     
     console.log('=== 创建支付订单成功 ===');
     return createSuccessResponse({
@@ -205,11 +206,23 @@ function generateOrderInfo(event, openid) {
   
   // 从前端传递的options中获取实际支付信息
   const options = event.options || {};
-  const amount = parseInt(options.amount, 10) || 5; // 实际支付金额（分），默认5分（0.05元）
-  const description = options.description || '绘本盲盒测试购买'; // 实际商品描述
-  const attach = options.attach || JSON.stringify({ productType: 'test', userId: openid }); // 实际业务数据
   
-  console.log('订单生成参数:', { amount, description, attach });
+  // ⚠️ 金额必须由前端传递，不能使用默认值
+  if (!options.amount || options.amount <= 0) {
+    console.error('❌ 错误：支付金额无效', options.amount);
+    throw new Error('支付金额无效，请重试');
+  }
+  
+  const amount = parseInt(options.amount, 10); // 实际支付金额（分）
+  const description = options.description || '绘本盲盒购买'; // 实际商品描述
+  const attach = options.attach || JSON.stringify({ productType: 'book', userId: openid }); // 实际业务数据
+  
+  console.log('订单生成参数:', { 
+    amount, 
+    amountYuan: (amount / 100).toFixed(2),
+    description, 
+    attach 
+  });
   
   return {
     appid: PAYMENT_CONFIG.appId,

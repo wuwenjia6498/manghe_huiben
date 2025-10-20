@@ -99,6 +99,11 @@
   border-radius: 2rpx;
 }
 
+.tab-count {
+  font-size: 22rpx;
+  margin-left: 4rpx;
+}
+
 /* 订单内容区域 */
 .orders-content {
   padding: var(--spacing-base);

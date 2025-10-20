@@ -59,6 +59,15 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    console.log('商品管理页面加载', options);
+    
+    // 从URL参数获取筛选条件
+    if (options.filter === 'lowStock') {
+      // 标记需要筛选低库存商品
+      this.pendingFilter = 'lowStock';
+      console.log('准备筛选低库存商品');
+    }
+    
     this.loadProductsFromDatabase();
   },
 
@@ -75,7 +84,8 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    this.refreshStatistics();
+    // 每次显示页面时重新加载数据，确保显示最新状态
+    this.loadProductsFromDatabase();
   },
 
   /**
@@ -95,8 +105,7 @@ Page({
 
     if (currentFilter === '') {
       // 显示所有年龄段和所有SKU，不管状态如何
-      filteredAgeGroups = ageGroups.map(group => ({
-        ...group,
+      filteredAgeGroups = ageGroups.map(group => Object.assign({}, group, {
         skus: group.skus // 显示所有SKU，不管状态
       }));
     } else if (currentFilter === 'inactive') {
@@ -105,10 +114,9 @@ Page({
         // 筛选出该年龄段中下架的SKU
         const inactiveSkus = group.skus.filter(sku => sku.status === 'inactive');
         if (inactiveSkus.length > 0) {
-          return {
-            ...group,
+          return Object.assign({}, group, {
             skus: inactiveSkus
-          };
+          });
         }
         return null;
       }).filter(group => group !== null);
@@ -137,10 +145,9 @@ Page({
 
         // 如果年龄段匹配或有匹配的SKU，返回该组
         if (ageMatch || matchedSkus.length > 0) {
-          return {
-            ...group,
+          return Object.assign({}, group, {
             skus: ageMatch ? group.skus : matchedSkus
-          };
+          });
         }
         return null;
       }).filter(group => group !== null);
@@ -165,6 +172,56 @@ Page({
     if (stock <= 0) return 'out';
     if (stock <= 10) return 'low';
     return 'normal';
+  },
+
+  /**
+   * 筛选低库存商品（库存 <= 10）
+   */
+  filterLowStock() {
+    const { ageGroups } = this.data;
+    let filteredAgeGroups = [];
+    let lowStockCount = 0;
+
+    // 筛选出库存不足的SKU
+    filteredAgeGroups = ageGroups.map(group => {
+      const lowStockSkus = group.skus.filter(sku => {
+        const isLowStock = sku.stock <= 10 && sku.status === 'active';
+        if (isLowStock) lowStockCount++;
+        return isLowStock;
+      });
+      
+      if (lowStockSkus.length > 0) {
+        // 为每个SKU设置库存状态
+        lowStockSkus.forEach(sku => {
+          sku.stock_status = this.getStockStatus(sku.stock);
+        });
+        
+        return Object.assign({}, group, {
+          skus: lowStockSkus
+        });
+      }
+      return null;
+    }).filter(group => group !== null);
+
+    this.setData({
+      filteredAgeGroups: filteredAgeGroups
+    });
+
+    console.log(`📦 筛选到 ${lowStockCount} 个低库存商品`);
+
+    // 显示提示
+    if (lowStockCount === 0) {
+      wx.showToast({
+        title: '暂无低库存商品',
+        icon: 'none'
+      });
+    } else {
+      wx.showToast({
+        title: `发现 ${lowStockCount} 个低库存商品`,
+        icon: 'none',
+        duration: 2000
+      });
+    }
   },
 
   /**
@@ -206,39 +263,81 @@ Page({
   /**
    * 年龄段开关切换
    */
-  onToggleAgeGroup(e) {
+  async onToggleAgeGroup(e) {
     const ageGroup = e.currentTarget.dataset.ageGroup;
     const { value } = e.detail;
     const status = value ? 'active' : 'inactive';
 
-    const { ageGroups } = this.data;
-    const updatedAgeGroups = ageGroups.map(group => {
-      if (group.age_group === ageGroup) {
-        // 如果年龄段被关闭，所有该年龄段的SKU都应该下架
-        const updatedSkus = group.skus.map(sku => ({
-          ...sku,
-          status: status === 'inactive' ? 'inactive' : sku.status
-        }));
-        return {
-          ...group,
-          status,
-          skus: updatedSkus
-        };
+    try {
+      wx.showLoading({
+        title: status === 'active' ? '启用中...' : '下架中...'
+      });
+
+      const { ageGroups } = this.data;
+      
+      // 找到该年龄段的所有商品
+      const targetGroup = ageGroups.find(group => group.age_group === ageGroup);
+      if (!targetGroup) {
+        throw new Error('未找到该年龄段');
       }
-      return group;
-    });
 
-    this.setData({
-      ageGroups: updatedAgeGroups
-    });
+      // 批量更新该年龄段所有商品的状态
+      const updatePromises = targetGroup.skus.map(sku => {
+        return wx.cloud.callFunction({
+          name: 'product',
+          data: {
+            action: 'updateProductStatus',
+            productId: sku.id,
+            status: status  // 直接使用目标状态：'active' 或 'inactive'
+          }
+        });
+      });
 
-    this.filterData();
-    this.refreshStatistics();
+      // 等待所有更新完成
+      await Promise.all(updatePromises);
 
-    wx.showToast({
-      title: `已${status === 'active' ? '启用' : '禁用'}${ageGroup}商品`,
-      icon: 'success'
-    });
+      // 更新本地数据
+      const updatedAgeGroups = ageGroups.map(group => {
+        if (group.age_group === ageGroup) {
+          // 批量更新该年龄段所有SKU的状态
+          const updatedSkus = group.skus.map(sku => Object.assign({}, sku, {
+            status: status  // 全部设置为目标状态
+          }));
+          return Object.assign({}, group, {
+            status,
+            skus: updatedSkus
+          });
+        }
+        return group;
+      });
+
+      this.setData({
+        ageGroups: updatedAgeGroups
+      });
+
+      this.filterData();
+      this.refreshStatistics();
+
+      wx.hideLoading();
+      
+      // 统计受影响的商品数量
+      const affectedCount = targetGroup.skus.length;
+      
+      wx.showToast({
+        title: `已${status === 'active' ? '上架' : '下架'}${affectedCount}个商品`,
+        icon: 'success'
+      });
+    } catch (error) {
+      wx.hideLoading();
+      console.error('批量更新商品状态失败:', error);
+      wx.showToast({
+        title: '操作失败，请重试',
+        icon: 'none'
+      });
+      
+      // 操作失败时，重新加载数据以确保显示正确状态
+      this.loadProductsFromDatabase();
+    }
   },
 
   /**
@@ -291,7 +390,7 @@ Page({
           icon: 'success'
         });
       } else {
-        throw new Error(result.result?.message || '更新状态失败');
+        throw new Error((result.result && result.result.message) || '更新状态失败');
       }
     } catch (error) {
       console.error('更新商品状态失败:', error);
@@ -334,7 +433,7 @@ Page({
               });
             } else {
               wx.showToast({
-                title: result.result?.message || '删除失败',
+                title: (result.result && result.result.message) || '删除失败',
                 icon: 'none'
               });
             }
@@ -355,10 +454,19 @@ Page({
    */
   deleteSku(skuId) {
     const { ageGroups } = this.data;
-    const updatedAgeGroups = ageGroups.map(group => ({
-      ...group,
-      skus: group.skus.filter(sku => sku.id !== skuId)
-    }));
+    const updatedAgeGroups = ageGroups.map(group => {
+      // 过滤掉被删除的SKU
+      const updatedSkus = group.skus.filter(sku => sku.id !== skuId);
+      
+      // 检查该年龄段是否还有上架的SKU
+      const hasActiveSku = updatedSkus.some(sku => sku.status === 'active');
+      
+      return Object.assign({}, group, {
+        skus: updatedSkus,
+        // 根据SKU状态自动更新年龄段状态
+        status: hasActiveSku ? 'active' : 'inactive'
+      });
+    });
 
     this.setData({
       ageGroups: updatedAgeGroups
@@ -373,10 +481,9 @@ Page({
    */
   updateSkuStock(skuId, newStock) {
     const { ageGroups } = this.data;
-    const updatedAgeGroups = ageGroups.map(group => ({
-      ...group,
+    const updatedAgeGroups = ageGroups.map(group => Object.assign({}, group, {
       skus: group.skus.map(sku => 
-        sku.id === skuId ? { ...sku, stock: newStock, stock_status: this.getStockStatus(newStock) } : sku
+        sku.id === skuId ? Object.assign({}, sku, { stock: newStock, stock_status: this.getStockStatus(newStock) }) : sku
       )
     }));
 
@@ -393,12 +500,21 @@ Page({
    */
   updateSkuStatus(skuId, newStatus) {
     const { ageGroups } = this.data;
-    const updatedAgeGroups = ageGroups.map(group => ({
-      ...group,
-      skus: group.skus.map(sku => 
-        sku.id === skuId ? { ...sku, status: newStatus } : sku
-      )
-    }));
+    const updatedAgeGroups = ageGroups.map(group => {
+      // 更新SKU状态
+      const updatedSkus = group.skus.map(sku => 
+        sku.id === skuId ? Object.assign({}, sku, { status: newStatus }) : sku
+      );
+      
+      // 检查该年龄段是否还有上架的SKU
+      const hasActiveSku = updatedSkus.some(sku => sku.status === 'active');
+      
+      return Object.assign({}, group, {
+        skus: updatedSkus,
+        // 根据SKU状态自动更新年龄段状态
+        status: hasActiveSku ? 'active' : 'inactive'
+      });
+    });
 
     this.setData({
       ageGroups: updatedAgeGroups
@@ -554,23 +670,30 @@ Page({
       if (result.result && result.result.success) {
         // 更新本地数据
         const { ageGroups } = this.data;
-        const updatedAgeGroups = ageGroups.map(group => ({
-          ...group,
-          skus: group.skus.map(sku => {
+        const updatedAgeGroups = ageGroups.map(group => {
+          const updatedSkus = group.skus.map(sku => {
             if (sku.id === editForm.id) {
-              return {
-                ...sku,
+              return Object.assign({}, sku, {
                 age_group: ageGroupOptions[editForm.ageIndex],
                 condition: conditionOptions[editForm.conditionIndex],
                 book_count: bookCount,
                 price: price, // 确保本地显示的价格也是整数
                 stock,
                 stock_status: this.getStockStatus(stock)
-              };
+              });
             }
             return sku;
-          })
-        }));
+          });
+          
+          // 检查该年龄段是否还有上架的SKU
+          const hasActiveSku = updatedSkus.some(sku => sku.status === 'active');
+          
+          return Object.assign({}, group, {
+            skus: updatedSkus,
+            // 根据SKU状态自动更新年龄段状态
+            status: hasActiveSku ? 'active' : 'inactive'
+          });
+        });
 
         this.setData({
           ageGroups: updatedAgeGroups,
@@ -585,7 +708,7 @@ Page({
           icon: 'success'
         });
       } else {
-        throw new Error(result.result?.message || '更新失败');
+        throw new Error((result.result && result.result.message) || '更新失败');
       }
     } catch (error) {
       console.error('更新商品失败:', error);
@@ -599,9 +722,8 @@ Page({
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
-  onPullDownRefresh() {
-    this.refreshStatistics();
-    this.filterData();
+  async onPullDownRefresh() {
+    await this.loadProductsFromDatabase();
     wx.stopPullDownRefresh();
   },
 
@@ -784,7 +906,7 @@ Page({
           icon: 'success'
         });
       } else {
-        throw new Error(result.result?.message || '添加失败');
+        throw new Error((result.result && result.result.message) || '添加失败');
       }
     } catch (error) {
       console.error('添加商品失败:', error);
@@ -836,6 +958,12 @@ Page({
         this.filterData();
         this.refreshStatistics();
         
+        // 如果有待处理的筛选条件，应用筛选
+        if (this.pendingFilter === 'lowStock') {
+          this.filterLowStock();
+          this.pendingFilter = null; // 清除标记
+        }
+        
       } else {
         throw new Error(res.result.message || '获取商品数据失败');
       }
@@ -877,7 +1005,7 @@ Page({
           age_group: groupInfo.name,
           icon: groupInfo.icon,
           label: groupInfo.label,
-          status: 'active',
+          status: 'active', // 临时设置，后面会根据SKU状态更新
           skus: []
         };
 
@@ -898,6 +1026,11 @@ Page({
           
           group.skus.push(sku);
         });
+
+        // 检查该年龄段所有SKU的状态
+        // 如果所有SKU都是下架状态，则年龄段开关也显示为关闭
+        const hasActiveSku = group.skus.some(sku => sku.status === 'active');
+        group.status = hasActiveSku ? 'active' : 'inactive';
 
         groups.push(group);
       }

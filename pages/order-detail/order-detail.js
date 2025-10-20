@@ -1,3 +1,7 @@
+// pages/order-detail/order-detail.js
+// 引入支付SDK
+const paymentSDK = require('../../utils/paymentSDK.js');
+
 Page({
   /**
    * 页面的初始数据
@@ -92,7 +96,7 @@ Page({
   convertDatabaseOrderToUI(orderData) {
     // 状态映射
     const statusMap = {
-      'pending': { text: '待发货', desc: '您的订单正在准备中，我们会尽快为您发货' },
+      'pending': { text: '待支付', desc: '请尽快完成支付，超时订单将自动取消' },
       'paid': { text: '待发货', desc: '您的订单已付款，正在准备发货' },
       'shipped': { text: '待收货', desc: '您的包裹正在路上，请耐心等待' },
       'completed': { text: '已完成', desc: '订单已完成，感谢您的购买' },
@@ -389,6 +393,99 @@ Page({
               }, 1500);
             }
           });
+        }
+      }
+    });
+  },
+
+  /**
+   * 继续支付
+   */
+  async onContinuePay() {
+    const { orderInfo } = this.data;
+    const orderId = orderInfo.id;
+    const orderNo = orderInfo.orderNo;
+    const totalAmount = orderInfo.totalAmount;
+    
+    console.log('=== 继续支付订单 ===');
+    console.log('订单ID:', orderId);
+    console.log('订单号:', orderNo);
+    console.log('订单金额:', totalAmount);
+    
+    wx.showModal({
+      title: '继续支付',
+      content: `订单金额：¥${totalAmount}\n是否继续完成支付？`,
+      confirmText: '去支付',
+      cancelText: '取消',
+      success: async (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '准备支付...' });
+          
+          try {
+            // 获取用户信息
+            const loginInfo = wx.getStorageSync('loginInfo');
+            const userInfo = loginInfo.userInfo || {};
+            
+            // 构建支付参数
+            const paymentAmount = Math.round(totalAmount * 100); // 转换为分
+            const paymentOptions = {
+              orderId: orderId,
+              orderNo: orderNo,
+              amount: paymentAmount,  // ⚠️ 必须使用 amount 字段
+              description: `订单号：${orderNo}`
+            };
+            
+            console.log('支付参数:', paymentOptions);
+            
+            wx.hideLoading();
+            
+            // 调用支付SDK发起支付
+            const paymentResult = await paymentSDK.processPayment(userInfo, paymentOptions);
+            
+            console.log('支付结果:', paymentResult);
+            
+            if (paymentResult.success) {
+              // 支付成功，立即更新订单状态
+              await wx.cloud.callFunction({
+                name: 'order',
+                data: {
+                  action: 'updateOrderStatus',
+                  orderId: orderId,
+                  status: 'paid',
+                  paymentStatus: 'paid'
+                }
+              });
+              
+              wx.showToast({
+                title: '支付成功',
+                icon: 'success'
+              });
+              
+              // 刷新订单详情
+              setTimeout(() => {
+                this.loadOrderDetail();
+              }, 1500);
+            } else if (paymentResult.cancelled) {
+              // 用户取消支付
+              wx.showToast({
+                title: '支付已取消',
+                icon: 'none'
+              });
+            } else {
+              // 支付失败
+              wx.showToast({
+                title: paymentResult.message || '支付失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('支付异常:', error);
+            wx.showToast({
+              title: '支付异常，请重试',
+              icon: 'none'
+            });
+          }
         }
       }
     });

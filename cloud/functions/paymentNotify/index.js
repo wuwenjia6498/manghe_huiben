@@ -297,9 +297,9 @@ async function processPaymentSuccess(paymentData) {
       用户OpenID: payer.openid
     });
     
-    // 1. 查询订单是否存在
+    // 1. 查询订单是否存在（通过 orderNo 查询，因为微信支付的 out_trade_no 就是我们的 orderNo）
     const orderQuery = await db.collection('orders')
-      .where({ out_trade_no })
+      .where({ orderNo: out_trade_no })
       .get();
     
     if (orderQuery.data.length === 0) {
@@ -313,13 +313,14 @@ async function processPaymentSuccess(paymentData) {
           transaction_id,
           trade_state,
           trade_state_desc,
-          amount: amount.total,
+          totalAmount: amount.total,
           payer_openid: payer.openid,
           attach: attach || '',
-          status: 'PAID',
+          status: 'paid', // 统一使用小写 paid
+          paymentStatus: 'paid',
           success_time: new Date(success_time),
-          created_at: new Date(),
-          updated_at: new Date(),
+          createTime: new Date(),
+          updateTime: new Date(),
           note: '支付回调时创建的订单记录'
         }
       });
@@ -333,7 +334,7 @@ async function processPaymentSuccess(paymentData) {
     const order = orderQuery.data[0];
     
     // 2. 检查订单是否已经处理过（幂等性处理）
-    if (order.status === 'PAID') {
+    if (order.status === 'paid' || order.status === 'PAID') {
       console.log('ℹ️ 订单已处理过（幂等性检查）:', out_trade_no);
       return { success: true, message: '订单已处理' };
     }
@@ -354,18 +355,19 @@ async function processPaymentSuccess(paymentData) {
       .doc(order._id)
       .update({
         data: {
-          status: 'PAID',
+          status: 'paid', // 统一使用小写 paid 表示已支付/待发货
+          paymentStatus: 'paid', // 支付状态
           transaction_id,
           trade_state,
           trade_state_desc,
           success_time: new Date(success_time),
           paid_amount: amount.total,
           payer_openid: payer.openid,
-          updated_at: new Date()
+          updateTime: new Date() // 统一使用 updateTime
         }
       });
     
-    console.log('✅ 订单状态已更新为PAID:', updateResult);
+    console.log('✅ 订单状态已更新为paid（待发货）:', updateResult);
     console.log('✅ 支付成功！订单号:', out_trade_no, '金额:', (amount.total / 100).toFixed(2), '元');
     
     // 5. 🎯 额外的业务逻辑处理（根据attach中的业务数据）

@@ -11,18 +11,34 @@
  */
 function processPayment(userInfo, options = {}) {
   console.log('=== 微信支付SDK：开始支付流程 ===');
+  console.log('接收到的用户信息:', userInfo);
+  console.log('接收到的支付选项:', options);
   
   return new Promise((resolve) => {
     try {
-      // 参数验证
-      if (!userInfo || !userInfo.nickName) {
+      // 参数验证 - 增强错误提示
+      if (!userInfo) {
+        console.error('❌ 用户信息为空');
         resolve({
           success: false,
-          message: '用户信息不完整',
+          message: '用户信息为空，请先登录',
+          code: 'USER_INFO_NULL'
+        });
+        return;
+      }
+      
+      if (!userInfo.nickName) {
+        console.error('❌ 用户信息缺少nickName字段');
+        console.error('当前用户信息:', JSON.stringify(userInfo));
+        resolve({
+          success: false,
+          message: '用户信息不完整（缺少nickName），请重新登录',
           code: 'INVALID_USER_INFO'
         });
         return;
       }
+      
+      console.log('✅ 用户信息验证通过');
       
       // 第一步：创建支付订单
       console.log('第一步：创建支付订单');
@@ -181,4 +197,6 @@ function requestPayment(payParams) {
 module.exports = {
   processPayment
 };
+
+
 

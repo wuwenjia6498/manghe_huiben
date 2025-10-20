@@ -82,7 +82,7 @@ Page({
       if (res.result && res.result.success) {
         return true;
       } else {
-        console.log('管理员权限验证失败:', res.result?.message);
+        console.log('管理员权限验证失败:', res.result && res.result.message);
         return false;
       }
     } catch (error) {
@@ -259,7 +259,7 @@ Page({
       } else {
         console.error('保存失败:', res.result);
         wx.showToast({
-          title: res.result?.message || '保存失败',
+          title: (res.result && res.result.message) || '保存失败',
           icon: 'error'
         });
       }

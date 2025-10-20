@@ -180,7 +180,8 @@ function drawItem(contents, probability) {
   const random = Math.random();
   let currentSum = 0;
   
-  for (const item of contents) {
+  for (let i = 0; i < contents.length; i++) {
+    const item = contents[i];
     currentSum += probability[item] || 0;
     if (random <= currentSum) {
       return item;
@@ -203,14 +204,15 @@ async function addProduct(event, context) {
   }
   
   try {
+    const data = Object.assign({}, product, {
+      sales: 0,
+      status: 'active',
+      createTime: new Date(),
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('products').add({
-      data: {
-        ...product,
-        sales: 0,
-        status: 'active',
-        createTime: new Date(),
-        updateTime: new Date()
-      }
+      data: data
     });
     
     return {
@@ -234,11 +236,12 @@ async function updateProduct(event, context) {
   }
   
   try {
+    const updateData = Object.assign({}, product, {
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('products').doc(productId).update({
-      data: {
-        ...product,
-        updateTime: new Date()
-      }
+      data: updateData
     });
     
     return {
@@ -319,12 +322,13 @@ async function addCategory(event, context) {
   }
   
   try {
+    const data = Object.assign({}, category, {
+      status: 'active',
+      createTime: new Date()
+    });
+    
     const result = await db.collection('categories').add({
-      data: {
-        ...category,
-        status: 'active',
-        createTime: new Date()
-      }
+      data: data
     });
     
     return {
@@ -348,11 +352,12 @@ async function updateCategory(event, context) {
   }
   
   try {
+    const updateData = Object.assign({}, category, {
+      updateTime: new Date()
+    });
+    
     const result = await db.collection('categories').doc(categoryId).update({
-      data: {
-        ...category,
-        updateTime: new Date()
-      }
+      data: updateData
     });
     
     return {

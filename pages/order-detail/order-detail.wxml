@@ -21,23 +21,27 @@
     <!-- 订单状态 -->
     <view class="status-section">
       <view class="status-icon">
-        <text wx:if="{{orderInfo.status === 'pending'}}">⏰</text>
-        <text wx:elif="{{orderInfo.status === 'shipping'}}">🚚</text>
-        <text wx:else>✅</text>
+        <text wx:if="{{orderInfo.status === 'pending'}}">💳</text>
+        <text wx:elif="{{orderInfo.status === 'paid'}}">📦</text>
+        <text wx:elif="{{orderInfo.status === 'shipped'}}">🚚</text>
+        <text wx:elif="{{orderInfo.status === 'completed'}}">✅</text>
+        <text wx:else>❌</text>
       </view>
       <view class="status-info">
         <view class="status-text">{{orderInfo.statusText}}</view>
         <view class="status-desc">
-          <text wx:if="{{orderInfo.status === 'pending'}}">您的订单正在准备中，我们会尽快为您发货</text>
-          <text wx:elif="{{orderInfo.status === 'shipping'}}">您的包裹正在路上，请耐心等待</text>
-          <text wx:else>订单已完成，感谢您的购买</text>
+          <text wx:if="{{orderInfo.status === 'pending'}}">请尽快完成支付，超时订单将自动取消</text>
+          <text wx:elif="{{orderInfo.status === 'paid'}}">您的订单已付款，正在准备发货</text>
+          <text wx:elif="{{orderInfo.status === 'shipped'}}">您的包裹正在路上，请耐心等待</text>
+          <text wx:elif="{{orderInfo.status === 'completed'}}">订单已完成，感谢您的购买</text>
+          <text wx:else>{{orderInfo.statusDesc}}</text>
         </view>
         <view class="status-time">{{orderInfo.createTime}}</view>
       </view>
     </view>
 
     <!-- 物流信息 -->
-    <view wx:if="{{orderInfo.status === 'shipping' || orderInfo.status === 'completed'}}" class="logistics-section">
+    <view wx:if="{{orderInfo.status === 'shipped' || orderInfo.status === 'completed'}}" class="logistics-section">
       <view class="section-header">
         <view class="section-icon">📦</view>
         <view class="section-title">物流信息</view>
@@ -183,6 +187,13 @@
     </view>
     <view 
       wx:elif="{{orderInfo.status === 'pending'}}"
+      class="action-btn primary" 
+      bindtap="onContinuePay"
+    >
+      继续支付
+    </view>
+    <view 
+      wx:elif="{{orderInfo.status === 'pending' || orderInfo.status === 'paid'}}"
       class="action-btn danger" 
       bindtap="onCancelOrder"
     >

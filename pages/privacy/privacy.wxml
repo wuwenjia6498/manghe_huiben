@@ -1,0 +1,87 @@
+<!--pages/privacy/privacy.wxml-->
+<view class="privacy-container">
+  <view class="privacy-content">
+    <!-- 引言 -->
+    <view class="section">
+      <view class="section-text">
+        我们重视您的隐私保护。本政策说明我们如何收集、使用和保护您的个人信息。使用本服务即表示您同意本政策。
+      </view>
+    </view>
+
+    <!-- 第一条 -->
+    <view class="section">
+      <view class="section-title">一、收集的信息</view>
+      <view class="section-text">
+        我们会收集以下信息：
+      </view>
+      <view class="section-list">
+        <view class="list-item">• 微信授权信息：昵称、头像</view>
+        <view class="list-item">• 收货信息：姓名、电话、地址</view>
+        <view class="list-item">• 订单信息：商品、金额、时间</view>
+        <view class="list-item">• 设备信息：用于保障服务安全</view>
+      </view>
+    </view>
+
+    <!-- 第二条 -->
+    <view class="section">
+      <view class="section-title">二、信息用途</view>
+      <view class="section-text">
+        我们使用您的信息用于：账号管理、订单处理、商品配送、客户服务、优化产品体验和保障服务安全。
+      </view>
+    </view>
+
+    <!-- 第三条 -->
+    <view class="section">
+      <view class="section-title">三、信息共享</view>
+      <view class="section-text">
+        我们不会出售您的个人信息。仅在必要时与物流公司、支付机构等服务商共享信息，或根据法律要求披露。
+      </view>
+    </view>
+
+    <!-- 第四条 -->
+    <view class="section">
+      <view class="section-title">四、信息保护</view>
+      <view class="section-text">
+        您的信息存储在中国境内的安全服务器上。我们采用数据加密、权限控制等措施保护您的信息安全。
+      </view>
+    </view>
+
+    <!-- 第五条 -->
+    <view class="section">
+      <view class="section-title">五、您的权利</view>
+      <view class="section-text">
+        您可以随时查看、修改或删除您的个人信息。如需注销账号，请联系客服。注销后我们将删除您的个人信息。
+      </view>
+    </view>
+
+    <!-- 第六条 -->
+    <view class="section">
+      <view class="section-title">六、未成年人保护</view>
+      <view class="section-text">
+        未成年人（18周岁以下）使用本服务需在监护人指导下进行。我们不会主动收集未成年人信息。
+      </view>
+    </view>
+
+    <!-- 第七条 -->
+    <view class="section">
+      <view class="section-title">七、其他</view>
+      <view class="section-text">
+        我们使用微信支付、物流查询等第三方服务，这些服务由第三方负责，请注意其隐私政策。
+      </view>
+      <view class="section-text">
+        我们有权修改本政策，修改后将在平台公布。继续使用服务视为接受新政策。
+      </view>
+      <view class="section-text">
+        如有疑问，请通过小程序内客服微信联系我们（工作时间：09:00 - 21:00）。
+      </view>
+    </view>
+
+    <!-- 底部声明 -->
+    <view class="section footer-section">
+      <view class="footer-text">
+        感谢您的信任！我们将持续保护您的隐私安全。
+      </view>
+    </view>
+  </view>
+</view>
+
